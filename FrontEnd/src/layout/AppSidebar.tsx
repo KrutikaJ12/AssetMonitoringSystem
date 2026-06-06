@@ -161,7 +161,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4 border border-red-400">
+    <ul className="flex flex-col gap-4 border">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
