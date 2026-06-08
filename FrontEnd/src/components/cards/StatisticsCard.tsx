@@ -14,7 +14,7 @@ const StatisticsCard = ({ key, title, value, icon }) => {
             </h4>
           </div>
           <div className=" flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
-            <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
+            <GroupIcon className="text-[#ef4444] size-6 dark:text-white/90" />
           </div>
         </div>
         {/* <Badge color="success">
