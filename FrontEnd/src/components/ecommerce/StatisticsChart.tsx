@@ -41,7 +41,7 @@ export default function StatisticsChart() {
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#465FFF", "#9CB9FF"], // Define line colors
+    colors: ["#ef4444"], // Define line colors
     chart: {
       fontFamily: "Outfit, sans-serif",
       height: 310,
@@ -94,18 +94,13 @@ export default function StatisticsChart() {
     xaxis: {
       type: "category", // Category-based x-axis
       categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
+        "1 May",
+        "5 May",
+        "10 May",
+        "15 May",
+        "20 May",
+        "25 May",
+        "29 May",
       ],
       axisBorder: {
         show: false, // Hide x-axis border
@@ -119,10 +114,7 @@ export default function StatisticsChart() {
     },
     yaxis: {
       labels: {
-        style: {
-          fontSize: "12px", // Adjust font size for y-axis labels
-          colors: ["#6B7280"], // Color of the labels
-        },
+        formatter: (value) => `${value / 1000}K`,
       },
       title: {
         text: "", // Remove y-axis title
@@ -135,12 +127,8 @@ export default function StatisticsChart() {
 
   const series = [
     {
-      name: "Sales",
-      data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
-    },
-    {
-      name: "Revenue",
-      data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
+      name: "Fuel Consumption",
+      data: [5000, 7000, 6000, 11000, 9000, 13000, 12540],
     },
   ];
   return (
@@ -148,12 +136,22 @@ export default function StatisticsChart() {
       <div className="flex flex-col gap-5 mb-6 sm:flex-row sm:justify-between">
         <div className="w-full">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Statistics
+            Fuel Consumption
           </h3>
           <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
             Target you've set for each month
           </p>
+           <div className="mb-2 mt-4">
+          <h2 className="text-3xl font-bold text-gray-900">12,540 L</h2>
+
+          {/* <div className="flex items-center gap-2 mt-1">
+            <span className="text-green-500 font-medium">+15.3%</span>
+
+            <span className="text-gray-500 text-sm">vs last month</span>
+          </div> */}
         </div>
+        </div>
+       
         <div className="flex items-center gap-3 sm:justify-end">
           <ChartTab />
           <div className="relative inline-flex items-center">
@@ -169,7 +167,7 @@ export default function StatisticsChart() {
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
         <div className="min-w-[1000px] xl:min-w-full">
-          <Chart options={options} series={series} type="area" height={310} />
+          <Chart options={options} series={series} type="area" height={210} />
         </div>
       </div>
     </div>
