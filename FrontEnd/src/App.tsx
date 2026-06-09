@@ -28,7 +28,15 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
-
+            {/* AdminSidebar Routes */}
+             <Route path="/customers" element={<LineChart />} />
+             <Route path="/sites" element={<LineChart />} />
+             <Route path="/assets" element={<LineChart />} />
+             <Route path="/operators" element={<LineChart />} />
+             <Route path="/users" element={<LineChart />} />
+             <Route path="/alerts" element={<LineChart />} />
+             <Route path="/reports" element={<LineChart />} />
+             <Route path="/settings" element={<UserProfiles />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
