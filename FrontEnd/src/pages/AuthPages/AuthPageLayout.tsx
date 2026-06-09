@@ -12,12 +12,16 @@ export default function AuthLayout({
     <div className="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div className="relative flex flex-row w-full h-screen  dark:bg-gray-900 sm:p-0 ">
            <div
-          className="items-center hidden w-[65%] h-full  bg-brand-950 dark:bg-white/5 lg:grid bg-cover"
+          className="hidden md:flex items-center justify-center 
+                w-[65%] lg:w-[55%] xl:w-[60%] 2xl:w-[65%] 
+                min-h-screen flex-shrink-0 bg-brand-950 dark:bg-white/5 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url('/images/logo/backgroundImage.jpeg')`,
           }}
         >
-          <div className="relative flex items-center justify-center z-1 ">
+          <div className="flex flex-col items-center justify-center 
+                  w-full md:w-[55%] lg:w-[45%] xl:w-[40%] 2xl:w-[35%] 
+                  min-h-screen px-4 sm:px-6 lg:px-8 flex-shrink-0">
             {/* <!-- ===== Common Grid Shape Start ===== --> */}
             {/* <GridShape /> */}
             <div className="flex flex-col items-center max-w-xs">
