@@ -39,12 +39,12 @@ const navItems: NavItem[] = [
   {
     icon: <CalenderIcon />,
     name: "Customers",
-    path: "/calendar",
+    path: "/customers",
   },
   {
     icon: <UserCircleIcon />,
     name: "Sites",
-    path: "/profile",
+    path: "/sites",
   },
 
   // {
@@ -55,32 +55,32 @@ const navItems: NavItem[] = [
   {
     icon: <UserCircleIcon />,
     name: "Assets",
-    path: "/profile",
+    path: "/assets",
   },
   {
     icon: <UserCircleIcon />,
     name: "Operators",
-    path: "/profile",
+    path: "/operators",
   },
   {
     icon: <UserCircleIcon />,
     name: "Users",
-    path: "/profile",
+    path: "/users",
   },
   {
     icon: <UserCircleIcon />,
     name: "Alerts",
-    path: "/profile",
+    path: "/alerts",
   },
   {
     icon: <UserCircleIcon />,
     name: "Reports",
-    path: "/profile",
+    path: "/reports",
   },
   {
     icon: <UserCircleIcon />,
     name: "Settings",
-    path: "/profile",
+    path: "/settings",
   },
   // {
   //   name: "Tables",
