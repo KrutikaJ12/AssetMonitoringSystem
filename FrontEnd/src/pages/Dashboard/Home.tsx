@@ -1,15 +1,15 @@
 // import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
 // import StatisticsChart from "../../components/ecommerce/StatisticsChart";
 // import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
-import SiteSummary from "../../components/ecommerce/SiteSummary";
+import SiteSummary from "../../components/dashboard/SiteSummary";
 // import DemographicCard from "../../components/ecommerce/DemographicCard";
 // import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import PageMeta from "../../components/common/PageMeta";
-import StatisticsMetrics from "../../components/ecommerce/StatisticsMetrics";
+import StatisticsMetrics from "../../components/dashboard/StatisticsMetrics";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
+import StatisticsChart from "../../components/dashboard/StatisticsChart";
 import { GroupIcon } from "../../icons";
 const SectionCard = ({ title, children }: any) => (
   <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
