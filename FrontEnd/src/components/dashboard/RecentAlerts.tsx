@@ -8,7 +8,7 @@ const alerts = [
 
 
 export const RecentAlerts = () => (
-  <div className="p-3">
+  <div className="">
     
     {alerts.map((alert) => (
       <div key={alert.id} className=" flex gap-4 mt-2">
