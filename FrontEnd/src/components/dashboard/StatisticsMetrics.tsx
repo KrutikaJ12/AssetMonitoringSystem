@@ -1,51 +1,64 @@
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  BoxIconLine,
-  GroupIcon,
-} from "../../icons";
-import StatisticsCard from "../cards/StatisticsCard";
-import Badge from "../ui/badge/Badge";
+// import {
+//   ArrowDownIcon,
+//   ArrowUpIcon,
+//   BoxIconLine,
+//   GroupIcon,
+// } from "../../icons";
+// import StatisticsCard from "../cards/StatisticsCard";
+// import Badge from "../ui/badge/Badge";
 
-const dashboardMetrics = [
-  {
-    title: "Total Assets",
-    value: 250,
-    change: "+12.5%",
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Active Assets",
-    value: 180,
-    change: "+8.2%",
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Idle Assets",
-    value: 45,
-    change: "-4.3%",
-    icon: <GroupIcon />,
-  },
-  // {
-  //   title: "Maintenance Due",
-  //   value: 25,
-  //   change: "+3.6%",
-  //   icon: <GroupIcon/>,
-  // },
-  {
-    title: "Total Sites",
-    value: 18,
-    change: "+2.1%",
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Active Operators",
-    value: 320,
-    change: "+9.7%",
-    icon: <GroupIcon />,
-  },
-];
-export default function StatisticsMetrics() {
+import StatisticsCard from "../cards/StatisticsCard";
+
+// const dashboardMetrics = [
+//   {
+//     title: "Total Assets",
+//     value: 250,
+//     change: "+12.5%",
+//     icon: <GroupIcon />,
+//   },
+//   {
+//     title: "Active Assets",
+//     value: 180,
+//     change: "+8.2%",
+//     icon: <GroupIcon />,
+//   },
+//   {
+//     title: "Idle Assets",
+//     value: 45,
+//     change: "-4.3%",
+//     icon: <GroupIcon />,
+//   },
+//   // {
+//   //   title: "Maintenance Due",
+//   //   value: 25,
+//   //   change: "+3.6%",
+//   //   icon: <GroupIcon/>,
+//   // },
+//   {
+//     title: "Total Sites",
+//     value: 18,
+//     change: "+2.1%",
+//     icon: <GroupIcon />,
+//   },
+//   {
+//     title: "Active Operators",
+//     value: 320,
+//     change: "+9.7%",
+//     icon: <GroupIcon />,
+//   },
+// ];
+interface Metric {
+  title: string;
+  value: number;
+  change?: string;
+  icon: React.ReactNode;
+}
+interface StatisticsMetricsProps {
+  metrics: Metric[];
+}
+export default function StatisticsMetrics({
+  metrics,
+}: StatisticsMetricsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5 md:gap-6 mb-6 ">
       {/* <!-- Metric Item Start --> */}
@@ -74,7 +87,7 @@ export default function StatisticsMetrics() {
         </div>
       </div> */}
       {/* <!-- Metric Item End --> */}
-      {dashboardMetrics.map((metric) => (
+      {metrics?.map((metric) => (
         <StatisticsCard
           key={metric.title}
           title={metric.title}
