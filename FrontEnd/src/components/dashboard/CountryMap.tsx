@@ -1,6 +1,6 @@
 // react plugin for creating vector maps
 import { VectorMap } from "@react-jvectormap/core";
-import { worldMill } from "@react-jvectormap/world";
+import { worldMill ,asia_mill} from "@react-jvectormap/world";
 
 // Define the component props
 interface CountryMapProps {
@@ -11,6 +11,7 @@ const CountryMap: React.FC<CountryMapProps> = ({ mapColor }) => {
   return (
     <VectorMap
       map={worldMill}
+       selectedRegions={["IN"]}
       backgroundColor="transparent"
       markerStyle={{
         initial: {
@@ -21,34 +22,16 @@ const CountryMap: React.FC<CountryMapProps> = ({ mapColor }) => {
       markersSelectable={true}
       markers={[
         {
-          latLng: [37.2580397, -104.657039],
-          name: "United States",
-          style: {
-            fill: "#465FFF",
-            borderWidth: 1,
-            borderColor: "white",
-            stroke: "#383f47",
-          },
+          latLng: [19.076, 72.8777],
+          name: "Mumbai Site",
         },
         {
-          latLng: [20.7504374, 73.7276105],
-          name: "India",
-          style: { fill: "#465FFF", borderWidth: 1, borderColor: "white" },
+          latLng: [18.5204, 73.8567],
+          name: "Pune Site",
         },
         {
-          latLng: [53.613, -11.6368],
-          name: "United Kingdom",
-          style: { fill: "#465FFF", borderWidth: 1, borderColor: "white" },
-        },
-        {
-          latLng: [-25.0304388, 115.2092761],
-          name: "Sweden",
-          style: {
-            fill: "#465FFF",
-            borderWidth: 1,
-            borderColor: "white",
-            strokeOpacity: 0,
-          },
+          latLng: [28.6139, 77.209],
+          name: "Delhi Site",
         },
       ]}
       zoomOnScroll={false}
