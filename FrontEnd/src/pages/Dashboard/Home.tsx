@@ -11,36 +11,11 @@ import { ApexOptions } from "apexcharts";
 
 import StatisticsChart from "../../components/dashboard/StatisticsChart";
 import { GroupIcon } from "../../icons";
-const SectionCard = ({ title, children }: any) => (
-  <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
-    <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
-      {title}
-    </h3>
-    {children}
-  </div>
-);
+import { RecentAlerts } from "../../components/dashboard/RecentAlerts";
+import { SectionCard } from "../../components/cards/SectionCard";
 
-const alerts = [
-  { id: 1, title: "Low Fuel - EX010", time: "3 hours Site" },
-  { id: 2, title: "Overheating - CR001", time: "25 min ago" },
-  { id: 3, title: "Maintenance Due - LD001", time: "1 hour ago" },
-];
 
-const RecentAlerts = () => (
-  <div>
-    {alerts.map((alert) => (
-      <div key={alert.id} className=" flex gap-4 mt-2">
-        <div className=" flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
-            <GroupIcon className="text-[#ef4444] size-6 dark:text-white/90" />
-          </div>
-        <div>
-          <h1 className="text-[15px]">{alert.title}</h1>
-          <p className="text-sm">{alert.time}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-);
+
 
 const donutOptions: ApexOptions = {
   chart: { type: "donut" },
@@ -95,7 +70,7 @@ export default function Home() {
             </div>
           </div>
 
-          <SectionCard title="Recents Alerts">
+          <SectionCard title="Recents Alerts" actionText="View Alerts">
             <RecentAlerts />
           </SectionCard>
         </div>
