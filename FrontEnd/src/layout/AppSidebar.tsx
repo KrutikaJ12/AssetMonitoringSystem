@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { menuConfig } from "../config/menuConfig";
 
 // Assume these icons are imported from an icon library
 import {
@@ -18,84 +19,100 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
-type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
 
-const navItems: NavItem[] = [
-  // {
-  //   icon: <GridIcon />,
-  //   name: "Dashboard",
-  //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  // },
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/profile",
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Customers",
-    path: "/customers",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Sites",
-    path: "/sites",
-  },
+// type NavItem = {
+//   name: string;
+//   icon: React.ReactNode;
+//   path?: string;
+//   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+// };
 
-  // {
-  //   name: "Assets",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
-  {
-    icon: <UserCircleIcon />,
-    name: "Assets",
-    path: "/assets",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Operators",
-    path: "/operators",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Users",
-    path: "/users",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Alerts",
-    path: "/alerts",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Reports",
-    path: "/reports",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Settings",
-    path: "/settings",
-  },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
-];
+// const navItems: NavItem[] = [
+//   // {
+//   //   icon: <GridIcon />,
+//   //   name: "Dashboard",
+//   //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+//   // },
+//   {
+//     icon: <GridIcon />,
+//     name: "Dashboard",
+//     path: "/profile",
+//   },
+//   {
+//     icon: <CalenderIcon />,
+//     name: "Customers",
+//     path: "/customers",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Sites",
+//     path: "/sites",
+//   },
+
+//   // {
+//   //   name: "Assets",
+//   //   icon: <ListIcon />,
+//   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+//   // },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Assets",
+//     path: "/assets",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Operators",
+//     path: "/operators",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Users",
+//     path: "/users",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Alerts",
+//     path: "/alerts",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Reports",
+//     path: "/reports",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Settings",
+//     path: "/settings",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Admin",
+//     path: "/admin",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "SiteManager",
+//     path: "/siteManager",
+//   },
+//    {
+//     icon: <UserCircleIcon />,
+//     name: "Operator",
+//     path: "/operator",
+//   },
+//   // {
+//   //   name: "Tables",
+//   //   icon: <TableIcon />,
+//   //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+//   // },
+//   // {
+//   //   name: "Pages",
+//   //   icon: <PageIcon />,
+//   //   subItems: [
+//   //     { name: "Blank Page", path: "/blank", pro: false },
+//   //     { name: "404 Error", path: "/error-404", pro: false },
+//   //   ],
+//   // },
+// ];
 
 const othersItems: NavItem[] = [
   {
@@ -128,9 +145,18 @@ const othersItems: NavItem[] = [
   },
 ];
 
+
+
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  let role = "admin";
+  if (location.pathname.startsWith("/siteManager")) {
+    role = "siteManager";
+  } else if (location.pathname.startsWith("/operator")) {
+    role = "operator";
+  }
+  const navItems = menuConfig[role];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";

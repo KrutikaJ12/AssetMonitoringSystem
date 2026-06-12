@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -18,6 +18,10 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import SiteManagerDashboard from "./pages/Dashboard/SiteManagerDashboard";
+// import AdminDashboard from "./pages/Dashboard/AdminDashboard";
+import { RecentAlerts } from "./components/dashboard/RecentAlerts";
+import OperatorDashboard from "./pages/Dashboard/OperatorDashboard";
 
 export default function App() {
   return (
@@ -25,18 +29,22 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            <Route path="/admin/dashboard" element={<Home />} />
             {/* AdminSidebar Routes */}
-             <Route path="/customers" element={<LineChart />} />
-             <Route path="/sites" element={<LineChart />} />
-             <Route path="/assets" element={<LineChart />} />
-             <Route path="/operators" element={<LineChart />} />
-             <Route path="/users" element={<LineChart />} />
-             <Route path="/alerts" element={<LineChart />} />
-             <Route path="/reports" element={<LineChart />} />
-             <Route path="/settings" element={<UserProfiles />} />
+            <Route path="/admin/customers" element={<LineChart />} />
+            <Route path="/admin/sites" element={<LineChart />} />
+            <Route path="/admin/assets" element={<LineChart />} />
+            <Route path="/admin/operators" element={<LineChart />} />
+            <Route path="/admin/users" element={<LineChart />} />
+            <Route path="/admin/alerts" element={<RecentAlerts />} />
+            <Route path="/admin/reports" element={<LineChart />} />
+            <Route path="/admin/settings" element={<UserProfiles />} />
+            {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+            <Route path="/siteManager" element={<SiteManagerDashboard />} />
+            <Route path="/operator" element={<OperatorDashboard />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
