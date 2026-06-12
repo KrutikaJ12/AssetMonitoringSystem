@@ -350,7 +350,7 @@ const AppSidebar: React.FC = () => {
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
-            ? "w-[250px] h-[250px]"
+            ? "w-[290px] h-[250px]"
             : isHovered
               ? "w-[290px]"
               : "w-[90px]"
@@ -393,7 +393,7 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar relative">
         <nav className="mb-32">
           <div className="flex flex-col">
             <div>
@@ -431,7 +431,7 @@ const AppSidebar: React.FC = () => {
           </div>
         </nav>
         {/* {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null} */}
-        <div className="border-t flex p-2">
+        <div className=" border-t flex p-2 bottom-0 fixed w-[80%]">
           <div className="border rounded-full h-11 w-11 mr-3 overflow-hidden">
             <img src="/images/user/owner.jpg" alt="User" />
           </div>
