@@ -1,7 +1,7 @@
 import { GroupIcon } from "../../icons";
 
 const alerts = [
-  { id: 1, title: "Low Fuel - EX010", time: "3 hours Site" },
+  { id: 1, title: "Low Fuel - EX010", time: "3 hours ago " },
   { id: 2, title: "Overheating - CR001", time: "25 min ago" },
   { id: 3, title: "Maintenance Due - LD001", time: "1 hour ago" },
 ];
