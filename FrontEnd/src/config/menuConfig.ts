@@ -95,6 +95,11 @@ export const siteManagerMenu: NavItem[] = [
     path: "/operators",
   },
   {
+    
+    name: "Location",
+    path: "/location",
+  },
+  {
    
     name: "Alerts",
     path: "/alerts",
@@ -103,6 +108,11 @@ export const siteManagerMenu: NavItem[] = [
     
     name: "Reports",
     path: "/reports",
+  },
+  {
+    
+    name: "Settings",
+    path: "/settings",
   },
 ];
 
@@ -123,6 +133,11 @@ export const operatorMenu:NavItem[] = [
 
     name: "Alerts",
     path: "/alerts",
+  },
+    {
+
+    name: "Profile",
+    path: "/profile",
   },
 ];
 
