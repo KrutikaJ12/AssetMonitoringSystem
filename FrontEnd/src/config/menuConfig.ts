@@ -62,16 +62,7 @@ export const adminMenu: NavItem[] = [
     name: "Settings",
     path: "/admin/settings",
   },
-  {
-    // icon: <UserCircleIcon />,
-    name: "SiteManager",
-    path: "/siteManager",
-  },
-   {
-    // icon: <UserCircleIcon />,
-    name: "Operator",
-    path: "/operator",
-  },
+
   // {
   //   name: "Tables",
   //   icon: <TableIcon />,
