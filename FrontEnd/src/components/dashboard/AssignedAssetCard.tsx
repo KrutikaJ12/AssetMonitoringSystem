@@ -11,7 +11,7 @@ const AssignedAssetCard = () => {
             <div>EX001</div>
             <div>Excavator</div>
             <div>CAT 320</div>
-            <Badge>Running</Badge>
+            <Badge color="success">Running</Badge>
             <button className="px-2 py-1 border rounded-lg mt-2">View Details</button>
         </div>
     </div>

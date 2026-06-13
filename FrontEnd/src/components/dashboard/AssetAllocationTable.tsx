@@ -176,7 +176,7 @@ const AssetAllocationTable = () => {
                     <Badge
                       size="sm"
                       color={
-                        site.status === "Delivered"
+                        site.status === "Running"
                           ? "success"
                           : site.status === "Pending"
                             ? "warning"
