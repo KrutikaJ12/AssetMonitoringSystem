@@ -4,7 +4,7 @@ import AssetAllocationTable from "../../components/dashboard/AssetAllocationTabl
 import CountryMap from "../../components/dashboard/CountryMap";
 import { RecentAlerts } from "../../components/dashboard/RecentAlerts";
 import StatisticsMetrics from "../../components/dashboard/StatisticsMetrics";
-import UtilizationCard from "../../components/dashboard/UtilizationCard";
+// import UtilizationCard from "../../components/dashboard/UtilizationCard";
 import { GroupIcon } from "../../icons";
 const siteManagerMetrics = [
   {
@@ -50,6 +50,13 @@ const operatorData = [
 const SiteManagerDashboard = () => {
   return (
     <div>
+      <div className="mb-6">
+        <select className="rounded-lg border border-gray-300 px-3 py-2 w-[50%]">
+          <option>Mumbai Site</option>
+          <option>Pune Site</option>
+          <option>Delhi Site</option>
+        </select>
+      </div>
       {/* kpi Cards */}
       <StatisticsMetrics metrics={siteManagerMetrics} />
       <div className="border flex flex-col lg:flex-row gap-3 w-full">

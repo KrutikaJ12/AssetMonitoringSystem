@@ -35,7 +35,7 @@ export default function App() {
             <Route path="/admin/dashboard" element={<Home />} />
             {/* AdminSidebar Routes */}
             <Route path="/admin/customers" element={<LineChart />} />
-            <Route path="/admin/sites" element={<LineChart />} />
+            <Route path="/admin/sites" element={<SiteManagerDashboard />} />
             <Route path="/admin/assets" element={<LineChart />} />
             <Route path="/admin/operators" element={<LineChart />} />
             <Route path="/admin/users" element={<LineChart />} />
