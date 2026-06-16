@@ -59,17 +59,19 @@ const SiteManagerDashboard = () => {
       </div>
       {/* kpi Cards */}
       <StatisticsMetrics metrics={siteManagerMetrics} />
-      <div className="border flex flex-col lg:flex-row gap-3 w-full">
-        <div className="w-full lg:w-1/2">
-          <AssetAllocationTable />
-        </div>
+     <div className="flex flex-col lg:flex-row gap-3 w-full">
+  <div className="w-full lg:w-1/2">
+    <AssetAllocationTable />
+  </div>
 
-        <div className="w-full lg:w-1/2">
-          <SectionCard title="Live Asset Map">
-            <CountryMap mapColor="#E5E7EB" />
-          </SectionCard>
-        </div>
+  <div className="w-full lg:w-1/2">
+    <SectionCard title="Live Asset Map">
+      <div className="w-full h-[168px]">
+        <CountryMap mapColor="#E5E7EB" />
       </div>
+    </SectionCard>
+  </div>
+</div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mt-6">
         <SectionCard title="Today's Utilization">
           <div className="space-y-4">
