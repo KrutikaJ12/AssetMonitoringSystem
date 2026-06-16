@@ -5,8 +5,8 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { MoreDotIcon } from "../../icons";
 
-export default function MonthlyTarget() {
-  const series = [75.55];
+export default function FuelConsumptionChart() {
+  const series = [75];
   const options: ApexOptions = {
     colors: ["#465FFF"],
     chart: {
@@ -47,7 +47,7 @@ export default function MonthlyTarget() {
     },
     fill: {
       type: "solid",
-      colors: ["#465FFF"],
+      colors: ["#ef4444"],
     },
     stroke: {
       lineCap: "round",
@@ -67,18 +67,18 @@ export default function MonthlyTarget() {
     <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="px-5 pt-5 bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6">
         <div className="flex justify-between">
-          <div>
+          {/* <div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
               Monthly Target
             </h3>
             <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
               Target you’ve set for each month
             </p>
-          </div>
+          </div> */}
           <div className="relative inline-block">
-            <button className="dropdown-toggle" onClick={toggleDropdown}>
+            {/* <button className="dropdown-toggle" onClick={toggleDropdown}>
               <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 size-6" />
-            </button>
+            </button> */}
             <Dropdown
               isOpen={isOpen}
               onClose={closeDropdown}
@@ -109,18 +109,17 @@ export default function MonthlyTarget() {
             />
           </div>
 
-          <span className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[95%] rounded-full bg-success-50 px-3 py-1 text-xs font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500">
+          {/* <span className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[95%] rounded-full bg-success-50 px-3 py-1 text-xs font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500">
             +10%
-          </span>
+          </span> */}
         </div>
         <p className="mx-auto mt-10 w-full max-w-[380px] text-center text-sm text-gray-500 sm:text-base">
-          You earn $3287 today, it's higher than last month. Keep up your good
-          work!
+        Fuel Remaining
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-5 px-6 py-3.5 sm:gap-8 sm:py-5">
-        <div>
+      {/* <div className="flex items-center justify-center gap-5 px-6 py-3.5 sm:gap-8 sm:py-5"> */}
+        {/* <div>
           <p className="mb-1 text-center text-gray-500 text-theme-xs dark:text-gray-400 sm:text-sm">
             Target
           </p>
@@ -141,11 +140,11 @@ export default function MonthlyTarget() {
               />
             </svg>
           </p>
-        </div>
+        </div> */}
 
-        <div className="w-px bg-gray-200 h-7 dark:bg-gray-800"></div>
+        {/* <div className="w-px bg-gray-200 h-7 dark:bg-gray-800"></div> */}
 
-        <div>
+        {/* <div>
           <p className="mb-1 text-center text-gray-500 text-theme-xs dark:text-gray-400 sm:text-sm">
             Revenue
           </p>
@@ -166,11 +165,11 @@ export default function MonthlyTarget() {
               />
             </svg>
           </p>
-        </div>
+        </div> */}
 
-        <div className="w-px bg-gray-200 h-7 dark:bg-gray-800"></div>
+        {/* <div className="w-px bg-gray-200 h-7 dark:bg-gray-800"></div> */}
 
-        <div>
+        {/* <div>
           <p className="mb-1 text-center text-gray-500 text-theme-xs dark:text-gray-400 sm:text-sm">
             Today
           </p>
@@ -191,8 +190,8 @@ export default function MonthlyTarget() {
               />
             </svg>
           </p>
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
     </div>
   );
 }

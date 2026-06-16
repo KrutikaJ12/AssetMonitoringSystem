@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -18,6 +18,12 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import SiteManagerDashboard from "./pages/Dashboard/SiteManagerDashboard";
+// import AdminDashboard from "./pages/Dashboard/AdminDashboard";
+import { RecentAlerts } from "./components/dashboard/RecentAlerts";
+import OperatorDashboard from "./pages/Dashboard/OperatorDashboard";
+import AssetAllocationTable from "./components/dashboard/AssetAllocationTable";
+import AssetTable from "./components/tables/BasicTables/AssetTable";
 
 export default function App() {
   return (
@@ -25,10 +31,22 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
-
+            <Route path="/admin/dashboard" element={<Home />} />
+            {/* AdminSidebar Routes */}
+            <Route path="/admin/customers" element={<LineChart />} />
+            <Route path="/admin/sites" element={<SiteManagerDashboard />} />
+            <Route path="/admin/assets" element={<AssetTable />} />
+            <Route path="/admin/operators" element={<OperatorDashboard />} />
+            <Route path="/admin/users" element={<LineChart />} />
+            <Route path="/admin/alerts" element={<RecentAlerts />} />
+            <Route path="/admin/reports" element={<LineChart />} />
+            <Route path="/admin/settings" element={<UserProfiles />} />
+            {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+            <Route path="/siteManager" element={<SiteManagerDashboard />} />
+            <Route path="/operator" element={<OperatorDashboard />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
