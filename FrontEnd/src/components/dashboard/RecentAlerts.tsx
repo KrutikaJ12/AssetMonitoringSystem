@@ -1,23 +1,65 @@
 import { GroupIcon } from "../../icons";
 
 const alerts = [
-  { id: 1, title: "Low Fuel - EX010", time: "3 hours ago " },
-  { id: 2, title: "Overheating - CR001", time: "25 min ago" },
-  { id: 3, title: "Maintenance Due - LD001", time: "1 hour ago" },
+  {
+    id: 1,
+    title: "Low Fuel - EX010",
+    description: "Fuel level has dropped below 15%",
+    time: "3 hours ago",
+    priority: "High",
+    color: "bg-red-100 text-red-600",
+  },
+  {
+    id: 2,
+    title: "Overheating - CR001",
+    description: "Engine temperature exceeded threshold",
+    time: "25 min ago",
+    priority: "Critical",
+    color: "bg-red-200 text-red-700",
+  },
+  {
+    id: 3,
+    title: "Maintenance Due - LD001",
+    description: "Scheduled maintenance is due today",
+    time: "1 hour ago",
+    priority: "Medium",
+    color: "bg-yellow-100 text-yellow-600",
+  },
 ];
 
-
 export const RecentAlerts = () => (
-  <div className="">
-    
+  <div className="space-y-3">
     {alerts.map((alert) => (
-      <div key={alert.id} className=" flex gap-4 mt-2">
-        <div className=" flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
-            <GroupIcon className="text-[#ef4444] size-6 dark:text-white/90" />
+      <div
+        key={alert.id}
+        className="rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex gap-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl dark:bg-gray-800">
+              <GroupIcon className="text-[#ef4444] size-6 dark:text-white/90" />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-white">
+                {alert.title}
+              </h3>
+
+              <p className="text-xs text-gray-500 mt-1">
+                {alert.description}
+              </p>
+
+              <p className="text-xs text-gray-400 mt-2">
+                {alert.time}
+              </p>
+            </div>
           </div>
-        <div>
-          <h1 className="text-[15px]">{alert.title}</h1>
-          <p className="text-sm">{alert.time}</p>
+
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${alert.color}`}
+          >
+            {alert.priority}
+          </span>
         </div>
       </div>
     ))}
