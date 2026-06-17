@@ -6,9 +6,9 @@ import {
   TableRow,
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
+import { Link } from "react-router";
 
 // Define the TypeScript interface for the table rows
-
 
 // Define the table data using the interface
 
@@ -47,7 +47,7 @@ const tableData: SiteSummary[] = [
     fuelConsumption: 1350,
     utilization: 68,
   },
-    {
+  {
     id: 3,
     siteName: "Hyderbad Site",
     totalAssets: 40,
@@ -55,7 +55,7 @@ const tableData: SiteSummary[] = [
     idleAssets: 6,
     maintenance: 6,
     operators: 28,
-    fuelConsumption:3680,
+    fuelConsumption: 3680,
     utilization: 70,
   },
 ];
@@ -190,12 +190,11 @@ export default function SiteSummary() {
                       />
                     </div> */}
                     <div>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {site.siteName}
-                      </p>
-                      {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {site.totalAssets}
-                      </span> */}
+                      <Link to="/admin/sites">
+                        <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90 hover:text-blue-500 cursor-pointer">
+                          {site.siteName}
+                        </p>
+                      </Link>
                     </div>
                   </div>
                 </TableCell>
