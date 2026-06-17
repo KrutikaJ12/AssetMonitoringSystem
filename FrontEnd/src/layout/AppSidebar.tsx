@@ -365,33 +365,38 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
+       <Link
+  to="/"
+  className="flex justify-center items-center w-full"
+>
+  {isExpanded || isHovered || isMobileOpen ? (
+    <div className="flex justify-center items-center w-full">
+      <img
+        className="dark:hidden"
+        src="/images/logo/algo-logo.png"
+        alt="Logo"
+        width={80}
+        height={20}
+      />
+
+      <img
+        className="hidden dark:block"
+        src="/images/logo/algo-logo.png"
+        alt="Logo"
+        width={150}
+        height={20}
+      />
+    </div>
+  ) : (
+    <img
+      src="/images/logo/algo-logo.png"
+      alt="Logo"
+      width={32}
+      height={20}
+      className="mx-auto"
+    />
+  )}
+</Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar relative">
         <nav className="mb-32">
