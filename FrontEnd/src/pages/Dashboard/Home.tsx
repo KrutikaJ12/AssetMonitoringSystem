@@ -1,10 +1,34 @@
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
-import RecentOrders from "../../components/ecommerce/RecentOrders";
-import DemographicCard from "../../components/ecommerce/DemographicCard";
+// import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
+// import StatisticsChart from "../../components/ecommerce/StatisticsChart";
+// import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
+import SiteSummary from "../../components/dashboard/SiteSummary";
+// import DemographicCard from "../../components/ecommerce/DemographicCard";
+// import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import PageMeta from "../../components/common/PageMeta";
+import StatisticsMetrics from "../../components/dashboard/StatisticsMetrics";
+import Chart from "react-apexcharts";
+import { ApexOptions } from "apexcharts";
+
+import StatisticsChart from "../../components/dashboard/StatisticsChart";
+import { GroupIcon } from "../../icons";
+import { RecentAlerts } from "../../components/dashboard/RecentAlerts";
+import { SectionCard } from "../../components/cards/SectionCard";
+
+
+
+
+const donutOptions: ApexOptions = {
+  chart: { type: "donut" },
+  labels: ["Running", "Idle", "Maintainence", "Offline"],
+  colors: ["#dc2626", "#ef4444", "#fca5a5"],
+  legend: { position: "bottom" },
+};
+const assetTypeOptions: ApexOptions = {
+  chart: { type: "donut" },
+  labels: ["Excavator", "Forklift", "Crane", "Loader", "Others"],
+  colors: ["#dc2626", "#ef4444", "#fca5a5"],
+  legend: { position: "bottom" },
+};
 
 export default function Home() {
   return (
@@ -13,27 +37,53 @@ export default function Home() {
         title="React.js Ecommerce Dashboard | TailAdmin - React.js Admin Dashboard Template"
         description="This is React.js Ecommerce Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
-      <div className="grid grid-cols-12 gap-4 md:gap-6 border border-red-500">
-        <div className="col-span-12 space-y-6 xl:col-span-7">
-          <EcommerceMetrics />
+      {/* <div className="grid grid-cols-12 gap-4 md:gap-6"> */}
+      {/* <div className="col-span-12 space-y-6 xl:col-span-7 border"> */}
+      <div>
+        <div className=" grid gap-2 w-full">
+          <StatisticsMetrics />
 
-          <MonthlySalesChart />
+          {/* <MonthlySalesChart /> */}
         </div>
+        <div className="flex md:gap-6 mb-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2">
+              <SectionCard title="Assets Status Overview">
+                <Chart
+                  options={donutOptions}
+                  series={[180, 45, 25, 10]}
+                  type="donut"
+                  height={300}
+                />
+              </SectionCard>
+              <SectionCard title="Assets By Type" >
+                <Chart
+                  options={assetTypeOptions}
+                  series={[85, 50, 30, 50, 24]}
+                  type="donut"
+                  height={300}
+                />
+              </SectionCard>
+            </div>
+            <div >
+              <StatisticsChart />
+            </div>
+          </div>
 
-        <div className="col-span-12 xl:col-span-5">
+          <SectionCard title="Recents Alerts" actionText="View Alerts">
+            <RecentAlerts />
+          </SectionCard>
+        </div>
+        {/* <div className="col-span-12 xl:col-span-5">
           <MonthlyTarget />
-        </div>
+        </div> */}
 
-        <div className="col-span-12">
-          <StatisticsChart />
-        </div>
-
-        <div className="col-span-12 xl:col-span-5">
+        {/* <div className="col-span-12 xl:col-span-5">
           <DemographicCard />
-        </div>
+        </div> */}
 
-        <div className="col-span-12 xl:col-span-7">
-          <RecentOrders />
+        <div className="col-span-12 xl:col-span-7 mt-4">
+          <SiteSummary />
         </div>
       </div>
     </>

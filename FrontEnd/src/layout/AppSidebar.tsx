@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { menuConfig } from "../config/menuConfig";
 
 // Assume these icons are imported from an icon library
 import {
@@ -18,48 +19,100 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
-type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
-  },
-];
+// type NavItem = {
+//   name: string;
+//   icon: React.ReactNode;
+//   path?: string;
+//   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+// };
+
+// const navItems: NavItem[] = [
+//   // {
+//   //   icon: <GridIcon />,
+//   //   name: "Dashboard",
+//   //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+//   // },
+//   {
+//     icon: <GridIcon />,
+//     name: "Dashboard",
+//     path: "/profile",
+//   },
+//   {
+//     icon: <CalenderIcon />,
+//     name: "Customers",
+//     path: "/customers",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Sites",
+//     path: "/sites",
+//   },
+
+//   // {
+//   //   name: "Assets",
+//   //   icon: <ListIcon />,
+//   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+//   // },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Assets",
+//     path: "/assets",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Operators",
+//     path: "/operators",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Users",
+//     path: "/users",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Alerts",
+//     path: "/alerts",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Reports",
+//     path: "/reports",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Settings",
+//     path: "/settings",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "Admin",
+//     path: "/admin",
+//   },
+//   {
+//     icon: <UserCircleIcon />,
+//     name: "SiteManager",
+//     path: "/siteManager",
+//   },
+//    {
+//     icon: <UserCircleIcon />,
+//     name: "Operator",
+//     path: "/operator",
+//   },
+//   // {
+//   //   name: "Tables",
+//   //   icon: <TableIcon />,
+//   //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+//   // },
+//   // {
+//   //   name: "Pages",
+//   //   icon: <PageIcon />,
+//   //   subItems: [
+//   //     { name: "Blank Page", path: "/blank", pro: false },
+//   //     { name: "404 Error", path: "/error-404", pro: false },
+//   //   ],
+//   // },
+// ];
 
 const othersItems: NavItem[] = [
   {
@@ -92,23 +145,32 @@ const othersItems: NavItem[] = [
   },
 ];
 
+
+
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+  let role = "admin";
+  if (location.pathname.startsWith("/siteManager")) {
+    role = "siteManager";
+  } else if (location.pathname.startsWith("/operator")) {
+    role = "operator";
+  }
+  const navItems = menuConfig[role];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
   } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
+    {},
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => location.pathname === path,
-    [location.pathname]
+    [location.pathname],
   );
 
   useEffect(() => {
@@ -161,7 +223,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4 border">
+    <ul className="flex flex-col gap-4">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
@@ -288,10 +350,10 @@ const AppSidebar: React.FC = () => {
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
-            ? "w-[290px]"
+            ? "w-[290px] h-[250px]"
             : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
+              ? "w-[290px]"
+              : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
@@ -303,39 +365,44 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
+       <Link
+  to="/"
+  className="flex justify-center items-center w-full"
+>
+  {isExpanded || isHovered || isMobileOpen ? (
+    <div className="flex justify-center items-center w-full">
+      <img
+        className="dark:hidden"
+        src="/images/logo/algo-logo.png"
+        alt="Logo"
+        width={80}
+        height={20}
+      />
+
+      <img
+        className="hidden dark:block"
+        src="/images/logo/algo-logo.png"
+        alt="Logo"
+        width={150}
+        height={20}
+      />
+    </div>
+  ) : (
+    <img
+      src="/images/logo/algo-logo.png"
+      alt="Logo"
+      width={32}
+      height={20}
+      className="mx-auto"
+    />
+  )}
+</Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav className="mb-6">
-          <div className="flex flex-col gap-4">
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar relative">
+        <nav className="mb-32">
+          <div className="flex flex-col">
             <div>
-              <h2
+              {/* <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
@@ -347,10 +414,10 @@ const AppSidebar: React.FC = () => {
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
-              </h2>
+              </h2> */}
               {renderMenuItems(navItems, "main")}
             </div>
-            <div className="">
+            {/* <div className="border">
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
@@ -365,10 +432,19 @@ const AppSidebar: React.FC = () => {
                 )}
               </h2>
               {renderMenuItems(othersItems, "others")}
-            </div>
+            </div> */}
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+        {/* {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null} */}
+        <div className=" border-t flex p-2 bottom-0 fixed w-[80%]">
+          <div className="border rounded-full h-11 w-11 mr-3 overflow-hidden">
+            <img src="/images/user/owner.jpg" alt="User" />
+          </div>
+          <div>
+            <div>Admin User</div>
+            <div>Super Admin</div>
+          </div>
+        </div>
       </div>
     </aside>
   );
