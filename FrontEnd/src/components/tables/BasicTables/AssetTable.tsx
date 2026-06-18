@@ -84,42 +84,7 @@ export function AssetTable(Asset: AssetTableProps) {
   const [search, setSearch] = useState("");
   const [selectedSite, setSelectedSite] = useState("");
   const [status, setStatus] = useState("");
-  const hasFilters = search || selectedSite|| status;
-  //   const handleExport = () => {
-  //     const headers = [
-  //       "Name",
-  //       "Mobile",
-  //       "City",
-  //       "KYC",
-  //       "PaymentStatus",
-  //       "Joined",
-  //     ];
-  //     const csvData = filteredUsers
-  //       .map((user) =>
-  //         [
-  //           user.name,
-  //           user.mobile,
-  //           user.city,
-  //           user.kyc,
-  //           user.paymentStatus || "N/A",
-  //           user.joined,
-  //         ].join(","),
-  //       )
-  //       .join("\n");
-
-  //     const blob = new Blob([[headers.join(","), csvData].join("\n")], {
-  //       type: "text/csv",
-  //     });
-  //     const url = URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.download = "riders_data.csv";
-  //     link.click();
-
-  //     // setToastType("success");
-  //     // setToastMessage("Data exported successfully!");
-  //     // setTimeout(() => setToastMessage(null), 3000);
-  //   };
+  const hasFilters = search || selectedSite || status;
 
   const sites = [
     { code: "MUM", name: "Mumbai" },
@@ -130,20 +95,63 @@ export function AssetTable(Asset: AssetTableProps) {
     const matchesSearch =
       data.assetName.toLowerCase().includes(search.toLowerCase()) ||
       data.category.toLowerCase().includes(search.toLowerCase());
-      const matchSite = selectedSite ? data.site == selectedSite :true
+    const matchSite = selectedSite ? data.site == selectedSite : true;
     return matchesSearch && matchSite;
   });
   console.log(filteredData, "filter");
   const clearFilters = () => {
     setSearch("");
-    setSelectedSite("")
+    setSelectedSite("");
+  };
+
+  const handleExport = () => {
+    const headers = [
+      "Asset ID",
+      "Name",
+      "Category",
+      "Site",
+      "Status",
+      "Operator",
+      "Engine Hours",
+      "Idle Hours",
+      "Fuel",
+    ];
+
+    const csvData = filteredData
+      .map((asset) =>
+        [
+          asset.assetId,
+          asset.assetName,
+          asset.category,
+          asset.site,
+          asset.status || "N/A",
+          asset.operator,
+          asset.engineHours,
+          asset.idleHours,
+          asset.fuelLevel,
+        ].join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob([[headers.join(","), csvData].join("\n")], {
+      type: "text/csv",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "assets_data.csv";
+    link.click();
+
+    // setToastType("success");
+    // setToastMessage("Data exported successfully!");
+    // setTimeout(() => setToastMessage(null), 3000);
   };
   return (
     <>
       <div className=" h-10 flex justify-between mb-4  ">
         <div></div>
         <button
-          //   onClick={handleExport}
+          onClick={handleExport}
           className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
         >
           <Download size={16} />
@@ -186,7 +194,6 @@ export function AssetTable(Asset: AssetTableProps) {
               </option>
             ))}
           </select>
-
 
           {/* Clear filters */}
           {hasFilters && (
