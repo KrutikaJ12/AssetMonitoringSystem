@@ -24,6 +24,7 @@ import { RecentAlerts } from "./components/dashboard/RecentAlerts";
 import OperatorDashboard from "./pages/Dashboard/OperatorDashboard";
 import AssetAllocationTable from "./components/dashboard/AssetAllocationTable";
 import AssetTable from "./components/tables/BasicTables/AssetTable";
+import Reports from "./components/dashboard/Reports";
 
 export default function App() {
   return (
@@ -42,7 +43,7 @@ export default function App() {
             <Route path="/admin/operators" element={<OperatorDashboard />} />
             <Route path="/admin/users" element={<LineChart />} />
             <Route path="/admin/alerts" element={<RecentAlerts />} />
-            <Route path="/admin/reports" element={<LineChart />} />
+            <Route path="/admin/reports" element={<Reports />} />
             <Route path="/admin/settings" element={<UserProfiles />} />
             {/* <Route path="/admin" element={<AdminDashboard />} /> */}
             <Route path="/siteManager" element={<SiteManagerDashboard />} />
