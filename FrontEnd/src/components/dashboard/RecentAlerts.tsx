@@ -62,6 +62,6 @@ export const RecentAlerts = () => (
           </span>
         </div>
       </div>
-    ))}
+    ))} 
   </div>
 );

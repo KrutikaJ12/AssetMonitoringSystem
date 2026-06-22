@@ -11,6 +11,8 @@ import { useState } from "react";
 import Label from "../form/Label";
 import Button from "../ui/button/Button";
 import { Download } from "lucide-react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Reports {
   siteName: string;
@@ -58,6 +60,8 @@ const reportsData: Reports[] = [
   },
 ];
 
+
+ // ================= xL EXPORT FUNCTION =================
  const handleExport = () => {
       const headers = [
         "Site Name",
@@ -92,6 +96,36 @@ const reportsData: Reports[] = [
       // setToastMessage("Data exported successfully!");
       // setTimeout(() => setToastMessage(null), 3000);
     };
+
+
+
+    // ================= PDF EXPORT FUNCTION =================
+const handlePdfExport = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("Vehicle Reports", 14, 15);
+
+  autoTable(doc, {
+    startY: 25,
+    head: [["Site Name", "Vehicle No", "Start Date", "End Date", "Duration"]],
+    body: reportsData.map((item) => [
+      item.siteName,
+      item.vehicaleNo,
+      item.startDate,
+      item.endDate,
+      item.duration,
+    ]),
+    theme: "grid",
+  });
+
+  doc.save("Vehicle_Reports.pdf");
+};
+// =======================================================
+
+
+
+
 const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -133,13 +167,14 @@ const Reports = () => {
           <Download size={16} />
           Export
         </button>
+
         <button
-          //   onClick={handleExport}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
-        >
-          <Download size={16} />
-          Pdf
-        </button>
+  onClick={handlePdfExport}
+  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+>
+  <Download size={16} />
+  Pdf
+</button>
         </div>
 
         <div className="max-w-full overflow-x-auto">
