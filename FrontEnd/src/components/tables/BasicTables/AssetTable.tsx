@@ -9,6 +9,9 @@ import {
 } from "../../ui/table";
 import { Download, Eye, Search } from "lucide-react";
 import Button from "../../ui/button/Button";
+// import Drawer from "../../ui/Drawer/Drawer";
+import { Modal } from "../../ui/modal";
+import AssetDetails from "./AssetDetails";
 const assetsData = [
   {
     assetId: "EX001",
@@ -77,6 +80,27 @@ interface Asset {
   idleHours: number;
   fuelLevel: number;
 }
+const asset = {
+  assetId: "EX001",
+  name: "Excavator",
+  category: "Earth Moving",
+  site: "Mumbai",
+  operator: "John",
+  customer: "ABC Construction",
+  purchaseDate: "12 Jan 2023",
+  model: "CAT 320D",
+  serialNumber: "CAT320D-EX001",
+  status: "Active",
+  engineHours: 1250,
+  idleHours: 180,
+  fuelLevel: 75,
+  lastUpdated: "18 Jun 2026 • 10:42 AM",
+  lastService: "12 Jun 2026",
+  nextService: "150 hrs remaining",
+  maintenanceStatus: "Good",
+  currentSite: "Mumbai Site",
+  lastSeen: "5 mins ago",
+};
 interface AssetTableProps {
   data: Asset[];
 }
@@ -85,7 +109,8 @@ export function AssetTable(Asset: AssetTableProps) {
   const [selectedSite, setSelectedSite] = useState("");
   const [status, setStatus] = useState("");
   const hasFilters = search || selectedSite || status;
-
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const sites = [
     { code: "MUM", name: "Mumbai" },
     { code: "PUN", name: "Pune" },
@@ -360,7 +385,14 @@ export function AssetTable(Asset: AssetTableProps) {
                     {site.fuelLevel}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    <Eye />
+                    <button
+                      onClick={() => {
+                        setSelectedAsset(asset);
+                        setIsDrawerOpen(true);
+                      }}
+                    >
+                      <Eye />
+                    </button>
                   </TableCell>
                   {/* <TableCell>
                     <div className="flex items-center gap-2">
@@ -378,6 +410,20 @@ export function AssetTable(Asset: AssetTableProps) {
               ))}
             </TableBody>
           </Table>
+          {/* {isDrawerOpen && (
+            <Drawer
+              isOpen={isDrawerOpen}
+              onClose={() => setIsDrawerOpen(false)}
+              title="Asset Details"
+            >
+              {isSelectedAsset && <AssetDetails asset={asset}/>}
+            </Drawer>
+          )} */}
+          {isDrawerOpen && (
+            <Modal isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
+              {isSelectedAsset && <AssetDetails asset={asset} />}
+            </Modal>
+          )}
         </div>
       </div>
     </>
