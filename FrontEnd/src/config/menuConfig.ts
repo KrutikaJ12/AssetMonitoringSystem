@@ -17,11 +17,6 @@ export const adminMenu: NavItem[] = [
     path: "/admin/dashboard",
   },
   {
-    // icon: <CalenderIcon />,
-    name: "Customers",
-    path: "/admin/customers",
-  },
-  {
     // icon: <UserCircleIcon />,
     name: "Sites",
     path: "/admin/sites",
@@ -41,11 +36,6 @@ export const adminMenu: NavItem[] = [
     // icon: <UserCircleIcon />,
     name: "Operators",
     path: "/admin/operators",
-  },
-  {
-    // icon: <UserCircleIcon />,
-    name: "Users",
-    path: "/admin/users",
   },
   {
     // icon: <UserCircleIcon />,

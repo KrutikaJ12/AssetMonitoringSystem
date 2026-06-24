@@ -13,9 +13,7 @@ import StatisticsChart from "../../components/dashboard/StatisticsChart";
 import { GroupIcon } from "../../icons";
 import { RecentAlerts } from "../../components/dashboard/RecentAlerts";
 import { SectionCard } from "../../components/cards/SectionCard";
-
-
-
+import WorkingHoursCard from "../../components/dashboard/WorkingHoursCard";
 
 const donutOptions: ApexOptions = {
   chart: { type: "donut" },
@@ -29,7 +27,33 @@ const assetTypeOptions: ApexOptions = {
   colors: ["#dc2626", "#ef4444", "#fca5a5"],
   legend: { position: "bottom" },
 };
-
+const adminMetrics = [
+  {
+    title: "Total Assets",
+    value: 250,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Active Assets",
+    value: 180,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Idle Assets",
+    value: 45,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Total Sites",
+    value: 18,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Active Operators",
+    value: 320,
+    icon: <GroupIcon />,
+  },
+];
 export default function Home() {
   return (
     <>
@@ -41,13 +65,13 @@ export default function Home() {
       {/* <div className="col-span-12 space-y-6 xl:col-span-7 border"> */}
       <div>
         <div className=" grid gap-2 w-full">
-          <StatisticsMetrics />
+          <StatisticsMetrics metrics={adminMetrics} />
 
           {/* <MonthlySalesChart /> */}
         </div>
         <div className="flex md:gap-6 mb-6">
           <div className="flex flex-col gap-4">
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <SectionCard title="Assets Status Overview">
                 <Chart
                   options={donutOptions}
@@ -56,7 +80,7 @@ export default function Home() {
                   height={300}
                 />
               </SectionCard>
-              <SectionCard title="Assets By Type" >
+              <SectionCard title="Assets By Type">
                 <Chart
                   options={assetTypeOptions}
                   series={[85, 50, 30, 50, 24]}
@@ -64,15 +88,21 @@ export default function Home() {
                   height={300}
                 />
               </SectionCard>
+               <SectionCard title="Recents Alerts" actionText="View Alerts">
+                <RecentAlerts />
+              </SectionCard>
+             
             </div>
-            <div >
+             <SectionCard title="Working Hours" >
+                <WorkingHoursCard />
+              </SectionCard>
+            <div className="">
               <StatisticsChart />
+              
             </div>
           </div>
-
-          <SectionCard title="Recents Alerts" actionText="View Alerts">
-            <RecentAlerts />
-          </SectionCard>
+         
+              
         </div>
         {/* <div className="col-span-12 xl:col-span-5">
           <MonthlyTarget />

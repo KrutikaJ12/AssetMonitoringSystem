@@ -51,7 +51,7 @@ const SiteManagerDashboard = () => {
   return (
     <div>
       <div className="mb-6">
-        <select className="rounded-lg border border-gray-300 px-3 py-2 w-[50%]">
+        <select className="rounded-lg border border-gray-300 px-3 py-2 w-72">
           <option>Mumbai Site</option>
           <option>Pune Site</option>
           <option>Delhi Site</option>
