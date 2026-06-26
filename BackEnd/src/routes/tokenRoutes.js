@@ -6,6 +6,8 @@ const {
   getAccessToken,
 } = require("../controllers/tokenController");
 
-router.post("/token", getAccessToken);
+router.post("/token", (req, res, next) => {
+  next();
+}, getAccessToken);
 
 module.exports = router;
