@@ -2,10 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
-const {
-  fetchVehicles
-} = require("../controllers/vehicleController");
+const { fetchLiveData } = require("../controllers/vehicleController");
 
-router.get("/vehicles", fetchVehicles);
+router.get("/vehicle-data", fetchLiveData);
 
 module.exports = router;

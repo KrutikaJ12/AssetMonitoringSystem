@@ -3,6 +3,10 @@ require("dotenv").config();
 const express = require("express");
 
 
+const tokenRoutes = require("./src/routes/tokenRoutes");
+const vehicleRoutes = require("./src/routes/vehicleRoutes");
+const { connectDB } = require("./src/config/db")
+connectDB();
 
 const app = express();
 

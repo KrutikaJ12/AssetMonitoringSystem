@@ -1,19 +1,18 @@
-const getVehicleData = require("../services/trakzeeService");
+const { getLiveData } = require("../services/vehicleService");
 
-const fetchVehicles = async (req, res) => {
+const fetchLiveData = async (req, res) => {
   try {
-    const data = await getVehicleData();
+    const data = await getLiveData();
 
-    res.json(data);
+    res.status(200).json(data);
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({
-      message: error.message
+      message: "Failed to fetch live data",
+      error: error.message,
     });
   }
 };
 
 module.exports = {
-  fetchVehicles
+  fetchLiveData,
 };

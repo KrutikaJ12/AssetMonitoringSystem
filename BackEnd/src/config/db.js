@@ -1,10 +1,11 @@
 const sql = require("mssql");
 
-const config = {
+const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   server: process.env.DB_SERVER,
   database: process.env.DB_DATABASE,
+  port: parseInt(process.env.DB_PORT),
 
   options: {
     trustServerCertificate: true,
@@ -12,17 +13,16 @@ const config = {
   },
 };
 
-const poolPromise = new sql.ConnectionPool(config)
-  .connect()
-  .then((pool) => {
-    console.log("SQL Connected");
-    return pool;
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+const connectDB = async () => {
+  try {
+    await sql.connect(dbConfig);
+    console.log("✅ SQL Server Connected");
+  } catch (err) {
+    console.error("❌ SQL Connection Error:", err);
+  }
+};
 
 module.exports = {
   sql,
-  poolPromise,
+  connectDB,
 };

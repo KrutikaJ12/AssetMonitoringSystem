@@ -3,6 +3,8 @@ const router = express.Router();
 
 const { getToken } = require("../controllers/tokenController");
 
-router.post("/generate-token", getToken);
+router.post("/token", (req, res, next) => {
+  next();
+}, getAccessToken);
 
 module.exports = router;
