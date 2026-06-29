@@ -1,14 +1,10 @@
 const axios = require("axios");
-const { generateAccessToken } = require("./tokenService");
+const { getValidToken } = require("./tokenService");
 
 const getLiveData = async () => {
   try {
-    // Step 1: Generate Token
-    const tokenResponse = await generateAccessToken();
+    const token = await getValidToken(1);
 
-    const token = tokenResponse.data.token;
-
-    // Step 2: Call Live Data API
     const response = await axios.post(
       `${process.env.IOT_BASE_URL}?token=getTokenBaseLiveData&ProjectId=${process.env.PROJECT_ID}`,
       {
@@ -22,14 +18,12 @@ const getLiveData = async () => {
           "Content-Type": "application/json",
           "auth-code": token,
         },
-      },
+      }
     );
 
     return response.data;
   } catch (error) {
-    console.log(error.response?.status);
-    console.log(error.response?.data);
-
+    console.error(error.response?.data || error.message);
     throw error;
   }
 };
