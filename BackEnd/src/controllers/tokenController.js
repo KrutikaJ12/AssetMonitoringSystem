@@ -1,20 +1,18 @@
-const {
-  generateAccessToken,
-} = require("../services/tokenService");
+const generateAccessToken = require("../services/tokenService");
 
-const getAccessToken = async (req, res) => {
+const getToken = async (req, res) => {
   try {
-    const token = await generateAccessToken();
-
-    res.status(200).json(token);
+    const data = await generateAccessToken();
+    res.json(data);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
-      message: "Failed to generate token",
-      error: error.message,
+      message: error.message,
     });
   }
 };
 
 module.exports = {
-  getAccessToken,
+  getToken,
 };
