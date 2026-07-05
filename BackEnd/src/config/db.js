@@ -19,6 +19,7 @@ const connectDB = async () => {
     console.log("✅ SQL Server Connected");
   } catch (err) {
     console.error("❌ SQL Connection Error:", err);
+    throw err;
   }
 };
 

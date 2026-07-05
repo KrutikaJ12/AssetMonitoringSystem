@@ -1,19 +1,11 @@
 const axios = require("axios");
 const { getValidToken } = require("./tokenService");
 const { sql } = require("../config/db");
-function formatDate(dateStr) {
-  if (!dateStr) return null;
-
-  const [date, time] = dateStr.split(" ");
-  const [day, month, year] = date.split("-");
-
-  return `${year}-${month}-${day} ${time}`;
-}
-
+const {formatDate,parseUffizioDate}=require("../helpers/dateHelper")
 const getLiveData = async () => {
   try {
     const token = await getValidToken(1);
-
+   
     const response = await axios.post(
       `${process.env.IOT_BASE_URL}?token=getTokenBaseLiveData&ProjectId=${process.env.PROJECT_ID}`,
       {
@@ -31,75 +23,59 @@ const getLiveData = async () => {
     );
     const liveData = response.data;
    console.log("liveData",liveData)
+   if (liveData.root?.error) {
+  console.log("Uffizio API Error:", liveData.root.error);
+  return;
+}
     const vehicle = liveData.root?.VehicleData?.[0];
     console.log("vehicle", vehicle);
     const gpsActualTime = formatDate(vehicle?.GPSActualTime);
     const deviceTime = formatDate(vehicle?.Datetime);
 
+   //What is the last time I inserted data for this vehicle?
     const result = await sql.query`
-    SELECT id
+    SELECT
+    DATEDIFF(
+        SECOND,
+        gps_actual_time,
+        ${gpsActualTime}
+    ) AS DifferenceInSeconds
+     FROM (
+    SELECT TOP 1 gps_actual_time
     FROM UffizioRawData
     WHERE imei_no = ${vehicle.Imeino}
+    ORDER BY gps_actual_time DESC
+    ) t;
 `;
-
-    if (result.recordset.length > 0) {
-      await sql.query`
-    UPDATE UffizioRawData
-    SET
-    vehicle_name = ${vehicle.Vehicle_Name},
-    company = ${vehicle.Company},
-    vehicle_no = ${vehicle.Vehicle_No},
-    branch = ${vehicle.Branch},
-    vehicle_type = ${vehicle.Vehicletype},
-    vin = ${vehicle.Vin},
-    device_model = ${vehicle.DeviceModel},
-    username = ${vehicle.username},
-    status = ${vehicle.Status},
-    speed = ${parseInt(vehicle.Speed) || 0},
-    ign = ${vehicle.IGN},
-    power = ${vehicle.Power},
-    gps = ${vehicle.GPS},
-    heartbeat = ${vehicle.heartbeat},
-    latitude = ${parseFloat(vehicle.Latitude) || 0},
-    longitude = ${parseFloat(vehicle.Longitude) || 0},
-    altitude = ${parseFloat(vehicle.Altitude) || 0},
-    angle = ${parseFloat(vehicle.Angle) || 0},
-    gps_actual_time = ${gpsActualTime},
-    device_time = ${deviceTime},
-    location = ${vehicle.Location},
-    odometer = ${parseInt(vehicle.Odometer) || 0},
-    can_odometer = ${parseInt(vehicle.can_odometer) || 0},
-    fuel_level = ${vehicle.Fuel?.[0]?.value || 0},
-    external_voltage = ${parseFloat(vehicle.ExternalVolt) || 0},
-    battery_percentage = ${parseInt(vehicle.battery_percentage) || 0},
-    temperature = ${vehicle.Temperature},
-    ac = ${vehicle.AC},
-    door1 = ${vehicle.Door1},
-    door2 = ${vehicle.Door2},
-    door3 = ${vehicle.Door3},
-    door4 = ${vehicle.Door4},
-    elock = ${vehicle.elock},
-    immobilize_state = ${vehicle.Immobilize_State},
-    ibutton_rfid = ${vehicle["Ibutton/RFID"]},
-    sos = ${vehicle.SOS},
-    driver_first_name = ${vehicle.Driver_First_Name},
-    driver_middle_name = ${vehicle.Driver_Middle_Name},
-    driver_last_name = ${vehicle.Driver_Last_Name},
-    poi = ${vehicle.POI},
-    mcc = ${vehicle.mcc},
-    mnc = ${vehicle.mnc},
-    lac = ${vehicle.lac},
-    cellid = ${vehicle.cellid},
-    gps_hdop = ${vehicle.gps_hdop},
-    satellite_count = ${vehicle.satellite_count},
-    course = ${vehicle.course},
-    updated_at = GETDATE()
-    WHERE imei_no = ${vehicle?.Imeino}
-`;
+  //  console.log("resultkts",result)
+  console.log("Scheduler Time:", new Date().toLocaleTimeString());
+   console.log("Raw API GPSActualTime:", vehicle.GPSActualTime);
+   let shouldInsert = false;
+   const ONE_MINUTE = 60 * 1000;
+    if (result.recordset.length === 0) {
+          shouldInsert = true;
     } else {
-      await sql.query`
-INSERT INTO UffizioRawData
-(
+  //   const lastGpsTime = result.recordset[0].gps_actual_time;
+  //   const currentGpsTime = parseUffizioDate(vehicle.GPSActualTime);
+  //   const difference = currentGpsTime.getTime() - lastGpsTime.getTime();
+  //  console.log("DB Time:", lastGpsTime);
+  //  console.log("API Time:", currentGpsTime);
+  //  console.log("Difference (ms):", difference);
+  //  console.log("Difference (seconds):", difference / 1000);
+  //  console.log("Difference (minutes):", difference / 60000);
+     const seconds = result.recordset[0].DifferenceInSeconds;
+
+    console.log("Difference:", seconds);
+
+    shouldInsert = seconds >= 60;
+  //  shouldInsert = difference >= ONE_MINUTE;
+
+    console.log("Should Insert:", shouldInsert);
+    }
+   if (shouldInsert) {
+   await sql.query`
+     INSERT INTO UffizioRawData
+    (
     vehicle_name,
     company,
     vehicle_no,
@@ -201,14 +177,14 @@ VALUES
     ${vehicle.course}
 )
 `;
+    console.log("Inserted new history record");
+  } else {
+    console.log("Skipped - Less than one minute");
     }
 
     return liveData;
     // return response.data;
   } catch (error) {
-    console.log(error.response?.status);
-    console.log(error.response?.data);
-    console.log(error.message);
     console.error(error.response?.data || error.message, "error");
     throw error;
   }
