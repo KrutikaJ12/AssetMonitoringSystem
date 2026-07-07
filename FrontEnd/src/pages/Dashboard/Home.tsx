@@ -14,47 +14,54 @@ import { GroupIcon } from "../../icons";
 import { RecentAlerts } from "../../components/dashboard/RecentAlerts";
 import { SectionCard } from "../../components/cards/SectionCard";
 import WorkingHoursCard from "../../components/dashboard/WorkingHoursCard";
+import {  useDashboard } from "../../hooks/useDashboard";
 
+export default function Home() {
+  const {data,isLoading,error}=useDashboard();
+  const assetStatusLabels=data?.assetStatus.map(asset=>asset.status) ?? [];
+  const assetStatusSeries = data?.assetStatus?.map((asset) => asset.count) ?? [];
+  const assetTypes=data?.assetTypes?.map(asset=>asset.assetType) ?? []
+  const assetTypesSeries = data?.assetTypes?.map((asset) => asset.count) ?? [];
+  console.log("data" ,data)
+  const adminMetrics = [
+  {
+    title: "Total Assets",
+    value: data?.summary?.totalAssets ?? 0,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Active Assets",
+    value: data?.summary?.activeAssets ?? 0,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Idle Assets",
+    value: data?.summary?.idleAssets ?? 0,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Total Sites",
+    value: data?.summary?.totalSites ?? 0,
+    icon: <GroupIcon />,
+  },
+  {
+    title: "Active Operators",
+    value: data?.summary?.activeOperators ?? 0,
+    icon: <GroupIcon />,
+  },
+];
 const donutOptions: ApexOptions = {
   chart: { type: "donut" },
-  labels: ["Running", "Idle", "Maintainence", "Offline"],
+  labels: assetStatusLabels,
   colors: ["#dc2626", "#ef4444", "#fca5a5"],
   legend: { position: "bottom" },
 };
 const assetTypeOptions: ApexOptions = {
   chart: { type: "donut" },
-  labels: ["Excavator", "Forklift", "Crane", "Loader", "Others"],
+  labels: assetTypes,
   colors: ["#dc2626", "#ef4444", "#fca5a5"],
   legend: { position: "bottom" },
 };
-const adminMetrics = [
-  {
-    title: "Total Assets",
-    value: 250,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Active Assets",
-    value: 180,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Idle Assets",
-    value: 45,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Total Sites",
-    value: 18,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Active Operators",
-    value: 320,
-    icon: <GroupIcon />,
-  },
-];
-export default function Home() {
   return (
     <>
       <PageMeta
@@ -75,7 +82,7 @@ export default function Home() {
               <SectionCard title="Assets Status Overview">
                 <Chart
                   options={donutOptions}
-                  series={[180, 45, 25, 10]}
+                  series={assetStatusSeries}
                   type="donut"
                   height={300}
                 />
@@ -83,7 +90,7 @@ export default function Home() {
               <SectionCard title="Assets By Type">
                 <Chart
                   options={assetTypeOptions}
-                  series={[85, 50, 30, 50, 24]}
+                  series={assetTypesSeries}
                   type="donut"
                   height={300}
                 />
