@@ -3,7 +3,7 @@ const { getValidToken } = require("./tokenService");
 
 const getLiveData = async () => {
   try {
-    const token = await getValidToken(1);
+    const token = await getValidToken(2);
 
     const response = await axios.post(
       `${process.env.IOT_BASE_URL}?token=getTokenBaseLiveData&ProjectId=${process.env.PROJECT_ID}`,
