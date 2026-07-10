@@ -101,7 +101,7 @@ const assetTypeOptions: ApexOptions = {
              
             </div>
              <SectionCard title="Working Hours" >
-                <WorkingHoursCard />
+                <WorkingHoursCard data={data.workingHours}/>
               </SectionCard>
             <div className="">
               <StatisticsChart />
@@ -120,7 +120,7 @@ const assetTypeOptions: ApexOptions = {
         </div> */}
 
         <div className="col-span-12 xl:col-span-7 mt-4">
-          <SiteSummary />
+          <SiteSummary data={data.siteSummary}/>
         </div>
       </div>
     </>
