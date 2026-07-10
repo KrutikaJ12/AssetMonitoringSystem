@@ -11,6 +11,7 @@ const getDashboardData = async () => {
       assetTypes,
       workingHours,
       topWorkingAssets,
+      siteSummary,
     ] = await Promise.all([
       sql.query(`
         SELECT COUNT(*) AS TotalAssets
@@ -65,8 +66,41 @@ const getDashboardData = async () => {
           am.AssetID,
           am.AssetName 
       ORDER BY TotalWorkingMinutes Desc;`),
+
+      sql.query(`SELECT
+          sm.SiteID,
+          sm.SiteName,
+          COUNT(DISTINCT ais.AssetID) AS TotalAssets,
+          COUNT(DISTINCT om.OperatorID) AS Operators,
+          COUNT(DISTINCT CASE WHEN am.Status = 'RUNNING' THEN am.AssetID END) AS ActiveAssets,
+          COUNT(DISTINCT CASE WHEN am.Status = 'IDLE' THEN am.AssetID END) AS IdleAssets,
+          ISNULL(SUM(ads.FuelConsumedLitres), 0) AS TotalFuelConsumed,
+          ISNULL(
+          ROUND(
+        SUM(ads.WorkingMinutes) * 100.0 /
+        NULLIF(SUM(ads.EngineMinutes), 0),
+        2
+    ),
+    0
+)       AS UtilizationPercentage
+      FROM SiteMaster sm
+      LEFT JOIN AssetInSite ais
+    ON sm.SiteID = ais.SiteID
+      LEFT JOIN AssetMaster am
+    ON ais.AssetID = am.AssetID
+      LEFT JOIN OperatorMaster om
+    ON sm.SiteID = om.SiteID
+      LEFT JOIN AssetDailyUsageSummary ads
+    ON am.AssetID = ads.AssetID
+      WHERE sm.CustomerID = 1
+      AND ads.UsageDate = '2026-07-07'
+      GROUP BY
+    sm.SiteID,
+    sm.SiteName
+      ORDER BY
+    sm.SiteID;`),
     ]);
-    console.log(workingHours, topWorkingAssets);
+    // console.log(workingHours, topWorkingAssets);
     const runningAssets =
       assetStatus.recordset.find((item) => item.Status === "RUNNING")?.Total ||
       0;
@@ -105,11 +139,22 @@ const getDashboardData = async () => {
           ),
         },
         topAssets: topWorkingAssets.recordset.map((item) => ({
-          assetId:item.AssetID,
+          assetId: item.AssetID,
           assetName: item.AssetName,
           workingHours: Number((item.TotalWorkingMinutes / 60).toFixed(1)),
         })),
       },
+        siteSummary: siteSummary.recordset.map((site) => ({
+    siteId: site.SiteID,
+    siteName: site.SiteName,
+    totalAssets: site.TotalAssets,
+    activeAssets: site.ActiveAssets,
+    idleAssets: site.IdleAssets,
+    maintenanceAssets: site.MaintenanceAssets,
+    operators: site.Operators,
+    totalFuelConsumed: Number(site.TotalFuelConsumed),
+    utilizationPercentage: Number(site.UtilizationPercentage),
+})),
     };
     return dashboardData;
   } catch (error) {
