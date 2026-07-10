@@ -22,7 +22,7 @@ export default function Home() {
   const assetStatusSeries = data?.assetStatus?.map((asset) => asset.count) ?? [];
   const assetTypes=data?.assetTypes?.map(asset=>asset.assetType) ?? []
   const assetTypesSeries = data?.assetTypes?.map((asset) => asset.count) ?? [];
-  console.log("data" ,data)
+  console.log("data" ,data,data?.workingHours?.workingHours)
   const adminMetrics = [
   {
     title: "Total Assets",
@@ -62,6 +62,9 @@ const assetTypeOptions: ApexOptions = {
   colors: ["#dc2626", "#ef4444", "#fca5a5"],
   legend: { position: "bottom" },
 };
+if (!data) {
+    return <div>Loading...</div>;
+}
   return (
     <>
       <PageMeta
@@ -101,7 +104,7 @@ const assetTypeOptions: ApexOptions = {
              
             </div>
              <SectionCard title="Working Hours" >
-                <WorkingHoursCard />
+                <WorkingHoursCard data={data.workingHours}/>
               </SectionCard>
             <div className="">
               <StatisticsChart />
@@ -120,7 +123,7 @@ const assetTypeOptions: ApexOptions = {
         </div> */}
 
         <div className="col-span-12 xl:col-span-7 mt-4">
-          <SiteSummary />
+          <SiteSummary data={data.siteSummary}/>
         </div>
       </div>
     </>
