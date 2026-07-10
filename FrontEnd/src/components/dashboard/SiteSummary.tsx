@@ -199,18 +199,18 @@ export default function SiteSummary({data}:SiteSummaryProps) {
                     {site.status}
                   </Badge>
                 </TableCell> */}
-                {/* <TableCell>
+                <TableCell>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-20 rounded-full bg-gray-200">
                       <div
                         className="h-2 rounded-full bg-red-500"
-                        style={{ width: `${site.utilization}%` }}
+                        style={{ width: `${site.utilizationPercentage}%` }}
                       />
                     </div>
 
-                    <span>{site.utilization}%</span>
+                    <span>{site.utilizationPercentage}%</span>
                   </div>
-                </TableCell> */}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
