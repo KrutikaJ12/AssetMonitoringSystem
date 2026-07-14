@@ -14,54 +14,59 @@ import { GroupIcon } from "../../icons";
 import { RecentAlerts } from "../../components/dashboard/RecentAlerts";
 import { SectionCard } from "../../components/cards/SectionCard";
 import WorkingHoursCard from "../../components/dashboard/WorkingHoursCard";
-import {  useDashboard } from "../../hooks/useDashboard";
+import { useDashboard } from "../../hooks/useDashboard";
 
 export default function Home() {
-  const {data,isLoading,error}=useDashboard();
-  const assetStatusLabels=data?.assetStatus.map(asset=>asset.status) ?? [];
-  const assetStatusSeries = data?.assetStatus?.map((asset) => asset.count) ?? [];
-  const assetTypes=data?.assetTypes?.map(asset=>asset.assetType) ?? []
+  const { data, isLoading, error } = useDashboard();
+  const assetStatusLabels =
+    data?.assetStatus.map((asset) => asset.status) ?? [];
+  const assetStatusSeries =
+    data?.assetStatus?.map((asset) => asset.count) ?? [];
+  const assetTypes = data?.assetTypes?.map((asset) => asset.assetType) ?? [];
   const assetTypesSeries = data?.assetTypes?.map((asset) => asset.count) ?? [];
-  console.log("data" ,data)
+  console.log("data", data);
   const adminMetrics = [
-  {
-    title: "Total Assets",
-    value: data?.summary?.totalAssets ?? 0,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Active Assets",
-    value: data?.summary?.activeAssets ?? 0,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Idle Assets",
-    value: data?.summary?.idleAssets ?? 0,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Total Sites",
-    value: data?.summary?.totalSites ?? 0,
-    icon: <GroupIcon />,
-  },
-  {
-    title: "Active Operators",
-    value: data?.summary?.activeOperators ?? 0,
-    icon: <GroupIcon />,
-  },
-];
-const donutOptions: ApexOptions = {
-  chart: { type: "donut" },
-  labels: assetStatusLabels,
-  colors: ["#dc2626", "#ef4444", "#fca5a5"],
-  legend: { position: "bottom" },
-};
-const assetTypeOptions: ApexOptions = {
-  chart: { type: "donut" },
-  labels: assetTypes,
-  colors: ["#dc2626", "#ef4444", "#fca5a5"],
-  legend: { position: "bottom" },
-};
+    {
+      title: "Total Assets",
+      value: data?.summary?.totalAssets ?? 0,
+      icon: <GroupIcon />,
+    },
+    {
+      title: "Active Assets",
+      value: data?.summary?.activeAssets ?? 0,
+      icon: <GroupIcon />,
+    },
+    {
+      title: "Idle Assets",
+      value: data?.summary?.idleAssets ?? 0,
+      icon: <GroupIcon />,
+    },
+    {
+      title: "Total Sites",
+      value: data?.summary?.totalSites ?? 0,
+      icon: <GroupIcon />,
+    },
+    {
+      title: "Active Operators",
+      value: data?.summary?.activeOperators ?? 0,
+      icon: <GroupIcon />,
+    },
+  ];
+  const donutOptions: ApexOptions = {
+    chart: { type: "donut" },
+    labels: assetStatusLabels,
+    colors: ["#dc2626", "#ef4444", "#fca5a5"],
+    legend: { position: "bottom" },
+  };
+  const assetTypeOptions: ApexOptions = {
+    chart: { type: "donut" },
+    labels: assetTypes,
+    colors: ["#dc2626", "#ef4444", "#fca5a5"],
+    legend: { position: "bottom" },
+  };
+  if (!data) {
+    return <div>Loading..</div>;
+  }
   return (
     <>
       <PageMeta
@@ -95,21 +100,17 @@ const assetTypeOptions: ApexOptions = {
                   height={300}
                 />
               </SectionCard>
-               <SectionCard title="Recents Alerts" actionText="View Alerts">
+              <SectionCard title="Recents Alerts" actionText="View Alerts">
                 <RecentAlerts />
               </SectionCard>
-             
             </div>
-             <SectionCard title="Working Hours" >
-                <WorkingHoursCard />
-              </SectionCard>
+            <SectionCard title="Working Hours">
+              <WorkingHoursCard data={data.workingHours} />
+            </SectionCard>
             <div className="">
               <StatisticsChart />
-              
             </div>
           </div>
-         
-              
         </div>
         {/* <div className="col-span-12 xl:col-span-5">
           <MonthlyTarget />
@@ -120,7 +121,7 @@ const assetTypeOptions: ApexOptions = {
         </div> */}
 
         <div className="col-span-12 xl:col-span-7 mt-4">
-          <SiteSummary />
+          <SiteSummary data={data.siteSummary} />
         </div>
       </div>
     </>

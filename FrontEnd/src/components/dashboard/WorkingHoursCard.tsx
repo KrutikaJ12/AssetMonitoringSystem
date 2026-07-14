@@ -9,25 +9,8 @@ import {
 } from "lucide-react";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-const topAssets = [
-  {
-    name: "Excavator EX120",
-    hours: 322,
-    percentage: 85,
-  },
-  {
-    name: "Loader LD-010",
-    hours: 281,
-    percentage: 75,
-  },
-  {
-    name: "Crane CR-008",
-    hours: 256,
-    percentage: 71,
-  },
-];
 
-export default function WorkingHoursCard() {
+export default function WorkingHoursCard({data}:any) {
   const series = [75];
   const options: ApexOptions = {
     colors: ["#465FFF"],
@@ -76,6 +59,14 @@ export default function WorkingHoursCard() {
     },
     labels: ["Progress"],
   };
+  let topAssets=data?.topAssets;
+  const maxHours = Math.max(
+  ...topAssets.map((asset) => asset.workingHours)
+);
+   topAssets=topAssets.map((asset)=>({
+    ...asset,
+     percentage: (asset.workingHours / maxHours) * 100,
+   }))
   return (
     <div className="flex justify-evenly w-full">
       <div className=" border shadow-xl shadow-gray-200 rounded-xl p-8">
@@ -158,7 +149,7 @@ export default function WorkingHoursCard() {
               <span>Running</span>
             </div>
 
-            <span className="font-semibold">980 h</span>
+            <span className="font-semibold">{data?.summary.workingHours} h</span>
           </div>
 
           <div className="flex items-center justify-between rounded-xl border p-4">
@@ -167,7 +158,7 @@ export default function WorkingHoursCard() {
               <span>Idle</span>
             </div>
 
-            <span className="font-semibold">180 h</span>
+            <span className="font-semibold">{data?.summary.idleHours} h</span>
           </div>
 
           <div className="flex items-center justify-between rounded-xl border p-4">
@@ -185,7 +176,7 @@ export default function WorkingHoursCard() {
               <span>Offline</span>
             </div>
 
-            <span className="font-semibold">34 h</span>
+            <span className="font-semibold">{data?.summary.offlineHours} h</span>
           </div>
         </div>
         <hr className="text-gray-600 my-6"></hr>
@@ -199,12 +190,12 @@ export default function WorkingHoursCard() {
         </div>
 
         <div className="space-y-5">
-          {topAssets.map((asset) => (
-            <div key={asset.name}>
+          {topAssets?.map((asset) => (
+            <div key={asset.assetId}>
               <div className="mb-2 flex justify-between">
-                <span>{asset.name}</span>
+                <span>{asset.assetName}</span>
 
-                <span className="font-semibold">{asset.hours} h</span>
+                <span className="font-semibold">{asset.workingHours} h</span>
               </div>
 
               <div className="h-2 rounded-full bg-gray-200">
