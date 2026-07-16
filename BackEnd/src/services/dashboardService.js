@@ -154,7 +154,28 @@ const getDashboardData = async () => {
     operators: site.Operators,
     totalFuelConsumed: Number(site.TotalFuelConsumed),
     utilizationPercentage: Number(site.UtilizationPercentage),
-})),
+      })),
+    fuelConsumption:{
+       summary: {
+        targetFuel: 12540,
+        actualFuel: 10980,
+        unit: "L",
+    },
+
+    analytics: {
+        period: "monthly",
+
+        data: [
+            { label: "1 Jul", value: 520 },
+            { label: "2 Jul", value: 610 },
+            { label: "3 Jul", value: 480 },
+            { label: "4 Jul", value: 700 },
+            { label: "5 Jul", value: 640 },
+            { label: "6 Jul", value: 590 },
+            { label: "7 Jul", value: 760 },
+        ],
+    },
+    }
     };
     return dashboardData;
   } catch (error) {
