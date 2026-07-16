@@ -108,7 +108,7 @@ export default function Home() {
               <WorkingHoursCard data={data.workingHours} />
             </SectionCard>
             <div className="">
-              <StatisticsChart />
+              <StatisticsChart data={data.fuelConsumption}/>
             </div>
           </div>
         </div>
