@@ -101,7 +101,7 @@ export default function Home() {
                 />
               </SectionCard>
               <SectionCard title="Recents Alerts" actionText="View Alerts">
-                <RecentAlerts />
+                <RecentAlerts data={data.recentAlerts}/>
               </SectionCard>
             </div>
             <SectionCard title="Working Hours">
