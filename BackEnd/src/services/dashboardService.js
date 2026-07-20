@@ -12,6 +12,7 @@ const getDashboardData = async () => {
       workingHours,
       topWorkingAssets,
       siteSummary,
+      recentAlerts,
     ] = await Promise.all([
       sql.query(`
         SELECT COUNT(*) AS TotalAssets
@@ -99,6 +100,19 @@ const getDashboardData = async () => {
     sm.SiteName
       ORDER BY
     sm.SiteID;`),
+      sql.query(`
+      SELECT TOP 3
+    al.AlertID,
+    am.AssetName,
+    al.AlertType,
+    al.AlertLevel,
+    al.AlertMessage,
+    al.AlertDateTime
+FROM AssetAlertLog al
+INNER JOIN AssetMaster am
+    ON al.AssetID = am.AssetID
+WHERE al.CustomerID = 1
+ORDER BY al.AlertDateTime DESC;`),
     ]);
     // console.log(workingHours, topWorkingAssets);
     const runningAssets =
@@ -122,7 +136,14 @@ const getDashboardData = async () => {
         assetType: item.AssetTypeName,
         count: item.Total,
       })),
-      recentAlerts: [],
+      recentAlerts:  recentAlerts.recordset.map((alert) => ({
+      alertId: alert.AlertID,
+      assetName: alert.AssetName,
+      alertType: alert.AlertType,
+      alertLevel: alert.AlertLevel,
+      alertMessage: alert.AlertMessage,
+      alertDateTime: alert.AlertDateTime,
+      })),
       workingHours: {
         summary: {
           workingHours: Number(
@@ -144,28 +165,28 @@ const getDashboardData = async () => {
           workingHours: Number((item.TotalWorkingMinutes / 60).toFixed(1)),
         })),
       },
-        siteSummary: siteSummary.recordset.map((site) => ({
-    siteId: site.SiteID,
-    siteName: site.SiteName,
-    totalAssets: site.TotalAssets,
-    activeAssets: site.ActiveAssets,
-    idleAssets: site.IdleAssets,
-    maintenanceAssets: site.MaintenanceAssets,
-    operators: site.Operators,
-    totalFuelConsumed: Number(site.TotalFuelConsumed),
-    utilizationPercentage: Number(site.UtilizationPercentage),
+      siteSummary: siteSummary.recordset.map((site) => ({
+        siteId: site.SiteID,
+        siteName: site.SiteName,
+        totalAssets: site.TotalAssets,
+        activeAssets: site.ActiveAssets,
+        idleAssets: site.IdleAssets,
+        maintenanceAssets: site.MaintenanceAssets,
+        operators: site.Operators,
+        totalFuelConsumed: Number(site.TotalFuelConsumed),
+        utilizationPercentage: Number(site.UtilizationPercentage),
       })),
-    fuelConsumption:{
-       summary: {
-        targetFuel: 12540,
-        actualFuel: 10980,
-        unit: "L",
-    },
+      fuelConsumption: {
+        summary: {
+          targetFuel: 12540,
+          actualFuel: 10980,
+          unit: "L",
+        },
 
-    analytics: {
-        period: "monthly",
+        analytics: {
+          period: "monthly",
 
-        data: [
+          data: [
             { label: "1 Jul", value: 520 },
             { label: "2 Jul", value: 610 },
             { label: "3 Jul", value: 480 },
@@ -173,9 +194,9 @@ const getDashboardData = async () => {
             { label: "5 Jul", value: 640 },
             { label: "6 Jul", value: 590 },
             { label: "7 Jul", value: 760 },
-        ],
-    },
-    }
+          ],
+        },
+      },
     };
     return dashboardData;
   } catch (error) {
