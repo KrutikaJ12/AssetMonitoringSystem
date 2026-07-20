@@ -12,54 +12,22 @@ import { Link } from "react-router";
 
 // Define the table data using the interface
 
-interface SiteSummary {
-  id: number;
+interface SiteSummaryItem {
+  siteId: number;
   siteName: string;
   totalAssets: number;
   activeAssets: number;
   idleAssets: number;
-  maintenance: number;
+  maintenanceAssets: number;
   operators: number;
-  fuelConsumption: number;
-  utilization: number;
+  totalFuelConsumed: number;
+  utilizationPercentage: number;
+}
+interface SiteSummaryProps {
+  data: SiteSummaryItem[];
 }
 
-const tableData: SiteSummary[] = [
-  {
-    id: 1,
-    siteName: "Mumbai Site",
-    totalAssets: 25,
-    activeAssets: 18,
-    idleAssets: 4,
-    maintenance: 3,
-    operators: 18,
-    fuelConsumption: 2450,
-    utilization: 72,
-  },
-  {
-    id: 2,
-    siteName: "Pune Site",
-    totalAssets: 12,
-    activeAssets: 9,
-    idleAssets: 2,
-    maintenance: 1,
-    operators: 10,
-    fuelConsumption: 1350,
-    utilization: 68,
-  },
-  {
-    id: 3,
-    siteName: "Hyderbad Site",
-    totalAssets: 40,
-    activeAssets: 28,
-    idleAssets: 6,
-    maintenance: 6,
-    operators: 28,
-    fuelConsumption: 3680,
-    utilization: 70,
-  },
-];
-export default function SiteSummary() {
+export default function SiteSummary({data}:SiteSummaryProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -166,20 +134,20 @@ export default function SiteSummary() {
               >
                 Utilization
               </TableCell>
-              <TableCell
+              {/* <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 View
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHeader>
 
           {/* Table Body */}
 
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {tableData.map((site) => (
-              <TableRow key={site.id} className="">
+            {data?.map((site) => (
+              <TableRow key={site.siteId} className="">
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">
                     {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
@@ -208,13 +176,13 @@ export default function SiteSummary() {
                   {site.idleAssets}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {site.maintenance}
+                  {site.maintenance || 9}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {site.operators}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {site.fuelConsumption}
+                  {site.totalFuelConsumed}
                 </TableCell>
                 {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   <Badge
@@ -235,11 +203,11 @@ export default function SiteSummary() {
                     <div className="h-2 w-20 rounded-full bg-gray-200">
                       <div
                         className="h-2 rounded-full bg-red-500"
-                        style={{ width: `${site.utilization}%` }}
+                        style={{ width: `${site.utilizationPercentage}%` }}
                       />
                     </div>
 
-                    <span>{site.utilization}%</span>
+                    <span>{site.utilizationPercentage}%</span>
                   </div>
                 </TableCell>
               </TableRow>

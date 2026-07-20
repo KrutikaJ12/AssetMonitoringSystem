@@ -5,9 +5,8 @@ import flatpickr from "flatpickr";
 import ChartTab from "../common/ChartTab";
 import { CalenderIcon } from "../../icons";
 
-export default function StatisticsChart() {
+export default function StatisticsChart({data}:any) {
   const datePickerRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     if (!datePickerRef.current) return;
 
@@ -93,15 +92,7 @@ export default function StatisticsChart() {
     },
     xaxis: {
       type: "category", // Category-based x-axis
-      categories: [
-        "1 May",
-        "5 May",
-        "10 May",
-        "15 May",
-        "20 May",
-        "25 May",
-        "29 May",
-      ],
+      categories:data.analytics?.data?.map(data=> data?.label),
       axisBorder: {
         show: false, // Hide x-axis border
       },
@@ -114,7 +105,7 @@ export default function StatisticsChart() {
     },
     yaxis: {
       labels: {
-        formatter: (value) => `${value / 1000}K`,
+        formatter: (value) => `${value} L`,
       },
       title: {
         text: "", // Remove y-axis title
@@ -128,7 +119,7 @@ export default function StatisticsChart() {
   const series = [
     {
       name: "Fuel Consumption",
-      data: [5000, 7000, 6000, 11000, 9000, 13000, 12540],
+      data: data.analytics?.data?.map(data=> data?.value),
     },
   ];
   return (
@@ -142,7 +133,7 @@ export default function StatisticsChart() {
             Target you've set for each month
           </p>
            <div className="mb-2 mt-4">
-          <h2 className="text-3xl font-bold text-gray-900">12,540 L</h2>
+          <h2 className="text-3xl font-bold text-gray-900">{data.summary.actualFuel}L</h2>
 
           {/* <div className="flex items-center gap-2 mt-1">
             <span className="text-green-500 font-medium">+15.3%</span>
