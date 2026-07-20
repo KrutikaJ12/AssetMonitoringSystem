@@ -9,8 +9,7 @@ const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const { connectDB } = require("./src/config/db")
 connectDB();
 
-const tokenRoutes = require("./src/routes/tokenRoutes");
-const vehicleRoutes = require("./src/routes/vehicleRoutes");
+
 const app = express();
 
 app.use(cors());
