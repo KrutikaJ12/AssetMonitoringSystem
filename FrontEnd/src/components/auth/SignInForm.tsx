@@ -1,14 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
+import { login } from "../../api/authApi";
 
 export default function SignInForm() {
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const navigate=useNavigate()
+  async function handleSubmit(e) {
+    e.preventDefault();
+    try {
+      const response = await login({ loginId, password });
+      navigate('/admin/dashboard')
+      return response;
+    } catch (error) {
+      console.log("Error", error);
+    }
+  }
   return (
     <div className="flex flex-col w-[25%] border flex-1">
       {/* <div className="w-full max-w-md pt-10 mx-auto">
@@ -31,15 +45,26 @@ export default function SignInForm() {
             </p>
           </div>
           <div>
-           
-           
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-6">
-                <div>
+                {/* <div>
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
                   <Input placeholder="info@gmail.com" />
+                </div> */}
+                <div>
+                  <Label>
+                    Label Id <span className="text-error-500">*</span>{" "}
+                  </Label>
+                  <Input
+                    id="loginId"
+                    name="loginId"
+                    type="text"
+                    value={loginId}
+                    placeholder="Enter your login Id"
+                    onChange={(event) => setLoginId(event.target.value)}
+                  />
                 </div>
                 <div>
                   <Label>
@@ -49,6 +74,8 @@ export default function SignInForm() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -77,7 +104,7 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm">
+                  <Button type="submit" className="w-full" size="sm">
                     Sign in
                   </Button>
                 </div>
