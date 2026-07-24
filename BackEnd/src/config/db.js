@@ -13,16 +13,27 @@ const dbConfig = {
   },
 };
 
+let pool = null;
 const connectDB = async () => {
   try {
-    await sql.connect(dbConfig);
+    pool = await sql.connect(dbConfig);
     console.log("✅ SQL Server Connected");
   } catch (err) {
     console.error("❌ SQL Connection Error:", err);
   }
 };
 
+
+const getPool = () => {
+  console.log("Current Pool :", pool);
+   if (!pool) {
+      throw new Error("Database not connected.");
+   }
+
+   return pool;
+};
 module.exports = {
   sql,
   connectDB,
+  getPool
 };
