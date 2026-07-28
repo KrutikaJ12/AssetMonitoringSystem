@@ -6,6 +6,7 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { login } from "../../api/authApi";
+import { setAxiosAuthHeader } from "../../services";
 
 export default function SignInForm() {
   const [loginId, setLoginId] = useState("");
@@ -17,6 +18,9 @@ export default function SignInForm() {
     e.preventDefault();
     try {
       const response = await login({ loginId, password });
+      console.log("Res",response)
+      localStorage.setItem("accessToken",response.accessToken)
+      setAxiosAuthHeader(response.accessToken)
       navigate('/admin/dashboard')
       return response;
     } catch (error) {
