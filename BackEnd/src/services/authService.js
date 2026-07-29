@@ -3,8 +3,6 @@ const jwt = require("jsonwebtoken");
 
 const authRepository = require("../repositories/authRepository");
 const { verifyPassword } = require("../utils/passwordUtils");
-console.log("1", process.env.JWT_ACCESS_SECRET);
-console.log("2", process.env.JWT_REFRESH_SECRET);
 function createAccessToken(user, roles) {
   return jwt.sign(
     {
@@ -46,6 +44,7 @@ async function authenticate(loginId, password) {
   };
 
   const user = await authRepository.getUserForAuthentication(loginId);
+
   console.log("user", user);
   /*
    * Use a generic message whether the user exists or not.
@@ -94,7 +93,7 @@ async function authenticate(loginId, password) {
     //     user.PasswordHash,
     //     password
     // );
-     passwordIsValid = await verifyPassword(password, user.PasswordHash);
+    passwordIsValid = await verifyPassword(password, user.PasswordHash);
     // const hash = user.PasswordHash.toString();
 
     // passwordIsValid = await argon2.verify(hash, password);
@@ -117,8 +116,8 @@ async function authenticate(loginId, password) {
    * Replace this example with the role/permission lookup
    * from usp_AppUser_GetLoginContext.
    */
-  const roles = [];
-  const permissions = [];
+  const roles = await authRepository.getUserRoles(user.UserID);
+  const permissions = await authRepository.getUserPermissions(user.UserID);
 
   const accessToken = createAccessToken(user, roles);
   const refreshToken = createRefreshToken(user.UserID);
