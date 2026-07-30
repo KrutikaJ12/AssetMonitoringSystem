@@ -38,9 +38,59 @@ async function clearExpiredLockout(userId) {
         .execute("dbo.usp_AppUser_ClearExpiredLockout");
 }
 
+async function getAuthorizationContext(userId, customerId) {
+    const pool = await getPool();
+
+    const request = pool
+        .request()
+        .input("UserID", sql.BigInt, userId);
+
+    if (customerId === null || customerId === undefined) {
+        request.input("CustomerID", sql.BigInt, null);
+    } else {
+        request.input("CustomerID", sql.BigInt, customerId);
+    }
+
+    const result = await request.execute(
+        "dbo.usp_AppUser_GetAuthorizationContext"
+    );
+
+    return {
+        roles: result.recordsets[0] || [],
+        permissions: result.recordsets[1] || []
+    };
+}
+
+async function hasPermission(userId, permissionCode) {
+    const pool = await getPool();
+
+    const result = await pool
+        .request()
+        .input("UserID", sql.BigInt, userId)
+        .input(
+            "PermissionCode",
+            sql.NVarChar(100),
+            permissionCode
+        )
+        .execute("dbo.usp_AppUser_HasPermission");
+
+    return result.recordset[0]?.HasPermission === true;
+}
+
+// async function getUserRoles(userId) {
+//   // SQL query here
+// }
+
+// async function getUserPermissions(userId) {
+//   // SQL query here
+// }
+
+
 module.exports = {
     getUserForAuthentication,
     recordSuccessfulLogin,
     recordFailedLogin,
-    clearExpiredLockout
+    clearExpiredLockout,
+    getAuthorizationContext,
+    hasPermission
 };
