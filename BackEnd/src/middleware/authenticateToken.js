@@ -37,7 +37,8 @@ function authenticateToken(req, res, next) {
         };
 
         next();
-    } catch {
+    } catch(error) {
+        console.error("JWT Error:", error);
         return res.status(401).json({
             success: false,
             message: "The session is invalid or expired."
