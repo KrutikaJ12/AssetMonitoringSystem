@@ -8,6 +8,7 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setAxiosAuthHeader } from "./services/httpRequest.ts";
+import { AuthProvider } from "./context/AuthContext.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +29,10 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AppWrapper>
-          <App />
+          <AuthProvider>
+            <App />
+            </AuthProvider>
+          
         </AppWrapper>
       </ThemeProvider>
 

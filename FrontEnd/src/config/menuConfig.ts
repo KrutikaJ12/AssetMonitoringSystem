@@ -5,69 +5,110 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
+// export const adminMenu: NavItem[] = [
+//   // {
+//   //   icon: <GridIcon />,
+//   //   name: "Dashboard",
+//   //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+//   // },
+//   {
+//     // icon: <GridIcon />,
+//     name: "Dashboard",
+//     path: "/admin/dashboard",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Sites",
+//     path: "/admin/sites",
+//   },
+
+//   // {
+//   //   name: "Assets",
+//   //   icon: <ListIcon />,
+//   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+//   // },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Assets",
+//     path: "/admin/assets",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Operators",
+//     path: "/admin/operators",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Alerts",
+//     path: "/admin/alerts",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Reports",
+//     path: "/admin/reports",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Settings",
+//     path: "/admin/settings",
+//   },
+
+//   // {
+//   //   name: "Tables",
+//   //   icon: <TableIcon />,
+//   //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+//   // },
+//   // {
+//   //   name: "Pages",
+//   //   icon: <PageIcon />,
+//   //   subItems: [
+//   //     { name: "Blank Page", path: "/blank", pro: false },
+//   //     { name: "404 Error", path: "/error-404", pro: false },
+//   //   ],
+//   // },
+// ];
 export const adminMenu: NavItem[] = [
-  // {
-  //   icon: <GridIcon />,
-  //   name: "Dashboard",
-  //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  // },
   {
-    // icon: <GridIcon />,
     name: "Dashboard",
     path: "/admin/dashboard",
+    moduleCode: "DASHBOARD",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Sites",
     path: "/admin/sites",
+    moduleCode: "SITES",
   },
-
-  // {
-  //   name: "Assets",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
   {
-    // icon: <UserCircleIcon />,
     name: "Assets",
     path: "/admin/assets",
+    moduleCode: "ASSETS",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Operators",
     path: "/admin/operators",
+    moduleCode: "OPERATORS",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Alerts",
     path: "/admin/alerts",
+    moduleCode: "ALERTS",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Reports",
     path: "/admin/reports",
+    moduleCode: "REPORTS",
   },
   {
-    // icon: <UserCircleIcon />,
+    name: "Users",
+    path: "/admin/users",
+    moduleCode: "USER_MANAGEMENT",
+  },
+  {
     name: "Settings",
     path: "/admin/settings",
+    moduleCode: "SETTINGS",
   },
-
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
 ];
-
 export const siteManagerMenu: NavItem[] = [
   {
     

@@ -25,6 +25,9 @@ import OperatorDashboard from "./pages/Dashboard/OperatorDashboard";
 import AssetAllocationTable from "./components/dashboard/AssetAllocationTable";
 import AssetTable from "./components/tables/BasicTables/AssetTable";
 import Reports from "./components/dashboard/Reports";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PermissionRoute from "./auth/PermissionRoute";
+import ForbiddenPage from "./pages/OtherPage/ForbiddenPage";
 
 export default function App() {
   return (
@@ -32,19 +35,109 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route
+            path="/"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
           {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route path="/admin/dashboard" element={<Home />} />
-            {/* AdminSidebar Routes */}
-            <Route path="/admin/customers" element={<LineChart />} />
-            <Route path="/admin/sites" element={<SiteManagerDashboard />} />
-            <Route path="/admin/assets" element={<AssetTable />} />
-            <Route path="/admin/operators" element={<OperatorDashboard />} />
-            <Route path="/admin/users" element={<LineChart />} />
-            <Route path="/admin/alerts" element={<RecentAlerts />} />
-            <Route path="/admin/reports" element={<Reports />} />
-            <Route path="/admin/settings" element={<UserProfiles />} />
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route
+              path="/forbidden"
+              element={
+                <ProtectedRoute>
+                  <ForbiddenPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="DASHBOARD_VIEW">
+                    <Home />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/sites"
+              element={
+                <ProtectedRoute>
+                  <SiteManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/assets"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="ASSET_VIEW">
+                    <AssetTable />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/operators"
+              element={
+                <ProtectedRoute moduleCode="OPERATORS">
+                  <OperatorDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="USER_VIEW">
+                    <LineChart />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/alerts"
+              element={
+                <ProtectedRoute moduleCode="ALERTS">
+                  <RecentAlerts />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/reports"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <Reports />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="USER_VIEW">
+                    <UserProfiles />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+
             {/* <Route path="/admin" element={<AdminDashboard />} /> */}
             <Route path="/siteManager" element={<SiteManagerDashboard />} />
             <Route path="/operator" element={<OperatorDashboard />} />

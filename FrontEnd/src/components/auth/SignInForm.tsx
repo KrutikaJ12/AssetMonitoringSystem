@@ -7,6 +7,8 @@ import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { login } from "../../api/authApi";
 import { setAxiosAuthHeader } from "../../services";
+import { useMutation } from "@tanstack/react-query";
+import { useLogin } from "../../hooks/useLogin";
 
 export default function SignInForm() {
   const [loginId, setLoginId] = useState("");
@@ -14,19 +16,27 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const navigate=useNavigate()
-  async function handleSubmit(e) {
-    e.preventDefault();
-    try {
-      const response = await login({ loginId, password });
-      console.log("Res",response)
-      localStorage.setItem("accessToken",response.accessToken)
-      setAxiosAuthHeader(response.accessToken)
-      navigate('/admin/dashboard')
-      return response;
-    } catch (error) {
-      console.log("Error", error);
-    }
-  }
+  const loginMutation = useLogin();
+  // async function handleSubmit(e) {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await login({ loginId, password });
+  //     console.log("Res",response)
+  //     localStorage.setItem("accessToken",response.accessToken)
+  //     setAxiosAuthHeader(response.accessToken)
+  //     navigate('/admin/dashboard')
+  //     return response;
+  //   } catch (error) {
+  //     console.log("Error", error);
+  //   }
+  // }
+  const handleSubmit = (e) => {
+     e.preventDefault();
+    loginMutation.mutate({
+        loginId,
+        password
+    });
+};
   return (
     <div className="flex flex-col w-[25%] border flex-1">
       {/* <div className="w-full max-w-md pt-10 mx-auto">

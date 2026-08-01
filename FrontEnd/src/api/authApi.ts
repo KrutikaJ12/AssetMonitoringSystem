@@ -7,3 +7,9 @@ export const login=(data)=>{
     payload:data
   })
 }
+export const logout = () => {
+  return httpRequest({
+    url: "/auth/logout",
+    method: HttpMethods.POST,
+  });
+};
