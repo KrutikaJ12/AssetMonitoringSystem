@@ -14,7 +14,7 @@ export function useLogin() {
         mutationFn: login,
 
         onSuccess: (data) => {
-
+           console.log("response",data)
             setAuthentication(data);
 
             navigate("/admin/dashboard");
