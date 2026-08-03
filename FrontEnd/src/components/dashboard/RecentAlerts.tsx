@@ -34,7 +34,7 @@ const colorMap = {
 };
 export const RecentAlerts = ({data}:any) => (
   <div className="space-y-3">
-    {data.map((alert) => (
+    {data?.map((alert) => (
       <div
         key={alert.id}
         className="rounded-xl border border-gray-200 p-4 hover:shadow-md transition-all"
