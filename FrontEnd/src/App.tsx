@@ -86,12 +86,24 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            <Route
+            
+             <Route
+              path="/admin/sites"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="SITE_VIEW">
+                    <SiteManagerDashboard/>
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+               <Route
               path="/admin/operators"
               element={
-                <ProtectedRoute moduleCode="OPERATORS">
-                  <OperatorDashboard />
+                <ProtectedRoute>
+                  <PermissionRoute permission="OPERATOR_VIEW">
+                    <OperatorDashboard/>
+                  </PermissionRoute>
                 </ProtectedRoute>
               }
             />
