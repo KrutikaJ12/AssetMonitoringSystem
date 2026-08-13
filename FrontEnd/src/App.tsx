@@ -28,6 +28,10 @@ import Reports from "./components/dashboard/Reports";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PermissionRoute from "./auth/PermissionRoute";
 import ForbiddenPage from "./pages/OtherPage/ForbiddenPage";
+import SiteAdmin from "./pages/Sites/SiteAdmin";
+import UsersPage from "./pages/Users/UsersPage";
+import OperatorsPage from "./pages/Operators/OperatorsPage";
+
 
 export default function App() {
   return (
@@ -68,15 +72,6 @@ export default function App() {
             />
 
             <Route
-              path="/admin/sites"
-              element={
-                <ProtectedRoute>
-                  <SiteManagerDashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
               path="/admin/assets"
               element={
                 <ProtectedRoute>
@@ -92,7 +87,7 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <PermissionRoute permission="SITE_VIEW">
-                    <SiteManagerDashboard/>
+                    <SiteAdmin/>
                   </PermissionRoute>
                 </ProtectedRoute>
               }
@@ -102,7 +97,7 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <PermissionRoute permission="OPERATOR_VIEW">
-                    <OperatorDashboard/>
+                    <OperatorsPage/>
                   </PermissionRoute>
                 </ProtectedRoute>
               }
@@ -113,7 +108,7 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <PermissionRoute permission="USER_VIEW">
-                    <LineChart />
+                    <UsersPage/>
                   </PermissionRoute>
                 </ProtectedRoute>
               }
