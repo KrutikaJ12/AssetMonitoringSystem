@@ -9,6 +9,7 @@ const tokenRoutes = require("./src/routes/tokenRoutes");
 const vehicleRoutes = require("./src/routes/vehicleRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const authRoutes = require("./src/routes/authRoutes");
+const siteRoutes = require("./src/routes/siteRoutes")
 const { connectDB } = require("./src/config/db")
 // connectDB();
 
@@ -22,6 +23,7 @@ app.use("/api", tokenRoutes);
 app.use("/api", vehicleRoutes);
 app.use("/api", dashboardRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api",siteRoutes)
 const PORT = process.env.PORT;
 
 const startServer = async () => {
