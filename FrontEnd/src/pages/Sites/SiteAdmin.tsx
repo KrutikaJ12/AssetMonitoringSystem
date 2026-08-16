@@ -15,6 +15,7 @@ import AssetDetails from "../../components/tables/BasicTables/AssetDetails";
 import Buttons from "../UiElements/Buttons";
 import SiteModal from "./SiteModal";
 import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
+import { useSites } from "../../hooks/useSites";
 
 const sitesData = [
   {
@@ -81,67 +82,72 @@ const sitesData = [
     siteManager: "Priya",
   },
 ];
-interface Asset {
-  assetId: string;
-  assetName: string;
-  category: string;
-  site: string;
-  status: string;
-  operator: string;
-  engineHours: number;
-  idleHours: number;
-  fuelLevel: number;
-}
-const asset = {
-  assetId: "EX001",
-  name: "Excavator",
-  category: "Earth Moving",
-  site: "Mumbai",
-  operator: "John",
-  customer: "ABC Construction",
-  purchaseDate: "12 Jan 2023",
-  model: "CAT 320D",
-  serialNumber: "CAT320D-EX001",
-  status: "Active",
-  engineHours: 1250,
-  idleHours: 180,
-  fuelLevel: 75,
-  lastUpdated: "18 Jun 2026 • 10:42 AM",
-  lastService: "12 Jun 2026",
-  nextService: "150 hrs remaining",
-  maintenanceStatus: "Good",
-  currentSite: "Mumbai Site",
-  lastSeen: "5 mins ago",
-};
-interface AssetTableProps {
-  data: Asset[];
-}
-const SiteAdmin = (Asset: AssetTableProps) => {
+// interface Asset {
+  // assetId: string;
+  // assetName: string;
+  // category: string;
+  // site: string;
+  // status: string;
+  // operator: string;
+  // engineHours: number;
+  // idleHours: number;
+  // fuelLevel: number;
+// }
+// const asset = {
+//   assetId: "EX001",
+//   name: "Excavator",
+//   category: "Earth Moving",
+//   site: "Mumbai",
+//   operator: "John",
+//   customer: "ABC Construction",
+//   purchaseDate: "12 Jan 2023",
+//   model: "CAT 320D",
+//   serialNumber: "CAT320D-EX001",
+//   status: "Active",
+//   engineHours: 1250,
+//   idleHours: 180,
+//   fuelLevel: 75,
+//   lastUpdated: "18 Jun 2026 • 10:42 AM",
+//   lastService: "12 Jun 2026",
+//   nextService: "150 hrs remaining",
+//   maintenanceStatus: "Good",
+//   currentSite: "Mumbai Site",
+//   lastSeen: "5 mins ago",
+// };
+// interface AssetTableProps {
+//   data: Asset[];
+// }
+const SiteAdmin = (Asset) => {
+  const { data, isLoading, error } = useSites();
+  console.log("siteData",data)
   const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedSite, setSelectedSite] = useState("");
+    const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   console.log("modelopen", isModalOpen);
   const [mode, setMode] = useState<
     "add" | "edit" | "view" | "delete" | "reset-password"
   >("add");
   const [search, setSearch] = useState("");
-  const [selectedSite, setSelectedSite] = useState("");
+  
   const [status, setStatus] = useState("");
   const hasFilters = search || selectedSite || status;
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const sites = [
     { code: "MUM", name: "Mumbai" },
     { code: "PUN", name: "Pune" },
     { code: "VAS", name: "Vashi" },
   ];
-  const filteredData = sitesData.filter((data) => {
+  const filteredData = data?.data.filter((data) => {
+    console.log(data,"datSIte")
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
-    const matchSite = selectedSite ? data.site == selectedSite : true;
+   const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
     // return matchesSearch && matchSite;
     return matchSite
   });
+
   console.log(filteredData, "filter");
   const clearFilters = () => {
     setSearch("");
@@ -241,19 +247,19 @@ const SiteAdmin = (Asset: AssetTableProps) => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  City
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  State
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
                   Location
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Coordinates
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Radius
                 </TableCell>
                 <TableCell
                   isHeader
@@ -277,31 +283,14 @@ const SiteAdmin = (Asset: AssetTableProps) => {
                   </TableCell>
                 )}
 
-                {/* <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel Consumption
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Utilization
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  View
-                </TableCell> */}
+                
               </TableRow>
             </TableHeader>
 
             {/* Table Body */}
 
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredData.map((site) => (
+              {filteredData?.map((site) => (
                 <TableRow className="">
                   <TableCell className="py-3">
                     <div className="flex items-center gap-3">
@@ -314,7 +303,7 @@ const SiteAdmin = (Asset: AssetTableProps) => {
                     </div> */}
                       <div>
                         <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {site.siteName}
+                          {site.SiteName}
                         </p>
                         {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {site.totalAssets}
@@ -322,28 +311,28 @@ const SiteAdmin = (Asset: AssetTableProps) => {
                       </div>
                     </div>
                   </TableCell>
+                  
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.city}
+                    {site.LocationName}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.state}
+                    {site.Latitude},{site.Longitude}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.location}
+                    {site.RadiusMeters} m
                   </TableCell>
-
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        site.status === "Active"
+                        `${site.IsActive}` 
                           ? "success"
                           : site.status === "Maintenance"
                             ? "warning"
                             : "error"
                       }
                     >
-                      {site.status}
+                      {site.IsActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
@@ -354,7 +343,7 @@ const SiteAdmin = (Asset: AssetTableProps) => {
                     <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <button
                         onClick={() => {
-                          setSelectedAsset(asset);
+                          setSelectedSite(site)
                           setIsModalOpen(true);
                           setMode("view");
                         }}
@@ -363,7 +352,7 @@ const SiteAdmin = (Asset: AssetTableProps) => {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedAsset(asset);
+                          setSelectedSite(site)
                           setIsModalOpen(true);
                           setMode("edit");
                         }}
@@ -400,6 +389,7 @@ const SiteAdmin = (Asset: AssetTableProps) => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             mode={mode}
+            selectedSite={selectedSite}
           />
           <DeleteConfirmationModal
             isOpen={isDeleteModalOpen}

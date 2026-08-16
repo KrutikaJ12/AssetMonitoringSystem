@@ -1,16 +1,19 @@
 import { Modal } from "../../components/ui/modal";
 import InputField from "../../components/form/input/InputField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Radio from "../../components/form/input/Radio";
 import Button from "../../components/ui/button/Button";
-const SiteModal = ({ isOpen, onClose, mode }) => {
+import { useCreateSite, useUpdateSite } from "../../hooks/useSites";
+const SiteModal = ({ isOpen, onClose, mode ,selectedSite}) => {
+  const createSiteMutation = useCreateSite();
+  const updateSiteMutation = useUpdateSite()
  const [formData, setFormData] = useState({
         siteName: "",
-        location: "",
+        locationName: "",
         latitude: "",
         longitude: "",
-        radius: "",
-        status: true,
+        radiusMeters: "",
+        isActive: true,
       });
 const modalConfig = {
   add: {
@@ -25,6 +28,42 @@ const modalConfig = {
     title: "View Site",
     buttonText: "Close",
   },
+};
+ console.log("formData",formData)
+ useEffect(() => {
+    if (selectedSite && (mode === "edit" || mode === "view")) {
+        setFormData({
+            siteName: selectedSite.SiteName || "",
+            locationName: selectedSite.LocationName || "",
+            latitude: selectedSite.Latitude ?? "",
+            longitude: selectedSite.Longitude ?? "",
+            radiusMeters: selectedSite.RadiusMeters ?? "",
+            isActive: selectedSite.IsActive ?? true
+        });
+    }
+
+    if (mode === "add") {
+        setFormData({
+            siteName: "",
+            locationName: "",
+            latitude: "",
+            longitude: "",
+            radiusMeters: "",
+            isActive: true
+        });
+    }
+}, [selectedSite, mode]);
+const handleSubmit = () => {
+    if (mode === "create") {
+        createSiteMutation.mutate(formData);
+    }
+
+    if (mode === "edit") {
+        updateSiteMutation.mutate({
+            siteId: selectedSite.SiteID,
+            siteData: formData,
+        });
+    }
 };
   return (
    <Modal isOpen={isOpen} onClose={onClose}>
@@ -51,11 +90,11 @@ const modalConfig = {
 
           <InputField
             placeholder="Enter Location"
-            value={formData.location}
+            value={formData.locationName}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                location: e.target.value,
+                locationName: e.target.value,
               })
             }
           />
@@ -95,11 +134,11 @@ const modalConfig = {
           <InputField
             type="password"
             placeholder="Enter radius"
-            value={formData.radius}
+            value={formData.radiusMeters}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                radius: e.target.value,
+                radiusMeters: e.target.value,
               })
             }
           />
@@ -116,11 +155,11 @@ const modalConfig = {
                 name="status"
                 value="Active"
                 label="Active"
-                checked={formData.status === "Active"}
+                checked={formData.isActive }
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: value,
+                     isActive: value === "true",
                   })
                 }
               />
@@ -130,11 +169,11 @@ const modalConfig = {
                 name="status"
                 value="Inactive"
                 label="Inactive"
-                checked={formData.status === "Inactive"}
+                checked={!formData.isActive }
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: value,
+                     isActive: value !== "true",
                   })
                 }
               />
@@ -146,7 +185,7 @@ const modalConfig = {
         <Button size="md" variant="outline">
           Cancel
         </Button>
-        <Button>{modalConfig[mode].buttonText}</Button>
+        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
       </div>
    </Modal>
   )
