@@ -25,7 +25,7 @@ const connectDB = async () => {
 
 
 const getPool = () => {
-  console.log("Current Pool :", pool);
+  // console.log("Current Pool :", pool);
    if (!pool) {
       throw new Error("Database not connected.");
    }
