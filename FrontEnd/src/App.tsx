@@ -39,10 +39,10 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-          <Route
-            path="/"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
+         <Route
+  path="/"
+  element={<Navigate to="/signin" replace />}
+/>
           {/* Dashboard Layout */}
           <Route
             element={
