@@ -139,7 +139,6 @@ const SiteAdmin = (Asset) => {
     { code: "VAS", name: "Vashi" },
   ];
   const filteredData = data?.data.filter((data) => {
-    console.log(data,"datSIte")
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
