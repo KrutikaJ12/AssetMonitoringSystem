@@ -54,7 +54,7 @@ const modalConfig = {
     }
 }, [selectedSite, mode]);
 const handleSubmit = () => {
-    if (mode === "create") {
+    if (mode === "add") {
         createSiteMutation.mutate(formData);
     }
 
