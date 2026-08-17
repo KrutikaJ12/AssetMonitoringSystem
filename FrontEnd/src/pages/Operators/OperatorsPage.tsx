@@ -16,81 +16,8 @@ import Buttons from "../UiElements/Buttons";
 
 import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
 import OperatorModal from "./OperatorModal";
+import { useOperators } from "../../hooks/useOperators";
 
-const operatorsData = [
-  {
-    operatorId: 1,
-    operatorCode: "EX001",
-    mobile: "9876543210",
-    licenseNo: "MH12-EM-45821",
-    rfidCard: "RFID001",
-    status: "Active",
-    site: "Mumbai",
-  },
-  {
-    operatorId: 2,
-    operatorCode: "DT002",
-    mobile: "9876543211",
-    licenseNo: "MH14-DT-67234",
-    rfidCard: "RFID002",
-    status: "Idle",
-    site: "Pune",
-  },
-  {
-    operatorId: 3,
-    operatorCode: "CR003",
-    mobile: "9876543212",
-    licenseNo: "DL08-CR-34567",
-    rfidCard: "RFID003",
-    status: "Active",
-    site: "Delhi",
-  },
-  {
-    operatorId: 4,
-    operatorCode: "BL004",
-    mobile: "9876543213",
-    licenseNo: "MH01-BL-78945",
-    rfidCard: "RFID004",
-    status: "Maintenance",
-    site: "Mumbai",
-  },
-  {
-    operatorId: 5,
-    operatorCode: "GR005",
-    mobile: "9876543214",
-    licenseNo: "MH31-GR-12356",
-    rfidCard: "RFID005",
-    status: "Active",
-    site: "Nagpur",
-  },
-  {
-    operatorId: 6,
-    operatorCode: "FL006",
-    mobile: "9876543215",
-    licenseNo: "GJ05-FL-56789",
-    rfidCard: "RFID006",
-    status: "Active",
-    site: "Ahmedabad",
-  },
-  {
-    operatorId: 7,
-    operatorCode: "EX007",
-    mobile: "9876543216",
-    licenseNo: "TN09-EX-23456",
-    rfidCard: "RFID007",
-    status: "Idle",
-    site: "Chennai",
-  },
-  {
-    operatorId: 8,
-    operatorCode: "CR008",
-    mobile: "9876543217",
-    licenseNo: "GJ01-CR-67890",
-    rfidCard: "RFID008",
-    status: "Active",
-    site: "Ahmedabad",
-  },
-];
 interface Asset {
   assetId: string;
   assetName: string;
@@ -127,6 +54,8 @@ interface AssetTableProps {
   data: Asset[];
 }
 const OperatorsPage = (Asset: AssetTableProps) => {
+  const{data} =useOperators();
+  console.log("operatorsDta",data)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   console.log("modelopen", isModalOpen);
@@ -134,28 +63,28 @@ const OperatorsPage = (Asset: AssetTableProps) => {
     "add" | "edit" | "view" | "delete" | "reset-password"
   >("add");
   const [search, setSearch] = useState("");
-  const [selectedSite, setSelectedSite] = useState("");
+  const [selectedOperator, setSelectedOperator] = useState("");
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
   const [status, setStatus] = useState("");
-  const hasFilters = search || selectedSite || status;
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const hasFilters = search || selectedOperator || status;
   const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const sites = [
     { code: "MUM", name: "Mumbai" },
     { code: "PUN", name: "Pune" },
     { code: "VAS", name: "Vashi" },
   ];
-  const filteredData = operatorsData.filter((data) => {
+  const filteredData = data?.data.filter((data) => {
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
-    const matchSite = selectedSite ? data.site == selectedSite : true;
+    const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
     // return matchesSearch && matchSite;
     return matchSite
   });
   console.log(filteredData, "filter");
   const clearFilters = () => {
     setSearch("");
-    setSelectedSite("");
+    setSelectedOperator("");
   };
   const { hasPermission } = useAuth();
   const handleDelete = (user) => {
@@ -203,9 +132,9 @@ const OperatorsPage = (Asset: AssetTableProps) => {
 
           {/* Sites Filter */}
           <select
-            value={selectedSite}
+            value={selectedOperator}
             onChange={(e) => {
-              setSelectedSite(e.target.value);
+              setSelectedOperator(e.target.value);
             }}
             className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
           >
@@ -244,7 +173,7 @@ const OperatorsPage = (Asset: AssetTableProps) => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Operator
+                  Operator 
                 </TableCell>
 
                 <TableCell
@@ -292,7 +221,7 @@ const OperatorsPage = (Asset: AssetTableProps) => {
             {/* Table Body */}
 
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredData.map((site) => (
+              {filteredData?.map((operator) => (
                 <TableRow className="">
                   <TableCell className="py-3">
                     <div className="flex items-center gap-3">
@@ -305,7 +234,7 @@ const OperatorsPage = (Asset: AssetTableProps) => {
                     </div> */}
                       <div>
                         <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {site.operatorId}
+                          {operator.OperatorName}
                         </p>
                         {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {site.totalAssets}
@@ -314,38 +243,38 @@ const OperatorsPage = (Asset: AssetTableProps) => {
                     </div>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.operatorCode}
+                    {operator.MobileNo}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.licenseNo}
+                    {operator.LicenseNo}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.rfidCard}
+                    {operator.RFIDCardNo}
                   </TableCell>
 
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        site.status === "Active"
+                        operator.IsActive 
                           ? "success"
-                          : site.status === "Maintenance"
+                          : operator.IsActive == "Maintenance"
                             ? "warning"
                             : "error"
                       }
                     >
-                      {site.status}
+                     {operator.IsActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.site}
+                    {operator.SiteName}
                   </TableCell>
 
                   {hasPermission("ASSET_VIEW") && (
                     <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <button
                         onClick={() => {
-                          setSelectedAsset(asset);
+                          setSelectedOperator(operator)
                           setIsModalOpen(true);
                           setMode("view");
                         }}
@@ -354,12 +283,12 @@ const OperatorsPage = (Asset: AssetTableProps) => {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedAsset(asset);
+                          setSelectedOperator(operator)
                           setIsModalOpen(true);
                           setMode("edit");
                         }}
                       >
-                        <SquarePen />
+                        <SquarePen/>
                       </button>
                       <button onClick={() => handleDelete(asset)}>
                         <Trash2 />
@@ -391,6 +320,8 @@ const OperatorsPage = (Asset: AssetTableProps) => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           mode={mode}
+          operators={filteredData}
+          selectedOperator={selectedOperator}
           />
           <DeleteConfirmationModal
             isOpen={isDeleteModalOpen}

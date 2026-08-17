@@ -1,18 +1,21 @@
 import { Modal } from "../../components/ui/modal";
 import InputField from "../../components/form/input/InputField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Radio from "../../components/form/input/Radio";
 import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
-const OperatorModal = ({ isOpen, onClose, mode }) => {
+import { useCreateOperator, useUpdateOperator } from "../../hooks/useOperators";
+const OperatorModal = ({ isOpen, onClose, mode,operators,selectedOperator}) => {
+   const createOperatorMutation = useCreateOperator(); 
+   const updateOperatorMutation = useUpdateOperator(); 
  const [formData, setFormData] = useState({
-        operator: "",
-        mobile: "",
+        operatorName: "",
+        mobileNo: "",
         licenseNo: "",
         rfidcard: "",
-        site: "",
-        status: true,
+        siteId: "",
+        isActive: true,
       });
 const modalConfig = {
   add: {
@@ -28,20 +31,49 @@ const modalConfig = {
     buttonText: "Close",
   },
 };
- const siteOptions = [
-    {
-      value: "1",
-      label: "Mumbai Plant",
-    },
-    {
-      value: "2",
-      label: "Pune Warehouse",
-    },
-    {
-      value: "3",
-      label: "Chennai Yard",
-    },
-  ];
+
+ const siteOptions = operators?.map((site) => ({
+    value: site.SiteID,
+    label: site.SiteName,
+}));
+useEffect(() => {
+    if (selectedOperator && (mode === "edit" || mode === "view")) {
+        setFormData({
+            operatorName: selectedOperator.OperatorName || "",
+            mobileNo: selectedOperator.MobileNo || "",
+            licenseNo: selectedOperator.LicenseNo ?? "",
+            rfidcard: selectedOperator.RFIDCardNo ?? "",
+            siteId: selectedOperator.SiteID ?? "",
+            isActive: selectedOperator.IsActive ?? true
+        });
+    }
+
+    if (mode === "add") {
+        setFormData({
+        operatorName: "",
+        mobileNo: "",
+        licenseNo: "",
+        rfidcard: "",
+        siteId: "",
+        isActive: true,
+        });
+    }
+}, [selectedOperator, mode]);
+const handleSubmit = () =>{
+  if(mode === "add"){
+   createOperatorMutation.mutate(formData)
+  }
+
+  if(mode === "edit"){
+    updateOperatorMutation.mutate({
+            operatorId: selectedOperator.OperatorID,
+            operatorData: formData,
+        });
+  }
+
+  
+}
+console.log("formData",formData)
   return (
    <Modal isOpen={isOpen} onClose={onClose}>
     <h2 className="text-2xl font-semibold mb-3">
@@ -53,11 +85,11 @@ const modalConfig = {
 
           <InputField
             placeholder="Enter Site Name"
-            value={formData.operator}
+            value={formData.operatorName}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                operator: e.target.value,
+                operatorName: e.target.value,
               })
             }
           />
@@ -67,11 +99,11 @@ const modalConfig = {
 
           <InputField
             placeholder="Enter Mobile No"
-            value={formData.mobile}
+            value={formData.mobileNo}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                mobile: e.target.value,
+                mobileNo: e.target.value,
               })
             }
           />
@@ -111,11 +143,11 @@ const modalConfig = {
           <Select
             options={siteOptions}
             placeholder="Select Site"
-            value={formData.site}
+            value={formData.siteId}
             onChange={(value) =>
               setFormData({
                 ...formData,
-                site: value,
+                siteId: value,
               })
             }
           />
@@ -132,11 +164,11 @@ const modalConfig = {
                 name="status"
                 value="Active"
                 label="Active"
-                checked={formData.status === "Active"}
+                checked={formData.isActive }
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: value,
+                    isActive: value,
                   })
                 }
               />
@@ -146,11 +178,11 @@ const modalConfig = {
                 name="status"
                 value="Inactive"
                 label="Inactive"
-                checked={formData.status === "Inactive"}
+                checked={!formData.isActive }
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: value,
+                    isActive: value,
                   })
                 }
               />
@@ -162,7 +194,7 @@ const modalConfig = {
         <Button size="md" variant="outline">
           Cancel
         </Button>
-        <Button>{modalConfig[mode].buttonText}</Button>
+        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
       </div>
    </Modal>
   )
