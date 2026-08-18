@@ -13,6 +13,7 @@ import Button from "../ui/button/Button";
 import { Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Reports {
   siteName: string;
@@ -129,6 +130,7 @@ const handlePdfExport = () => {
 const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const{hasPermission}=useAuth()
   return (
     <div>
       <div className="flex w-full gap-5">
@@ -160,21 +162,24 @@ const Reports = () => {
       </div>
       <SectionCard>
         <div className="mb-5 flex justify-start gap-6">
-          <button
+          {hasPermission("REPORT_EXPORT") && (
+             <button
             onClick={handleExport}
           className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
         >
           <Download size={16} />
           Export
         </button>
-
+          )}
+          
+        {hasPermission("REPORT_EXPORT") && (
         <button
   onClick={handlePdfExport}
   className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
 >
   <Download size={16} />
   Pdf
-</button>
+</button>)}
         </div>
 
         <div className="max-w-full overflow-x-auto">

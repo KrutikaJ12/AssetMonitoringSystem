@@ -1,73 +1,96 @@
+import { Delete, Download, Eye, Search, SquarePen, Trash2 } from "lucide-react";
 import { useState } from "react";
-import Badge from "../../ui/badge/Badge";
+import { useAuth } from "../../hooks/useAuth";
+import Button from "../../components/ui/button/Button";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import { Download, Eye, Search } from "lucide-react";
-import Button from "../../ui/button/Button";
-// import Drawer from "../../ui/Drawer/Drawer";
-import { Modal } from "../../ui/modal";
-import AssetDetails from "./AssetDetails";
-import { useAuth } from "../../../hooks/useAuth";
-const assetsData = [
+} from "../../components/ui/table";
+import Badge from "../../components/ui/badge/Badge";
+import { Modal } from "../../components/ui/modal";
+import AssetDetails from "../../components/tables/BasicTables/AssetDetails";
+import UserModal from "./UserModal";
+import DeleteUserModel from "./DeleteUserModel";
+import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
+interface User {
+  fullName: string;
+  username: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+  role: string;
+  site: string;
+  status: string;
+}
+
+const usersData = [
   {
-    assetId: "EX001",
-    assetName: "Excavator",
-    category: "Earth Moving",
-    site: "Mumbai",
+    userId: 1,
+    name: "Sandeep",
+    username: "sandi",
+    email: "sandeep@watran.in",
+    role: "Admin",
     status: "Active",
-    operator: "John",
-    engineHours: 1250,
-    idleHours: 180,
-    fuelLevel: 75,
   },
   {
-    assetId: "DT002",
-    assetName: "Dump Truck",
-    category: "Transport",
-    site: "Pune",
-    status: "Idle",
-    operator: "Mike",
-    engineHours: 980,
-    idleHours: 245,
-    fuelLevel: 58,
-  },
-  {
-    assetId: "CR003",
-    assetName: "Crane",
-    category: "Lifting Equipment",
-    site: "Delhi",
+    userId: 2,
+    name: "Krutika",
+    username: "krutika",
+    email: "krutika@test.com",
+    role: "Super Admin",
     status: "Active",
-    operator: "David",
-    engineHours: 1540,
-    idleHours: 120,
-    fuelLevel: 82,
   },
   {
-    assetId: "BL004",
-    assetName: "Backhoe Loader",
-    category: "Earth Moving",
-    site: "Mumbai",
-    status: "Maintenance",
-    operator: "Rajesh",
-    engineHours: 2100,
-    idleHours: 340,
-    fuelLevel: 35,
-  },
-  {
-    assetId: "GR005",
-    assetName: "Motor Grader",
-    category: "Transport",
-    site: "Nagpur",
+    userId: 3,
+    name: "Rahul Sharma",
+    username: "rahul.sharma",
+    email: "rahul.sharma@example.com",
+    role: "Site Manager",
     status: "Active",
-    operator: "Amit",
-    engineHours: 1320,
-    idleHours: 95,
-    fuelLevel: 68,
+  },
+  {
+    userId: 4,
+    name: "Priya Patel",
+    username: "priya.patel",
+    email: "priya.patel@example.com",
+    role: "Operator",
+    status: "Inactive",
+  },
+  {
+    userId: 5,
+    name: "Amit Kumar",
+    username: "amit.kumar",
+    email: "amit.kumar@example.com",
+    role: "Site Manager",
+    status: "Active",
+  },
+  {
+    userId: 6,
+    name: "Neha Singh",
+    username: "neha.singh",
+    email: "neha.singh@example.com",
+    role: "Operator",
+    status: "Active",
+  },
+  {
+    userId: 7,
+    name: "Vikram Joshi",
+    username: "vikram.joshi",
+    email: "vikram.joshi@example.com",
+    role: "Admin",
+    status: "Inactive",
+  },
+  {
+    userId: 8,
+    name: "Anjali Mehta",
+    username: "anjali.mehta",
+    email: "anjali.mehta@example.com",
+    role: "Operator",
+    status: "Active",
   },
 ];
 interface Asset {
@@ -105,87 +128,64 @@ const asset = {
 interface AssetTableProps {
   data: Asset[];
 }
-export function AssetTable(Asset: AssetTableProps) {
+const UsersPage = (Asset: AssetTableProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  console.log("modelopen", isModalOpen);
+  const [mode, setMode] = useState<
+    "add" | "edit" | "view" | "delete" | "reset-password"
+  >("add");
+
+  const [selectedUser, setSelectedUser] = useState<User>({
+    fullName: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+    site: "",
+    status: "Active",
+  });
   const [search, setSearch] = useState("");
   const [selectedSite, setSelectedSite] = useState("");
   const [status, setStatus] = useState("");
   const hasFilters = search || selectedSite || status;
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-  const sites = [
-    { code: "MUM", name: "Mumbai" },
-    { code: "PUN", name: "Pune" },
-    { code: "VAS", name: "Vashi" },
-  ];
-  const filteredData = assetsData.filter((data) => {
-    const matchesSearch =
-      data.assetName.toLowerCase().includes(search.toLowerCase()) ||
-      data.category.toLowerCase().includes(search.toLowerCase());
+  const filteredData = usersData.filter((data) => {
+    // const matchesSearch =
+    //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
+    //   data.category.toLowerCase().includes(search.toLowerCase());
     const matchSite = selectedSite ? data.site == selectedSite : true;
-    return matchesSearch && matchSite;
+    // return matchesSearch && matchSite;
+    return matchSite
   });
   console.log(filteredData, "filter");
   const clearFilters = () => {
     setSearch("");
     setSelectedSite("");
   };
-   const {hasPermission}=useAuth()
-  const handleExport = () => {
-    const headers = [
-      "Asset ID",
-      "Name",
-      "Category",
-      "Site",
-      "Status",
-      "Operator",
-      "Engine Hours",
-      "Idle Hours",
-      "Fuel",
-    ];
-
-    const csvData = filteredData
-      .map((asset) =>
-        [
-          asset.assetId,
-          asset.assetName,
-          asset.category,
-          asset.site,
-          asset.status || "N/A",
-          asset.operator,
-          asset.engineHours,
-          asset.idleHours,
-          asset.fuelLevel,
-        ].join(","),
-      )
-      .join("\n");
-
-    const blob = new Blob([[headers.join(","), csvData].join("\n")], {
-      type: "text/csv",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "assets_data.csv";
-    link.click();
-
-    // setToastType("success");
-    // setToastMessage("Data exported successfully!");
-    // setTimeout(() => setToastMessage(null), 3000);
+  const { hasPermission } = useAuth();
+  const handleDelete = (user) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+  const onDelete = () => {
+    console.log(selectedUser);
+    setIsDeleteModalOpen(false)
   };
   return (
     <>
       <div className=" h-10 flex justify-between mb-4  ">
-        <div></div>
-        {hasPermission("ASSET_EXPORT") && (
-          <button
-          onClick={handleExport}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+        <div>Users</div>
+        <Button
+          onClick={() => {
+            setIsModalOpen(!isModalOpen);
+            setMode("add");
+          }}
         >
-          <Download size={16} />
-          Export
-        </button>
-        )}
-        
+          {" "}
+          + Add User
+        </Button>
       </div>
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         {/* Search + City/Branch Filters */}
@@ -198,16 +198,34 @@ export function AssetTable(Asset: AssetTableProps) {
             />
             <input
               type="text"
-              placeholder="Search by assets by name,category..."
+              placeholder="Search User..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             />
           </div>
-          <Button size="sm" variant="outline">
-            Status
-          </Button>
+          <select
+            value={selectedSite}
+            onChange={(e) => {
+              setSelectedSite(e.target.value);
+            }}
+            className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
+          >
+            <option value="">Role</option>
+            <option>Admin</option>
+            <option>Operator</option>
+            <option>Manager</option>
+          </select>
 
+          {/* Clear filters */}
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 whitespace-nowrap"
+            >
+              Clear filters
+            </button>
+          )}
           {/* Sites Filter */}
           <select
             value={selectedSite}
@@ -216,12 +234,9 @@ export function AssetTable(Asset: AssetTableProps) {
             }}
             className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
           >
-            <option value="">All sites</option>
-            {sites.map((site) => (
-              <option key={site.code} value={site.name}>
-                {site.name}
-              </option>
-            ))}
+            <option value="">Status</option>
+            <option>Active</option>
+            <option>Inactive</option>
           </select>
 
           {/* Clear filters */}
@@ -235,13 +250,7 @@ export function AssetTable(Asset: AssetTableProps) {
           )}
         </div>
 
-        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-              Asset Allocation
-            </h3>
-          </div> */}
-        </div>
+        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between"></div>
         <div className="max-w-full overflow-x-auto">
           <Table>
             {/* Table Header */}
@@ -251,65 +260,43 @@ export function AssetTable(Asset: AssetTableProps) {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Asset ID
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
                   Name
                 </TableCell>
+
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Category
+                  Username
                 </TableCell>
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Assigned Site
+                  Email
                 </TableCell>
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Status
+                 Status
                 </TableCell>
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Operator
+                   Role
                 </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Engine Hours
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Idle Hours
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel %
-                </TableCell>
+
                 {hasPermission("ASSET_VIEW") && (
                   <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  View
-                </TableCell>
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Actions
+                  </TableCell>
                 )}
-                
+
                 {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -347,7 +334,7 @@ export function AssetTable(Asset: AssetTableProps) {
                     </div> */}
                       <div>
                         <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {site.assetId}
+                          {site.name}
                         </p>
                         {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {site.totalAssets}
@@ -356,13 +343,10 @@ export function AssetTable(Asset: AssetTableProps) {
                     </div>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.assetName}
+                    {site.username}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.category}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.site}
+                    {site.email}
                   </TableCell>
 
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
@@ -380,42 +364,34 @@ export function AssetTable(Asset: AssetTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.operator}
+                    {site.role}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.engineHours}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.idleHours}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.fuelLevel}
-                  </TableCell>
-                  {
-                   hasPermission("ASSET_VIEW") && (
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    <button
-                      onClick={() => {
-                        setSelectedAsset(asset);
-                        setIsDrawerOpen(true);
-                      }}
-                    >
-                      <Eye />
-                    </button>
-                  </TableCell>
-                    )}
-                  {/* <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-20 rounded-full bg-gray-200">
-                        <div
-                          className="h-2 rounded-full bg-red-500"
-                          style={{ width: `${site.utilization}%` }}
-                        />
-                      </div>
 
-                      <span>{site.utilization}%</span>
-                    </div>
-                  </TableCell> */}
+                  {hasPermission("ASSET_VIEW") && (
+                    <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      <button
+                        onClick={() => {
+                          setSelectedUser(selectedUser);
+                          setIsModalOpen(true);
+                          setMode("view");
+                        }}
+                      >
+                        <Eye />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedUser(selectedUser);
+                          setIsModalOpen(true);
+                          setMode("edit");
+                        }}
+                      >
+                        <SquarePen />
+                      </button>
+                      <button onClick={() => handleDelete(selectedUser)}>
+                        <Trash2 />
+                      </button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -429,15 +405,30 @@ export function AssetTable(Asset: AssetTableProps) {
               {isSelectedAsset && <AssetDetails asset={asset}/>}
             </Drawer>
           )} */}
-          {isDrawerOpen && (
+          {/* {isDrawerOpen && (
             <Modal isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-              {isSelectedAsset && <AssetDetails asset={asset} />}
+              <UserModel/>
             </Modal>
-          )}
+          )} */}
+
+          <UserModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            mode={mode}
+            user={selectedUser}
+          />
+          <DeleteConfirmationModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            title="Delete User"
+            message="Are you sure you want to delete this user?"
+            itemName={selectedUser?.fullName}
+            onDelete={()=>onDelete()}
+          />
         </div>
       </div>
     </>
   );
-}
+};
 
-export default AssetTable;
+export default UsersPage;

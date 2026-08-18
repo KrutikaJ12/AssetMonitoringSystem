@@ -1,75 +1,23 @@
-import { useState } from "react";
-import Badge from "../../ui/badge/Badge";
+import { Delete, Download, Eye, Search, SquarePen, Trash2 } from "lucide-react";
+import Button from "../../components/ui/button/Button";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import { Download, Eye, Search } from "lucide-react";
-import Button from "../../ui/button/Button";
-// import Drawer from "../../ui/Drawer/Drawer";
-import { Modal } from "../../ui/modal";
-import AssetDetails from "./AssetDetails";
-import { useAuth } from "../../../hooks/useAuth";
-const assetsData = [
-  {
-    assetId: "EX001",
-    assetName: "Excavator",
-    category: "Earth Moving",
-    site: "Mumbai",
-    status: "Active",
-    operator: "John",
-    engineHours: 1250,
-    idleHours: 180,
-    fuelLevel: 75,
-  },
-  {
-    assetId: "DT002",
-    assetName: "Dump Truck",
-    category: "Transport",
-    site: "Pune",
-    status: "Idle",
-    operator: "Mike",
-    engineHours: 980,
-    idleHours: 245,
-    fuelLevel: 58,
-  },
-  {
-    assetId: "CR003",
-    assetName: "Crane",
-    category: "Lifting Equipment",
-    site: "Delhi",
-    status: "Active",
-    operator: "David",
-    engineHours: 1540,
-    idleHours: 120,
-    fuelLevel: 82,
-  },
-  {
-    assetId: "BL004",
-    assetName: "Backhoe Loader",
-    category: "Earth Moving",
-    site: "Mumbai",
-    status: "Maintenance",
-    operator: "Rajesh",
-    engineHours: 2100,
-    idleHours: 340,
-    fuelLevel: 35,
-  },
-  {
-    assetId: "GR005",
-    assetName: "Motor Grader",
-    category: "Transport",
-    site: "Nagpur",
-    status: "Active",
-    operator: "Amit",
-    engineHours: 1320,
-    idleHours: 95,
-    fuelLevel: 68,
-  },
-];
+} from "../../components/ui/table";
+import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { Modal } from "../../components/ui/modal";
+import Badge from "../../components/ui/badge/Badge";
+import AssetDetails from "../../components/tables/BasicTables/AssetDetails";
+import Buttons from "../UiElements/Buttons";
+
+import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
+import OperatorModal from "./OperatorModal";
+import { useOperators } from "../../hooks/useOperators";
+
 interface Asset {
   assetId: string;
   assetName: string;
@@ -105,87 +53,61 @@ const asset = {
 interface AssetTableProps {
   data: Asset[];
 }
-export function AssetTable(Asset: AssetTableProps) {
+const OperatorsPage = (Asset: AssetTableProps) => {
+  const{data} =useOperators();
+  console.log("operatorsDta",data)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  console.log("modelopen", isModalOpen);
+  const [mode, setMode] = useState<
+    "add" | "edit" | "view" | "delete" | "reset-password"
+  >("add");
   const [search, setSearch] = useState("");
-  const [selectedSite, setSelectedSite] = useState("");
+  const [selectedOperator, setSelectedOperator] = useState("");
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
   const [status, setStatus] = useState("");
-  const hasFilters = search || selectedSite || status;
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const hasFilters = search || selectedOperator || status;
   const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const sites = [
     { code: "MUM", name: "Mumbai" },
     { code: "PUN", name: "Pune" },
     { code: "VAS", name: "Vashi" },
   ];
-  const filteredData = assetsData.filter((data) => {
-    const matchesSearch =
-      data.assetName.toLowerCase().includes(search.toLowerCase()) ||
-      data.category.toLowerCase().includes(search.toLowerCase());
-    const matchSite = selectedSite ? data.site == selectedSite : true;
-    return matchesSearch && matchSite;
+  const filteredData = data?.data.filter((data) => {
+    // const matchesSearch =
+    //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
+    //   data.category.toLowerCase().includes(search.toLowerCase());
+    const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
+    // return matchesSearch && matchSite;
+    return matchSite
   });
   console.log(filteredData, "filter");
   const clearFilters = () => {
     setSearch("");
-    setSelectedSite("");
+    setSelectedOperator("");
   };
-   const {hasPermission}=useAuth()
-  const handleExport = () => {
-    const headers = [
-      "Asset ID",
-      "Name",
-      "Category",
-      "Site",
-      "Status",
-      "Operator",
-      "Engine Hours",
-      "Idle Hours",
-      "Fuel",
-    ];
-
-    const csvData = filteredData
-      .map((asset) =>
-        [
-          asset.assetId,
-          asset.assetName,
-          asset.category,
-          asset.site,
-          asset.status || "N/A",
-          asset.operator,
-          asset.engineHours,
-          asset.idleHours,
-          asset.fuelLevel,
-        ].join(","),
-      )
-      .join("\n");
-
-    const blob = new Blob([[headers.join(","), csvData].join("\n")], {
-      type: "text/csv",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "assets_data.csv";
-    link.click();
-
-    // setToastType("success");
-    // setToastMessage("Data exported successfully!");
-    // setTimeout(() => setToastMessage(null), 3000);
+  const { hasPermission } = useAuth();
+  const handleDelete = (user) => {
+    setSelectedAsset(user);
+    setIsDeleteModalOpen(true);
+  };
+  const onDelete = () => {
+    console.log("Deleted sucessfully");
+    setIsDeleteModalOpen(false)
   };
   return (
     <>
       <div className=" h-10 flex justify-between mb-4  ">
-        <div></div>
-        {hasPermission("ASSET_EXPORT") && (
-          <button
-          onClick={handleExport}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+        <div>Sites</div>
+        <Button
+          onClick={() => {
+            setIsModalOpen(true);
+            setMode("add");
+          }}
         >
-          <Download size={16} />
-          Export
-        </button>
-        )}
-        
+          {" "}
+          + Add Operator
+        </Button>
       </div>
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         {/* Search + City/Branch Filters */}
@@ -198,7 +120,7 @@ export function AssetTable(Asset: AssetTableProps) {
             />
             <input
               type="text"
-              placeholder="Search by assets by name,category..."
+              placeholder="Search Site..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-sm focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
@@ -210,9 +132,9 @@ export function AssetTable(Asset: AssetTableProps) {
 
           {/* Sites Filter */}
           <select
-            value={selectedSite}
+            value={selectedOperator}
             onChange={(e) => {
-              setSelectedSite(e.target.value);
+              setSelectedOperator(e.target.value);
             }}
             className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
           >
@@ -251,25 +173,26 @@ export function AssetTable(Asset: AssetTableProps) {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Asset ID
+                  Operator 
+                </TableCell>
+
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                 Mobile
                 </TableCell>
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Name
+                 License No
                 </TableCell>
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Category
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Assigned Site
+                  RFID Card
                 </TableCell>
                 <TableCell
                   isHeader
@@ -281,60 +204,24 @@ export function AssetTable(Asset: AssetTableProps) {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Operator
+                  Assigned Site
                 </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Engine Hours
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Idle Hours
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel %
-                </TableCell>
+
                 {hasPermission("ASSET_VIEW") && (
                   <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  View
-                </TableCell>
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Actions
+                  </TableCell>
                 )}
-                
-                {/* <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel Consumption
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Utilization
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  View
-                </TableCell> */}
               </TableRow>
             </TableHeader>
 
             {/* Table Body */}
 
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredData.map((site) => (
+              {filteredData?.map((operator) => (
                 <TableRow className="">
                   <TableCell className="py-3">
                     <div className="flex items-center gap-3">
@@ -347,7 +234,7 @@ export function AssetTable(Asset: AssetTableProps) {
                     </div> */}
                       <div>
                         <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {site.assetId}
+                          {operator.OperatorName}
                         </p>
                         {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {site.totalAssets}
@@ -356,54 +243,58 @@ export function AssetTable(Asset: AssetTableProps) {
                     </div>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.assetName}
+                    {operator.MobileNo}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.category}
+                    {operator.LicenseNo}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.site}
+                    {operator.RFIDCardNo}
                   </TableCell>
 
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        site.status === "Active"
+                        operator.IsActive 
                           ? "success"
-                          : site.status === "Maintenance"
+                          : operator.IsActive == "Maintenance"
                             ? "warning"
                             : "error"
                       }
                     >
-                      {site.status}
+                     {operator.IsActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.operator}
+                    {operator.SiteName}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.engineHours}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.idleHours}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.fuelLevel}
-                  </TableCell>
-                  {
-                   hasPermission("ASSET_VIEW") && (
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    <button
-                      onClick={() => {
-                        setSelectedAsset(asset);
-                        setIsDrawerOpen(true);
-                      }}
-                    >
-                      <Eye />
-                    </button>
-                  </TableCell>
-                    )}
+
+                  {hasPermission("ASSET_VIEW") && (
+                    <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      <button
+                        onClick={() => {
+                          setSelectedOperator(operator)
+                          setIsModalOpen(true);
+                          setMode("view");
+                        }}
+                      >
+                        <Eye />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedOperator(operator)
+                          setIsModalOpen(true);
+                          setMode("edit");
+                        }}
+                      >
+                        <SquarePen/>
+                      </button>
+                      <button onClick={() => handleDelete(asset)}>
+                        <Trash2 />
+                      </button>
+                    </TableCell>
+                  )}
                   {/* <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-20 rounded-full bg-gray-200">
@@ -421,23 +312,29 @@ export function AssetTable(Asset: AssetTableProps) {
             </TableBody>
           </Table>
           {/* {isDrawerOpen && (
-            <Drawer
-              isOpen={isDrawerOpen}
-              onClose={() => setIsDrawerOpen(false)}
-              title="Asset Details"
-            >
-              {isSelectedAsset && <AssetDetails asset={asset}/>}
-            </Drawer>
-          )} */}
-          {isDrawerOpen && (
             <Modal isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
               {isSelectedAsset && <AssetDetails asset={asset} />}
             </Modal>
-          )}
+          )} */}
+          <OperatorModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          mode={mode}
+          operators={filteredData}
+          selectedOperator={selectedOperator}
+          />
+          <DeleteConfirmationModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            title="Delete Operator"
+            message="Are you sure you want to delete this operator?"
+            itemName={""}
+            onDelete={() => onDelete()}
+          />
         </div>
       </div>
     </>
   );
-}
+};
 
-export default AssetTable;
+export default OperatorsPage;
