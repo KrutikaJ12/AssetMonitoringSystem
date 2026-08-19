@@ -1,75 +1,77 @@
 import { useState } from "react";
-import Badge from "../../ui/badge/Badge";
+import Badge from "../../components/ui/badge/Badge";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import { Download, Eye, Search } from "lucide-react";
-import Button from "../../ui/button/Button";
+} from "../../components/ui/table";
+import { Download, Eye, Search, SquarePen, Trash2 } from "lucide-react";
+import Button from "../../components/ui/button/Button";
 // import Drawer from "../../ui/Drawer/Drawer";
-import { Modal } from "../../ui/modal";
+import { Modal } from "../../components/ui/modal";
 import AssetDetails from "./AssetDetails";
-import { useAuth } from "../../../hooks/useAuth";
-const assetsData = [
-  {
-    assetId: "EX001",
-    assetName: "Excavator",
-    category: "Earth Moving",
-    site: "Mumbai",
-    status: "Active",
-    operator: "John",
-    engineHours: 1250,
-    idleHours: 180,
-    fuelLevel: 75,
-  },
-  {
-    assetId: "DT002",
-    assetName: "Dump Truck",
-    category: "Transport",
-    site: "Pune",
-    status: "Idle",
-    operator: "Mike",
-    engineHours: 980,
-    idleHours: 245,
-    fuelLevel: 58,
-  },
-  {
-    assetId: "CR003",
-    assetName: "Crane",
-    category: "Lifting Equipment",
-    site: "Delhi",
-    status: "Active",
-    operator: "David",
-    engineHours: 1540,
-    idleHours: 120,
-    fuelLevel: 82,
-  },
-  {
-    assetId: "BL004",
-    assetName: "Backhoe Loader",
-    category: "Earth Moving",
-    site: "Mumbai",
-    status: "Maintenance",
-    operator: "Rajesh",
-    engineHours: 2100,
-    idleHours: 340,
-    fuelLevel: 35,
-  },
-  {
-    assetId: "GR005",
-    assetName: "Motor Grader",
-    category: "Transport",
-    site: "Nagpur",
-    status: "Active",
-    operator: "Amit",
-    engineHours: 1320,
-    idleHours: 95,
-    fuelLevel: 68,
-  },
-];
+import { useAuth } from "../../hooks/useAuth";
+import { useGetAsstes } from "../../hooks/useAssets";
+import AssetModal from "./AssetModal";
+// const assetsData = [
+//   {
+//     assetId: "EX001",
+//     assetName: "Excavator",
+//     category: "Earth Moving",
+//     site: "Mumbai",
+//     status: "Active",
+//     operator: "John",
+//     engineHours: 1250,
+//     idleHours: 180,
+//     fuelLevel: 75,
+//   },
+//   {
+//     assetId: "DT002",
+//     assetName: "Dump Truck",
+//     category: "Transport",
+//     site: "Pune",
+//     status: "Idle",
+//     operator: "Mike",
+//     engineHours: 980,
+//     idleHours: 245,
+//     fuelLevel: 58,
+//   },
+//   {
+//     assetId: "CR003",
+//     assetName: "Crane",
+//     category: "Lifting Equipment",
+//     site: "Delhi",
+//     status: "Active",
+//     operator: "David",
+//     engineHours: 1540,
+//     idleHours: 120,
+//     fuelLevel: 82,
+//   },
+//   {
+//     assetId: "BL004",
+//     assetName: "Backhoe Loader",
+//     category: "Earth Moving",
+//     site: "Mumbai",
+//     status: "Maintenance",
+//     operator: "Rajesh",
+//     engineHours: 2100,
+//     idleHours: 340,
+//     fuelLevel: 35,
+//   },
+//   {
+//     assetId: "GR005",
+//     assetName: "Motor Grader",
+//     category: "Transport",
+//     site: "Nagpur",
+//     status: "Active",
+//     operator: "Amit",
+//     engineHours: 1320,
+//     idleHours: 95,
+//     fuelLevel: 68,
+//   },
+// ];
 interface Asset {
   assetId: string;
   assetName: string;
@@ -106,23 +108,30 @@ interface AssetTableProps {
   data: Asset[];
 }
 export function AssetTable(Asset: AssetTableProps) {
+  const {data} = useGetAsstes();
+  console.log("assetData",data)
   const [search, setSearch] = useState("");
-  const [selectedSite, setSelectedSite] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
   const [status, setStatus] = useState("");
-  const hasFilters = search || selectedSite || status;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [mode, setMode] = useState<
+    "add" | "edit" | "view" | "delete" | "reset-password"
+  >("add");
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const hasFilters = search || selectedAsset || status;
   const sites = [
     { code: "MUM", name: "Mumbai" },
     { code: "PUN", name: "Pune" },
     { code: "VAS", name: "Vashi" },
   ];
-  const filteredData = assetsData.filter((data) => {
-    const matchesSearch =
-      data.assetName.toLowerCase().includes(search.toLowerCase()) ||
-      data.category.toLowerCase().includes(search.toLowerCase());
-    const matchSite = selectedSite ? data.site == selectedSite : true;
-    return matchesSearch && matchSite;
+  const filteredData = data?.assetData?.filter((data) => {
+    // const matchesSearch =
+    //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
+    //   data.category.toLowerCase().includes(search.toLowerCase());
+     const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
+    // return matchesSearch && matchSite;
+    return matchSite;
   });
   console.log(filteredData, "filter");
   const clearFilters = () => {
@@ -174,8 +183,16 @@ export function AssetTable(Asset: AssetTableProps) {
   };
   return (
     <>
-      <div className=" h-10 flex justify-between mb-4  ">
-        <div></div>
+      <div className=" h-10 flex justify-end gap-4 mb-4  ">
+        <Button
+          onClick={() => {
+            setIsModalOpen(true);
+            setMode("add");
+          }}
+        >
+          {" "}
+          + Add Sites
+        </Button>
         {hasPermission("ASSET_EXPORT") && (
           <button
           onClick={handleExport}
@@ -210,9 +227,9 @@ export function AssetTable(Asset: AssetTableProps) {
 
           {/* Sites Filter */}
           <select
-            value={selectedSite}
+            value={selectedAsset}
             onChange={(e) => {
-              setSelectedSite(e.target.value);
+              setSelectedAsset(e.target.value);
             }}
             className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
           >
@@ -247,12 +264,12 @@ export function AssetTable(Asset: AssetTableProps) {
             {/* Table Header */}
             <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
               <TableRow>
-                <TableCell
+                {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
                   Asset ID
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -306,38 +323,19 @@ export function AssetTable(Asset: AssetTableProps) {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  View
+                  Actions
                 </TableCell>
                 )}
-                
-                {/* <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel Consumption
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Utilization
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  View
-                </TableCell> */}
               </TableRow>
             </TableHeader>
 
             {/* Table Body */}
 
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredData.map((site) => (
+              {filteredData?.map((asset) => (
                 <TableRow className="">
-                  <TableCell className="py-3">
-                    <div className="flex items-center gap-3">
+                  {/* <TableCell className="py-3"> */}
+                    {/* <div className="flex items-center gap-3"> */}
                       {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
                       <img
                         src={site.image}
@@ -345,65 +343,77 @@ export function AssetTable(Asset: AssetTableProps) {
                         alt={site.name}
                       />
                     </div> */}
-                      <div>
-                        <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {site.assetId}
-                        </p>
+                      {/* <div> */}
+                        {/* <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                          {asset.assetId}
+                        </p> */}
                         {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {site.totalAssets}
                       </span> */}
-                      </div>
-                    </div>
+                      {/* </div> */}
+                    {/* </div> */}
+                  {/* </TableCell> */}
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {asset.AssetTypeName}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.assetName}
+                    {asset.Category}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.category}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.site}
+                    {asset.SiteName}
                   </TableCell>
 
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        site.status === "Active"
+                        asset.Status === "RUNNING"
                           ? "success"
-                          : site.status === "Maintenance"
+                          : asset.Status === "IDLE"
                             ? "warning"
                             : "error"
                       }
                     >
-                      {site.status}
+                      {asset.Status}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.operator}
+                    {asset.operator}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.engineHours}
+                    {asset.EngineHours}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.idleHours}
+                    {asset.IdleHours}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.fuelLevel}
+                    {asset.FuelPercentage}%
                   </TableCell>
-                  {
-                   hasPermission("ASSET_VIEW") && (
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    <button
-                      onClick={() => {
-                        setSelectedAsset(asset);
-                        setIsDrawerOpen(true);
-                      }}
-                    >
-                      <Eye />
-                    </button>
-                  </TableCell>
-                    )}
+                 {hasPermission("ASSET_VIEW") && (
+                    <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      <button
+                        onClick={() => {
+                          setSelectedAsset(asset)
+                          setIsDrawerOpen(true)
+                          setMode("view");
+                        }}
+                      >
+                        <Eye />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedAsset(asset)
+                          setIsModalOpen(true);
+                          setMode("edit");
+                        }}
+                      >
+                        <SquarePen />
+                      </button>
+                      <button onClick={() => handleDelete(asset)}>
+                        <Trash2 />
+                      </button>
+                    </TableCell>
+                  )}
                   {/* <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-20 rounded-full bg-gray-200">
@@ -420,20 +430,19 @@ export function AssetTable(Asset: AssetTableProps) {
               ))}
             </TableBody>
           </Table>
-          {/* {isDrawerOpen && (
-            <Drawer
-              isOpen={isDrawerOpen}
-              onClose={() => setIsDrawerOpen(false)}
-              title="Asset Details"
-            >
-              {isSelectedAsset && <AssetDetails asset={asset}/>}
-            </Drawer>
-          )} */}
+
           {isDrawerOpen && (
             <Modal isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-              {isSelectedAsset && <AssetDetails asset={asset} />}
+              {selectedAsset && <AssetDetails asset={asset} />}
             </Modal>
           )}
+           <AssetModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            mode={mode}
+            assets={filteredData}
+            selectedAsset={selectedAsset}
+          />
         </div>
       </div>
     </>
