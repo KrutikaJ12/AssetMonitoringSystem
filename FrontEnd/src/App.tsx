@@ -23,7 +23,7 @@ import SiteManagerDashboard from "./pages/Dashboard/SiteManagerDashboard";
 import { RecentAlerts } from "./components/dashboard/RecentAlerts";
 import OperatorDashboard from "./pages/Dashboard/OperatorDashboard";
 import AssetAllocationTable from "./components/dashboard/AssetAllocationTable";
-import AssetTable from "./components/tables/BasicTables/AssetTable";
+import AssetTable from "./pages/Assets/AssetTable";
 import Reports from "./components/dashboard/Reports";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PermissionRoute from "./auth/PermissionRoute";
