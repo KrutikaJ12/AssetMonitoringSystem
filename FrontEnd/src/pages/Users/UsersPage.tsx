@@ -15,89 +15,24 @@ import AssetDetails from "../../components/tables/BasicTables/AssetDetails";
 import UserModal from "./UserModal";
 import DeleteUserModel from "./DeleteUserModel";
 import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
-interface User {
-  fullName: string;
-  username: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  confirmPassword: string;
-  role: string;
-  site: string;
-  status: string;
-}
+import { useUsers } from "../../hooks/useUsers";
+// interface User {
+//   fullName: string;
+//   username: string;
+//   email: string;
+//   phoneNumber: string;
+//   password: string;
+//   confirmPassword: string;
+//   role: string;
+//   user: string;
+//   status: string;
+// }
 
-const usersData = [
-  {
-    userId: 1,
-    name: "Sandeep",
-    username: "sandi",
-    email: "sandeep@watran.in",
-    role: "Admin",
-    status: "Active",
-  },
-  {
-    userId: 2,
-    name: "Krutika",
-    username: "krutika",
-    email: "krutika@test.com",
-    role: "Super Admin",
-    status: "Active",
-  },
-  {
-    userId: 3,
-    name: "Rahul Sharma",
-    username: "rahul.sharma",
-    email: "rahul.sharma@example.com",
-    role: "Site Manager",
-    status: "Active",
-  },
-  {
-    userId: 4,
-    name: "Priya Patel",
-    username: "priya.patel",
-    email: "priya.patel@example.com",
-    role: "Operator",
-    status: "Inactive",
-  },
-  {
-    userId: 5,
-    name: "Amit Kumar",
-    username: "amit.kumar",
-    email: "amit.kumar@example.com",
-    role: "Site Manager",
-    status: "Active",
-  },
-  {
-    userId: 6,
-    name: "Neha Singh",
-    username: "neha.singh",
-    email: "neha.singh@example.com",
-    role: "Operator",
-    status: "Active",
-  },
-  {
-    userId: 7,
-    name: "Vikram Joshi",
-    username: "vikram.joshi",
-    email: "vikram.joshi@example.com",
-    role: "Admin",
-    status: "Inactive",
-  },
-  {
-    userId: 8,
-    name: "Anjali Mehta",
-    username: "anjali.mehta",
-    email: "anjali.mehta@example.com",
-    role: "Operator",
-    status: "Active",
-  },
-];
 interface Asset {
   assetId: string;
   assetName: string;
   category: string;
-  site: string;
+  user: string;
   status: string;
   operator: string;
   engineHours: number;
@@ -108,7 +43,7 @@ const asset = {
   assetId: "EX001",
   name: "Excavator",
   category: "Earth Moving",
-  site: "Mumbai",
+  user: "Mumbai",
   operator: "John",
   customer: "ABC Construction",
   purchaseDate: "12 Jan 2023",
@@ -122,13 +57,14 @@ const asset = {
   lastService: "12 Jun 2026",
   nextService: "150 hrs remaining",
   maintenanceStatus: "Good",
-  currentSite: "Mumbai Site",
+  currentSite: "Mumbai User",
   lastSeen: "5 mins ago",
 };
 interface AssetTableProps {
   data: Asset[];
 }
 const UsersPage = (Asset: AssetTableProps) => {
+  const {data} = useUsers();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   console.log("modelopen", isModalOpen);
@@ -136,33 +72,23 @@ const UsersPage = (Asset: AssetTableProps) => {
     "add" | "edit" | "view" | "delete" | "reset-password"
   >("add");
 
-  const [selectedUser, setSelectedUser] = useState<User>({
-    fullName: "",
-    username: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    confirmPassword: "",
-    role: "",
-    site: "",
-    status: "Active",
-  });
+  const [selectedUser, setSelectedUser] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedSite, setSelectedSite] = useState("");
   const [status, setStatus] = useState("");
-  const hasFilters = search || selectedSite || status;
-  const filteredData = usersData.filter((data) => {
+  const hasFilters = search || status;
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
+  const filteredData = data?.data.filter((data) => {
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
-    const matchSite = selectedSite ? data.site == selectedSite : true;
+    const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
     // return matchesSearch && matchSite;
-    return matchSite
+    return matchSite;
   });
   console.log(filteredData, "filter");
   const clearFilters = () => {
     setSearch("");
-    setSelectedSite("");
+
   };
   const { hasPermission } = useAuth();
   const handleDelete = (user) => {
@@ -205,9 +131,9 @@ const UsersPage = (Asset: AssetTableProps) => {
             />
           </div>
           <select
-            value={selectedSite}
+            value={selectedUser}
             onChange={(e) => {
-              setSelectedSite(e.target.value);
+              setSelectedUser(e.target.value);
             }}
             className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
           >
@@ -228,9 +154,9 @@ const UsersPage = (Asset: AssetTableProps) => {
           )}
           {/* Sites Filter */}
           <select
-            value={selectedSite}
+            value={selectedUser}
             onChange={(e) => {
-              setSelectedSite(e.target.value);
+              setSelectedUser(e.target.value);
             }}
             className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[150px]"
           >
@@ -279,6 +205,12 @@ const UsersPage = (Asset: AssetTableProps) => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
+                 Mobile No
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                  Status
                 </TableCell>
                 <TableCell
@@ -321,57 +253,59 @@ const UsersPage = (Asset: AssetTableProps) => {
             {/* Table Body */}
 
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredData.map((site) => (
+              {filteredData?.map((user) => (
                 <TableRow className="">
                   <TableCell className="py-3">
                     <div className="flex items-center gap-3">
                       {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
                       <img
-                        src={site.image}
+                        src={user.image}
                         className="h-[50px] w-[50px]"
-                        alt={site.name}
+                        alt={user.name}
                       />
                     </div> */}
                       <div>
                         <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {site.name}
+                          {user.fullName}
                         </p>
                         {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {site.totalAssets}
+                        {user.totalAssets}
                       </span> */}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.username}
+                    {user.userName}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.email}
+                    {user.emailId}
                   </TableCell>
-
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {user.mobileNo}
+                  </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        site.status === "Active"
+                        user.isActive 
                           ? "success"
-                          : site.status === "Maintenance"
+                          : user.isActive === "Maintenance"
                             ? "warning"
                             : "error"
                       }
                     >
-                      {site.status}
+                      {user.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.role}
+                    {user.roles?.map((role) => role.roleName).join(", ") || "-"}
                   </TableCell>
 
                   {hasPermission("ASSET_VIEW") && (
                     <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <button
                         onClick={() => {
-                          setSelectedUser(selectedUser);
+                          setSelectedUser(user);
                           setIsModalOpen(true);
                           setMode("view");
                         }}
@@ -380,7 +314,7 @@ const UsersPage = (Asset: AssetTableProps) => {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedUser(selectedUser);
+                          setSelectedUser(user);
                           setIsModalOpen(true);
                           setMode("edit");
                         }}
@@ -415,7 +349,7 @@ const UsersPage = (Asset: AssetTableProps) => {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             mode={mode}
-            user={selectedUser}
+            selectedUser={selectedUser}
           />
           <DeleteConfirmationModal
             isOpen={isDeleteModalOpen}

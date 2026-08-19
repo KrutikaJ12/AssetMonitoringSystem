@@ -5,33 +5,37 @@ import Radio from "../../components/form/input/Radio";
 import Select from "../../components/form/Select";
 import Label from "../../components/form/Label";
 import Button from "../../components/ui/button/Button";
-const UserModal = ({ isOpen, onClose, mode, user }) => {
+import { useCreateUser, useUpdateUser } from "../../hooks/useUsers";
+const UserModal = ({ isOpen, onClose, mode, selectedUser }) => {
+  console.log("beforeselectedUser:", selectedUser);
+  const createUserMutation = useCreateUser();
+  const updateUserMutation = useUpdateUser();
   const [formData, setFormData] = useState({
     fullName: "",
     userName: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    confirmPassword: "",
-    role: "",
-    site: "",
+    emailId: "",
+    mobileNo: "",
+    // password: "",
+    // confirmPassword: "",
+    roleId: "",
+    siteIds: "",
     isActive: true,
   });
   const roleOptions = [
     {
-      value: "CUSTOMER_ADMIN",
+      value: "10",
       label: "Customer Admin",
     },
     {
-      value: "SITE_ADMIN",
+      value: "11",
       label: "Site Admin",
     },
     {
-      value: "OPERATOR",
+      value: "12",
       label: "Operator",
     },
     {
-      value: "REPORT_USER",
+      value: "14",
       label: "Report User",
     },
   ];
@@ -50,40 +54,61 @@ const UserModal = ({ isOpen, onClose, mode, user }) => {
     },
   ];
   useEffect(() => {
-    if (mode === "edit" && user) {
-        setFormData({
-            fullName: user.FullName,
-            userName: user.UserName,
-            email: user.Email,
-            phoneNumber: user.PhoneNumber,
-            role: user.RoleID,
-            site: user.SiteID,
-            isActive: user.IsActive ? "Active" : "Inactive",
-            password: "",
-            confirmPassword: "",
-        });
+    if (selectedUser && (mode === "edit" || mode === "view")) {
+      console.log(12)
+      setFormData({
+        fullName: selectedUser.fullName || "",
+        userName: selectedUser.userName || "",
+        emailId: selectedUser.emailId ?? "",
+        mobileNo: selectedUser.mobileNo ?? "",
+        roleId: selectedUser.roles?.[0]?.roleId ?? "",
+        siteIds: selectedUser.sites?.map((site) => String(site.siteId)) || [],
+        isActive: selectedUser.IsActive ?? true,
+      });
     }
-}, [mode, user]);
-const modalConfig = {
-  add: {
-    title: "Add User",
-    buttonText: "Save User",
-  },
-  edit: {
-    title: "Edit User",
-    buttonText: "Update User",
-  },
-  view: {
-    title: "View User",
-    buttonText: "Close",
-  },
-};
-  console.log("mode", mode);
+
+    if (mode === "add") {
+      setFormData({
+        fullName: "",
+        userName: "",
+        emailId: "",
+        mobileNo: "",
+        roleId: "",
+        siteIds: "",
+        isActive: true,
+      });
+    }
+  }, [selectedUser, mode]);
+  const modalConfig = {
+    add: {
+      title: "Add User",
+      buttonText: "Save User",
+    },
+    edit: {
+      title: "Edit User",
+      buttonText: "Update User",
+    },
+    view: {
+      title: "View User",
+      buttonText: "Close",
+    },
+  }
+
+  const handleSubmit = () => {
+    if (mode === "add") {
+      createUserMutation.mutate(formData);
+    }
+
+    if (mode === "edit") {
+      updateUserMutation.mutate({
+        userId: selectedUser.userId,
+        userData: formData,
+      });
+    }
+  };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-2xl font-semibold mb-3">
-       {modalConfig[mode].title}
-      </h2>
+      <h2 className="text-2xl font-semibold mb-3">{modalConfig[mode].title}</h2>
       <div className="grid grid-cols-2 gap-5">
         <div>
           <label className="mb-2 block text-sm font-medium">Full Name</label>
@@ -119,11 +144,11 @@ const modalConfig = {
           <InputField
             type="email"
             placeholder="Enter Email"
-            value={formData.userName}
+            value={formData.emailId}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                userName: e.target.value,
+                emailId: e.target.value,
               })
             }
           />
@@ -133,16 +158,16 @@ const modalConfig = {
 
           <InputField
             placeholder="Enter username"
-            value={formData.userName}
+            value={formData.mobileNo}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                userName: e.target.value,
+                mobileNo: e.target.value,
               })
             }
           />
         </div>
-        <div>
+        {/* <div>
           <label className="mb-2 block text-sm font-medium">Password</label>
 
           <InputField
@@ -173,36 +198,53 @@ const modalConfig = {
               })
             }
           />
-        </div>
+        </div> */}
         <div>
           <Label>Role</Label>
 
           <Select
             options={roleOptions}
             placeholder="Select Role"
-            value={formData.role}
+            value={formData.roleId}
             onChange={(value) =>
               setFormData({
                 ...formData,
-                role: value,
+                roleId: value,
               })
             }
           />
         </div>
         <div>
-          <Label>Assigned Site</Label>
+          <Label>Assigned Sites</Label>
 
-          <Select
-            options={siteOptions}
-            placeholder="Select Site"
-            value={formData.site}
-            onChange={(value) =>
-              setFormData({
-                ...formData,
-                site: value,
-              })
-            }
-          />
+          <div className="mt-2 space-y-2">
+            {siteOptions.map((site) => (
+              <label
+                key={site.value}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value={site.value}
+                  checked={formData.siteIds?.includes(site.value)}
+                  onChange={(e) => {
+                    const siteId = e.target.value;
+
+                    setFormData((prev) => ({
+                      ...prev,
+                      siteIds: e.target.checked
+                        ? [...prev.siteIds, siteId]
+                        : prev.siteIds.filter((id) => id !== siteId),
+                    }));
+                  }}
+                />
+
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {site.label}
+                </span>
+              </label>
+            ))}
+          </div>
         </div>
         <div>
           <div>
@@ -216,11 +258,11 @@ const modalConfig = {
                 name="status"
                 value="Active"
                 label="Active"
-                checked={formData.status === "Active"}
+                checked={formData.isActive}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: value,
+                    isActive: value,
                   })
                 }
               />
@@ -230,11 +272,11 @@ const modalConfig = {
                 name="status"
                 value="Inactive"
                 label="Inactive"
-                checked={formData.status === "Inactive"}
+                checked={!formData.isActive}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: value,
+                    isActive: value,
                   })
                 }
               />
@@ -246,7 +288,7 @@ const modalConfig = {
         <Button size="md" variant="outline">
           Cancel
         </Button>
-        <Button>{modalConfig[mode].buttonText}</Button>
+        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
       </div>
     </Modal>
   );
