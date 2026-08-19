@@ -11,10 +11,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export const useUsers = () => {
   return useQuery({
     queryKey: ["/users"],
-    queryFn: getUsersData,
+    queryFn: async () => {
+      const response = await getUsersData();
+
+      return response.data;
+    },
   });
 };
-
 // POST - Create User
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
