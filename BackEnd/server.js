@@ -10,7 +10,8 @@ const vehicleRoutes = require("./src/routes/vehicleRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const siteRoutes = require("./src/routes/siteRoutes")
-const opratorRoutes = require("./src/routes/operatorRoutes")
+const opratorRoutes = require("./src/routes/operatorRoutes");
+const assetRoutes = require("./src/routes/assetRoutes")
 const { connectDB } = require("./src/config/db")
 // connectDB();
 
@@ -26,6 +27,7 @@ app.use("/api", dashboardRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api",siteRoutes)
 app.use("/api",opratorRoutes)
+app.use("/api",assetRoutes)
 const PORT = process.env.PORT;
 
 const startServer = async () => {
