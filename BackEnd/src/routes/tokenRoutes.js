@@ -1,10 +1,9 @@
 const express = require("express");
+
 const router = express.Router();
 
-const { getToken } = require("../controllers/tokenController");
+const { getAccessToken } = require("../controllers/tokenController");
 
-router.post("/token", (req, res, next) => {
-  next();
-}, getAccessToken);
+router.post("/token", getAccessToken );
 
 module.exports = router;
