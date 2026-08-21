@@ -6,6 +6,10 @@ import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
 import { useCreateOperator, useUpdateOperator } from "../../hooks/useOperators";
+
+
+
+
 const OperatorModal = ({ isOpen, onClose, mode,operators,selectedOperator}) => {
    const createOperatorMutation = useCreateOperator(); 
    const updateOperatorMutation = useUpdateOperator(); 
@@ -59,20 +63,32 @@ useEffect(() => {
         });
     }
 }, [selectedOperator, mode]);
-const handleSubmit = () =>{
-  if(mode === "add"){
-   createOperatorMutation.mutate(formData)
+
+
+
+const handleSubmit = () => {
+  if (mode === "add") {
+    createOperatorMutation.mutate(formData, {
+      onSuccess: () => {
+        onClose(); // ✅ Save Operator ke baad modal close
+      },
+    });
   }
 
-  if(mode === "edit"){
-    updateOperatorMutation.mutate({
-            operatorId: selectedOperator.OperatorID,
-            operatorData: formData,
-        });
+  if (mode === "edit") {
+    updateOperatorMutation.mutate(
+      {
+        operatorId: selectedOperator.OperatorID,
+        operatorData: formData,
+      },
+      {
+        onSuccess: () => {
+          onClose(); // ✅ Update Operator ke baad modal close
+        },
+      }
+    );
   }
-
-  
-}
+};
 console.log("formData",formData)
   return (
    <Modal isOpen={isOpen} onClose={onClose}>
@@ -190,11 +206,23 @@ console.log("formData",formData)
           </div>
         </div>
       </div>
+        {/* Buttons */}
       <div className="flex justify-between mt-5">
-        <Button size="md" variant="outline">
+
+        {/* ✅ Cancel also closes modal */}
+        <Button
+          size="md"
+          variant="outline"
+          onClick={onClose}
+        >
           Cancel
         </Button>
-        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
+
+        {/* Save / Update */}
+        <Button onClick={handleSubmit}>
+          {modalConfig[mode].buttonText}
+        </Button>
+
       </div>
    </Modal>
   )

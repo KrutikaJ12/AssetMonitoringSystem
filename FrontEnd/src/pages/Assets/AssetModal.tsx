@@ -1,16 +1,20 @@
 import { Modal } from "../../components/ui/modal";
 import InputField from "../../components/form/input/InputField";
 import { useEffect, useState } from "react";
-import Radio from "../../components/form/input/Radio";
+// import Radio from "../../components/form/input/Radio";
 import Button from "../../components/ui/button/Button";
-import { useCreateSite, useUpdateSite } from "../../hooks/useSites";
+// import { useCreateSite, useUpdateSite } from "../../hooks/useSites";
 import Select from "../../components/form/Select";
 import Label from "../../components/form/Label";
 import { useCreateAsset, useUpdateAsset } from "../../hooks/useAssets";
+
+
+
+
 const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
   const createAssetMutation = useCreateAsset();
   const updateAssetMutation = useUpdateAsset()
-  const updateSiteMutation = useUpdateSite();
+  // const updateSiteMutation = useUpdateSite();
   const [formData, setFormData] = useState({
     assetCode: "",
     assetName: "",
@@ -90,18 +94,31 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
       });
     }
   }, [selectedAsset, mode]);
-  const handleSubmit = () => {
-    if (mode === "add") {
-      createAssetMutation.mutate(formData);
-    }
 
-    if (mode === "edit") {
-      updateAssetMutation.mutate({
+
+  const handleSubmit = () => {
+  if (mode === "add") {
+    createAssetMutation.mutate(formData, {
+      onSuccess: () => {
+        onClose(); // ✅ Save Asset ke baad modal close
+      },
+    });
+  }
+
+  if (mode === "edit") {
+    updateAssetMutation.mutate(
+      {
         assetId: selectedAsset.AssetID,
         assetData: formData,
-      });
-    }
-  };
+      },
+      {
+        onSuccess: () => {
+          onClose(); // ✅ Update Asset ke baad modal close
+        },
+      }
+    );
+  }
+};
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-semibold mb-3">{modalConfig[mode].title}</h2>
@@ -194,12 +211,19 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
           />
         </div>
       </div>
-      <div className="flex justify-between mt-5">
-        <Button size="md" variant="outline">
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
-      </div>
+     <div className="flex justify-between mt-5">
+  <Button
+    size="md"
+    variant="outline"
+    onClick={onClose}
+  >
+    Cancel
+  </Button>
+
+  <Button onClick={handleSubmit}>
+    {modalConfig[mode].buttonText}
+  </Button>
+</div>
     </Modal>
   );
 };

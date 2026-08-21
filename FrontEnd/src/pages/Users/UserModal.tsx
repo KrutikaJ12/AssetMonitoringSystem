@@ -94,18 +94,29 @@ const UserModal = ({ isOpen, onClose, mode, selectedUser }) => {
     },
   }
 
-  const handleSubmit = () => {
-    if (mode === "add") {
-      createUserMutation.mutate(formData);
-    }
+const handleSubmit = () => {
+  if (mode === "add") {
+    createUserMutation.mutate(formData, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
+  }
 
-    if (mode === "edit") {
-      updateUserMutation.mutate({
+  if (mode === "edit") {
+    updateUserMutation.mutate(
+      {
         userId: selectedUser.userId,
         userData: formData,
-      });
-    }
-  };
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
+  }
+};
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <h2 className="text-2xl font-semibold mb-3">{modalConfig[mode].title}</h2>
@@ -284,12 +295,19 @@ const UserModal = ({ isOpen, onClose, mode, selectedUser }) => {
           </div>
         </div>
       </div>
-      <div className="flex justify-between mt-5">
-        <Button size="md" variant="outline">
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
-      </div>
+     <div className="flex justify-between mt-5">
+  <Button
+    size="md"
+    variant="outline"
+    onClick={onClose}
+  >
+    Cancel
+  </Button>
+
+  <Button onClick={handleSubmit}>
+    {modalConfig[mode].buttonText}
+  </Button>
+</div>
     </Modal>
   );
 };

@@ -4,10 +4,51 @@ import { useEffect, useState } from "react";
 import Radio from "../../components/form/input/Radio";
 import Button from "../../components/ui/button/Button";
 import { useCreateSite, useUpdateSite } from "../../hooks/useSites";
-const SiteModal = ({ isOpen, onClose, mode ,selectedSite}) => {
+
+const SiteModal = (props: any) => {
+  const { isOpen, onClose, mode, selectedSite } = props;
   const createSiteMutation = useCreateSite();
-  const updateSiteMutation = useUpdateSite()
- const [formData, setFormData] = useState({
+  const updateSiteMutation = useUpdateSite();
+
+  const [formData, setFormData] = useState({
+    siteName: "",
+    locationName: "",
+    latitude: "",
+    longitude: "",
+    radiusMeters: "",
+    isActive: true,
+  });
+
+  const modalConfig = {
+    add: {
+      title: "Add Site",
+      buttonText: "Save Site",
+    },
+    edit: {
+      title: "Edit Site",
+      buttonText: "Update Site",
+    },
+    view: {
+      title: "View Site",
+      buttonText: "Close",
+    },
+  };
+
+  console.log("formData", formData);
+  useEffect(() => {
+    if (selectedSite && (mode === "edit" || mode === "view")) {
+      setFormData({
+        siteName: selectedSite.SiteName || "",
+        locationName: selectedSite.LocationName || "",
+        latitude: selectedSite.Latitude ?? "",
+        longitude: selectedSite.Longitude ?? "",
+        radiusMeters: selectedSite.RadiusMeters ?? "",
+        isActive: selectedSite.IsActive ?? true,
+      });
+    }
+
+    if (mode === "add") {
+      setFormData({
         siteName: "",
         locationName: "",
         latitude: "",
@@ -15,62 +56,40 @@ const SiteModal = ({ isOpen, onClose, mode ,selectedSite}) => {
         radiusMeters: "",
         isActive: true,
       });
-const modalConfig = {
-  add: {
-    title: "Add Site",
-    buttonText: "Save Site",
-  },
-  edit: {
-    title: "Edit Site",
-    buttonText: "Update Site",
-  },
-  view: {
-    title: "View Site",
-    buttonText: "Close",
-  },
-};
- console.log("formData",formData)
- useEffect(() => {
-    if (selectedSite && (mode === "edit" || mode === "view")) {
-        setFormData({
-            siteName: selectedSite.SiteName || "",
-            locationName: selectedSite.LocationName || "",
-            latitude: selectedSite.Latitude ?? "",
-            longitude: selectedSite.Longitude ?? "",
-            radiusMeters: selectedSite.RadiusMeters ?? "",
-            isActive: selectedSite.IsActive ?? true
-        });
     }
+  }, [selectedSite, mode]);
 
+  const handleSubmit = () => {
     if (mode === "add") {
-        setFormData({
-            siteName: "",
-            locationName: "",
-            latitude: "",
-            longitude: "",
-            radiusMeters: "",
-            isActive: true
-        });
-    }
-}, [selectedSite, mode]);
-const handleSubmit = () => {
-    if (mode === "add") {
-        createSiteMutation.mutate(formData);
+      createSiteMutation.mutate(formData, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
     }
 
     if (mode === "edit") {
-        updateSiteMutation.mutate({
-            siteId: selectedSite.SiteID,
-            siteData: formData,
-        });
+      updateSiteMutation.mutate(
+        {
+          siteId: selectedSite.SiteID,
+          siteData: formData,
+        },
+        {
+          onSuccess: () => {
+            onClose();
+          }, 
+        },
+      );
     }
-};
+  };
+
   return (
-   <Modal isOpen={isOpen} onClose={onClose}>
-    <h2 className="text-2xl font-semibold mb-3">
-       {modalConfig[mode].title}
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <h2 className="text-2xl font-semibold mb-3">
+        {modalConfig[mode as keyof typeof modalConfig]?.title}
       </h2>
       <div className="grid grid-cols-2 gap-5">
+        {/* ================= SITE NAME ================= */}
         <div>
           <label className="mb-2 block text-sm font-medium">Full Name</label>
 
@@ -85,6 +104,7 @@ const handleSubmit = () => {
             }
           />
         </div>
+        {/* ================= LOCATION ================= */}
         <div>
           <label className="mb-2 block text-sm font-medium">Location</label>
 
@@ -99,11 +119,12 @@ const handleSubmit = () => {
             }
           />
         </div>
+        {/* ================= LATITUDE ================= */}
         <div>
           <label className="mb-2 block text-sm font-medium">Latitude</label>
-
+          {/* ✅ FIX: email changed to number */}
           <InputField
-            type="email"
+            type="number"
             placeholder="Enter latitude"
             value={formData.latitude}
             onChange={(e) =>
@@ -114,11 +135,13 @@ const handleSubmit = () => {
             }
           />
         </div>
+        {/* ================= LONGITUDE ================= */}
         <div>
           <label className="mb-2 block text-sm font-medium">Longitude</label>
-
+          {/* ✅ FIX: username placeholder changed */}
           <InputField
-            placeholder="Enter username"
+            type="number"
+            placeholder="Enter longitude"
             value={formData.longitude}
             onChange={(e) =>
               setFormData({
@@ -128,11 +151,12 @@ const handleSubmit = () => {
             }
           />
         </div>
+        {/* ================= RADIUS ================= */}
         <div>
           <label className="mb-2 block text-sm font-medium">Radius</label>
-
+          {/* ✅ FIX: password changed to number */}
           <InputField
-            type="password"
+            type="number"
             placeholder="Enter radius"
             value={formData.radiusMeters}
             onChange={(e) =>
@@ -143,6 +167,7 @@ const handleSubmit = () => {
             }
           />
         </div>
+        {/* ================= STATUS ================= */}
         <div>
           <div>
             <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-white">
@@ -150,30 +175,31 @@ const handleSubmit = () => {
             </label>
 
             <div className="flex gap-6">
+              {/* ✅ FIX: value changed from "Active" to "true" */}
               <Radio
                 id="active"
                 name="status"
-                value="Active"
+                value="true"
                 label="Active"
-                checked={formData.isActive }
+                checked={formData.isActive === true}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                     isActive: value === "true",
+                    isActive: value === "true",
                   })
                 }
               />
-
+              {/* ✅ FIX: value changed from "Inactive" to "false" */}
               <Radio
                 id="inactive"
                 name="status"
-                value="Inactive"
+                value="false"
                 label="Inactive"
-                checked={!formData.isActive }
+                checked={formData.isActive === false}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
-                     isActive: value !== "true",
+                    isActive: value === "true",
                   })
                 }
               />
@@ -181,14 +207,18 @@ const handleSubmit = () => {
           </div>
         </div>
       </div>
+      {/* ================= BUTTONS ================= */}
       <div className="flex justify-between mt-5">
-        <Button size="md" variant="outline">
+        <Button size="md" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
-      </div>
-   </Modal>
-  )
-}
 
-export default SiteModal
+        <Button onClick={handleSubmit}>
+          {modalConfig[mode as keyof typeof modalConfig]?.buttonText}
+        </Button>
+      </div>
+    </Modal>
+  );
+};
+
+export default SiteModal;
