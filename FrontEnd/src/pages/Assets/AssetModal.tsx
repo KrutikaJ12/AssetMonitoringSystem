@@ -22,6 +22,7 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
     regNo: "",
     siteId: "",
     status: "IDLE",
+    operator:""
   });
   const modalConfig = {
     add: {
@@ -80,6 +81,8 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
         regNo: selectedAsset.RegistrationNo ?? "",
         siteId: selectedAsset.SiteID ?? "",
         status: selectedAsset.Status ?? true,
+        operator:selectedAsset.Operator ?? true,
+        
       });
     }
 
@@ -91,6 +94,7 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
         regNo: "",
         siteId: "",
         status: "",
+        operator: "",
       });
     }
   }, [selectedAsset, mode]);
@@ -192,6 +196,24 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
               setFormData({
                 ...formData,
                 siteId: value,
+              })
+            }
+          />
+        </div>
+
+         <div>
+          <label className="mb-2 block text-sm font-medium">
+            Operator
+          </label>
+
+          <InputField
+            type="email"
+            placeholder="Enter Operator"
+            value={formData.operator}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                operator: e.target.value,
               })
             }
           />

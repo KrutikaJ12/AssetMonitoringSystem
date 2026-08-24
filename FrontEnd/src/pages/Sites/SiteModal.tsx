@@ -15,7 +15,7 @@ const SiteModal = (props: any) => {
     locationName: "",
     latitude: "",
     longitude: "",
-    radiusMeters: "",
+    assetCount: "",
     isActive: true,
   });
 
@@ -42,7 +42,7 @@ const SiteModal = (props: any) => {
         locationName: selectedSite.LocationName || "",
         latitude: selectedSite.Latitude ?? "",
         longitude: selectedSite.Longitude ?? "",
-        radiusMeters: selectedSite.RadiusMeters ?? "",
+        assetCount: selectedSite.assetCount ?? "",
         isActive: selectedSite.IsActive ?? true,
       });
     }
@@ -53,7 +53,7 @@ const SiteModal = (props: any) => {
         locationName: "",
         latitude: "",
         longitude: "",
-        radiusMeters: "",
+       assetCount: "",
         isActive: true,
       });
     }
@@ -153,16 +153,16 @@ const SiteModal = (props: any) => {
         </div>
         {/* ================= RADIUS ================= */}
         <div>
-          <label className="mb-2 block text-sm font-medium">Radius</label>
+          <label className="mb-2 block text-sm font-medium">Asset Count</label>
           {/* ✅ FIX: password changed to number */}
           <InputField
             type="number"
-            placeholder="Enter radius"
-            value={formData.radiusMeters}
+            placeholder="Enter Asset Count"
+            value={formData.assetCount}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                radiusMeters: e.target.value,
+                assetCount: e.target.value,
               })
             }
           />

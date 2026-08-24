@@ -10,7 +10,7 @@ import { useCreateOperator, useUpdateOperator } from "../../hooks/useOperators";
 
 
 
-const OperatorModal = ({ isOpen, onClose, mode,operators,selectedOperator}) => {
+   const OperatorModal = ({ isOpen, onClose, mode,operators,selectedOperator}) => {
    const createOperatorMutation = useCreateOperator(); 
    const updateOperatorMutation = useUpdateOperator(); 
  const [formData, setFormData] = useState({
@@ -20,6 +20,7 @@ const OperatorModal = ({ isOpen, onClose, mode,operators,selectedOperator}) => {
         rfidcard: "",
         siteId: "",
         isActive: true,
+        assetCode:"",
       });
 const modalConfig = {
   add: {
@@ -48,7 +49,8 @@ useEffect(() => {
             licenseNo: selectedOperator.LicenseNo ?? "",
             rfidcard: selectedOperator.RFIDCardNo ?? "",
             siteId: selectedOperator.SiteID ?? "",
-            isActive: selectedOperator.IsActive ?? true
+            isActive: selectedOperator.IsActive ?? true,
+            assetCode:selectedOperator.assetCode,
         });
     }
 
@@ -60,6 +62,7 @@ useEffect(() => {
         rfidcard: "",
         siteId: "",
         isActive: true,
+        assetCode:""
         });
     }
 }, [selectedOperator, mode]);
@@ -81,6 +84,7 @@ const handleSubmit = () => {
         operatorId: selectedOperator.OperatorID,
         operatorData: formData,
       },
+      
       {
         onSuccess: () => {
           onClose(); // ✅ Update Operator ke baad modal close
@@ -140,19 +144,34 @@ console.log("formData",formData)
           />
         </div>
         <div>
-          <label className="mb-2 block text-sm font-medium">RFID Card No</label>
+          <label className="mb-2 block text-sm font-medium">Asset Code</label>
 
           <InputField
-            placeholder="Enter RFID Card No"
-            value={formData.rfidcard}
+            placeholder="Enter Asset Code"
+            value={formData.assetCode}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                rfidcard: e.target.value,
+                assetCode: e.target.value,
               })
             }
           />
         </div>
+
+         {/* <div>
+          <Label>Asset Type</Label>
+          <Select
+            options={assetTypeOptions}
+            placeholder="Select Asset Type"
+            value={formData.assetTypeId}
+            onChange={(value) =>
+              setFormData({
+                ...formData,
+                assetTypeId: value,
+              })
+            }
+          />
+        </div> */}
         <div>
           <Label>Assigned Site</Label>
 
