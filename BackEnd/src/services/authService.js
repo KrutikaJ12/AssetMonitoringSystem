@@ -13,7 +13,7 @@ function createAccessToken(user, roles) {
     },
     process.env.JWT_ACCESS_SECRET,
     {
-      expiresIn: "15m",
+      expiresIn: "2hr",
       issuer: "asset-monitoring-api",
       audience: "asset-monitoring-web",
     },
