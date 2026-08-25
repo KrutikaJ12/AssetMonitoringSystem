@@ -1,56 +1,69 @@
 const {sql,getPool} = require("../config/db");
 
-async function getAssets(customerId) {
-    const pool = await getPool();
+async function getAssets(customerId, siteId) {
+  const pool = await getPool();
 
-    const result = await pool
-        .request()
-        .input("CustomerID", sql.Int, customerId)
-        .query(`
-            SELECT
-    am.AssetID,
-    am.AssetCode,
-    am.AssetName,
-    am.AssetTypeID,
-    atm.AssetTypeName,
-    atm.Category,
-    am.FuelPercentage,
-    am.RegistrationNo,
-    am.Make,
-    am.Model,
-    am.SerialNo,
-    am.DeviceID,
-    am.SIMNo,
-    am.TankCapacityLitres,
-    am.OpeningEngineHours,
-    am.OpeningOdometer,
-    am.Status,
-    am.ProtocolType,
-    ais.SiteID,
-    sm.SiteName,    
-    ROUND(COALESCE(ads.EngineMinutes, 0) / 60.0, 2) AS EngineHours,
-    ROUND(COALESCE(ads.IdleMinutes, 0) / 60.0, 2) AS IdleHours
+  const request = pool
+    .request()
+    .input("CustomerID", sql.Int, customerId);
 
-FROM AssetMaster am
+  let siteCondition = "";
 
-LEFT JOIN AssetTypeMaster atm
-    ON am.AssetTypeID = atm.AssetTypeID
+  if (siteId) {
+    request.input("SiteID", sql.BigInt, Number(siteId));
 
-LEFT JOIN AssetInSite ais
-    ON am.AssetID = ais.AssetID
+    siteCondition = `
+      AND ais.SiteID = @SiteID
+    `;
+  }
 
-LEFT JOIN SiteMaster sm
-    ON ais.SiteID = sm.SiteID
+  const result = await request.query(`
+    SELECT 
+      am.AssetID, 
+      am.AssetCode, 
+      am.AssetName, 
+      am.AssetTypeID, 
+      atm.AssetTypeName, 
+      atm.Category, 
+      am.FuelPercentage, 
+      am.RegistrationNo, 
+      am.Make, 
+      am.Model, 
+      am.SerialNo, 
+      am.DeviceID, 
+      am.SIMNo, 
+      am.TankCapacityLitres, 
+      am.OpeningEngineHours, 
+      am.OpeningOdometer, 
+      am.Status, 
+      am.ProtocolType, 
+      ais.SiteID, 
+      sm.SiteName,     
+      ROUND(COALESCE(ads.EngineMinutes, 0) / 60.0, 2) AS EngineHours, 
+      ROUND(COALESCE(ads.IdleMinutes, 0) / 60.0, 2) AS IdleHours 
 
-LEFT JOIN AssetDailyUsageSummary ads
-    ON am.AssetID = ads.AssetID
-    AND ads.UsageDate = CAST(GETDATE() AS DATE)
-WHERE am.CustomerID = @CustomerID
+    FROM AssetMaster am 
 
-ORDER BY am.AssetID;
-        `);
+    LEFT JOIN AssetTypeMaster atm 
+      ON am.AssetTypeID = atm.AssetTypeID 
 
-    return result.recordset;
+    LEFT JOIN AssetInSite ais 
+      ON am.AssetID = ais.AssetID 
+
+    LEFT JOIN SiteMaster sm 
+      ON ais.SiteID = sm.SiteID 
+
+    LEFT JOIN AssetDailyUsageSummary ads 
+      ON am.AssetID = ads.AssetID 
+      AND ads.UsageDate = CAST(GETDATE() AS DATE) 
+
+    WHERE am.CustomerID = @CustomerID
+      ${siteCondition}
+
+    ORDER BY am.AssetID;
+  `);
+
+  return result.recordset;
 }
 async function createAsset(assetData, customerId) {
   const pool = await getPool();

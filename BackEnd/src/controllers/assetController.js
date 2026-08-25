@@ -3,13 +3,14 @@ const assetService = require("../services/assetService");
 async function getAssets(req,res){
    try{
     const customerId = req.auth.customerId;
+    const { siteId } = req.query;
     if(!customerId){
         return res.status(400).json({
                 success: false,
                 message: "Customer information is missing.",
             });
     }
-    const assets = await assetService.getAssets(customerId);
+    const assets = await assetService.getAssets(customerId,siteId);
 
     return res.status(200).json({
         success:true,
