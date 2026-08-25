@@ -220,7 +220,7 @@ async function updateOperator(operatorId, customerId, operatorsData) {
         operatorName,
         mobileNo,
         licenseNo,
-        rfidcard,
+        // rfidcard,
         siteId,
         isActive
     } = operatorsData;
@@ -237,9 +237,9 @@ async function updateOperator(operatorId, customerId, operatorsData) {
         throw new Error("License No is required.");
     }
 
-    if (!rfidcard) {
-        throw new Error("RFIDCard NO is required.");
-    }
+    // if (!rfidcard) {
+    //     throw new Error("RFIDCard NO is required.");
+    // }
 
     if (!siteId) {
         throw new Error("Site Id is required.");
@@ -252,7 +252,7 @@ async function updateOperator(operatorId, customerId, operatorsData) {
         .input("OperatorName", sql.NVarChar(100), operatorName.trim())
         .input("MobileNo", sql.NVarChar(20), mobileNo)
         .input("LicenseNo", sql.NVarChar(100), licenseNo)
-        .input("RFIDCardNo", sql.NVarChar(100), rfidcard)
+        // .input("RFIDCardNo", sql.NVarChar(100), rfidcard)
         .input("SiteID", sql.Int, siteId)
         .input("IsActive", sql.Bit, isActive)
         .query(`
@@ -262,7 +262,7 @@ async function updateOperator(operatorId, customerId, operatorsData) {
                 om.OperatorName = @OperatorName,
                 om.MobileNo = @MobileNo,
                 om.LicenseNo = @LicenseNo,
-                om.RFIDCardNo = @RFIDCardNo,
+               
                 om.IsActive = @IsActive
             FROM OperatorMaster om
             INNER JOIN SiteMaster sm
