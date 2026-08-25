@@ -192,7 +192,13 @@ const OperatorsPage = (Asset: AssetTableProps) => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  RFID Card
+                  Asset Code
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Asset Type
                 </TableCell>
                 <TableCell
                   isHeader
@@ -243,15 +249,17 @@ const OperatorsPage = (Asset: AssetTableProps) => {
                     </div>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {operator.MobileNo}
+                    {operator.MobileNo ?? " - "}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {operator.LicenseNo}
+                    {operator.LicenseNo ?? " - "}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {operator.RFIDCardNo}
+                    {operator.AssetCode ?? " - "}
                   </TableCell>
-
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                   {operator.AssetTypeName ?? "-"}
+                  </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"

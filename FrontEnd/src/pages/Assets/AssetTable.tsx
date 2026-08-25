@@ -13,8 +13,9 @@ import Button from "../../components/ui/button/Button";
 import { Modal } from "../../components/ui/modal";
 import AssetDetails from "./AssetDetails";
 import { useAuth } from "../../hooks/useAuth";
-import { useGetAsstes } from "../../hooks/useAssets";
+import { useGetAssets } from "../../hooks/useAssets";
 import AssetModal from "./AssetModal";
+import { useSearchParams } from "react-router";
 // const assetsData = [
 //   {
 //     assetId: "EX001",
@@ -108,8 +109,11 @@ interface AssetTableProps {
   data: Asset[];
 }
 export function AssetTable(Asset: AssetTableProps) {
-  const {data} = useGetAsstes();
-  console.log("assetData",data)
+   // Read siteId on the Assets page
+  const [searchParams] = useSearchParams();
+  const siteId = searchParams.get("siteId");
+  const {data,isLoading,error} = useGetAssets(siteId);
+  console.log("assetData",data);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
@@ -191,7 +195,7 @@ export function AssetTable(Asset: AssetTableProps) {
           }}
         >
           {" "}
-          + Add Sites
+          + Add Asset
         </Button>
         {hasPermission("ASSET_EXPORT") && (
           <button
@@ -264,17 +268,17 @@ export function AssetTable(Asset: AssetTableProps) {
             {/* Table Header */}
             <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
               <TableRow>
-                {/* <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Asset ID
-                </TableCell> */}
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Name
+                  Asset Code
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Asset Type
                 </TableCell>
                 <TableCell
                   isHeader
@@ -353,6 +357,9 @@ export function AssetTable(Asset: AssetTableProps) {
                       {/* </div> */}
                     {/* </div> */}
                   {/* </TableCell> */}
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {asset.AssetCode}
+                  </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.AssetTypeName}
                   </TableCell>
@@ -433,7 +440,7 @@ export function AssetTable(Asset: AssetTableProps) {
 
           {isDrawerOpen && (
             <Modal isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-              {selectedAsset && <AssetDetails asset={asset} />}
+              {selectedAsset && <AssetDetails asset={selectedAsset} />}
             </Modal>
           )}
            <AssetModal

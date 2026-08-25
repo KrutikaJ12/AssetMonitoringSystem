@@ -6,102 +6,113 @@ import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Select from "../../components/form/Select";
 import { useCreateOperator, useUpdateOperator } from "../../hooks/useOperators";
+import { useGetAssets } from "../../hooks/useAssets";
 
-
-
-
-   const OperatorModal = ({ isOpen, onClose, mode,operators,selectedOperator}) => {
-   const createOperatorMutation = useCreateOperator(); 
-   const updateOperatorMutation = useUpdateOperator(); 
- const [formData, setFormData] = useState({
-        operatorName: "",
-        mobileNo: "",
-        licenseNo: "",
-        rfidcard: "",
-        siteId: "",
-        isActive: true,
-        assetCode:"",
-      });
-const modalConfig = {
-  add: {
-    title: "Add Operator",
-    buttonText: "Save Operator",
-  },
-  edit: {
-    title: "Edit Operator",
-    buttonText: "Update Operator",
-  },
-  view: {
-    title: "View Operator",
-    buttonText: "Close",
-  },
-};
-
- const siteOptions = operators?.map((site) => ({
+const OperatorModal = ({
+  isOpen,
+  onClose,
+  mode,
+  operators,
+  selectedOperator,
+}) => {
+  const createOperatorMutation = useCreateOperator();
+  const updateOperatorMutation = useUpdateOperator();
+  const [formData, setFormData] = useState({
+    operatorName: "",
+    mobileNo: "",
+    licenseNo: "",
+    siteId: "",
+    assetId: "",
+    isActive: true,
+    assetCode: "",
+  });
+  // console.log("formData.siteId:", formData.siteId);
+  // const { data } = useGetAssets(formData.siteId);
+  // console.log("assets:", data.assetData);
+  const modalConfig = {
+    add: {
+      title: "Add Operator",
+      buttonText: "Save Operator",
+    },
+    edit: {
+      title: "Edit Operator",
+      buttonText: "Update Operator",
+    },
+    view: {
+      title: "View Operator",
+      buttonText: "Close",
+    },
+  };
+  //This are actually the assets assigned to the operator on that particular site
+  //but we have to get the data from assets api for the available assets api in future
+  const assetOptions = (operators || [])?.map((asset) => ({
+    value: asset.AssetID,
+    label: `${asset.AssetCode} - ${asset.AssetName} (${asset.AssetTypeName})`,
+  }));
+  console.log("Assetoptions",assetOptions)
+  const siteOptions = operators?.map((site) => ({
     value: site.SiteID,
     label: site.SiteName,
-}));
-useEffect(() => {
+  }));
+  useEffect(() => {
     if (selectedOperator && (mode === "edit" || mode === "view")) {
-        setFormData({
-            operatorName: selectedOperator.OperatorName || "",
-            mobileNo: selectedOperator.MobileNo || "",
-            licenseNo: selectedOperator.LicenseNo ?? "",
-            rfidcard: selectedOperator.RFIDCardNo ?? "",
-            siteId: selectedOperator.SiteID ?? "",
-            isActive: selectedOperator.IsActive ?? true,
-            assetCode:selectedOperator.assetCode,
-        });
+      setFormData({
+        operatorName: selectedOperator.OperatorName || "",
+        mobileNo: selectedOperator.MobileNo || "",
+        licenseNo: selectedOperator.LicenseNo ?? "",
+        siteId: selectedOperator.SiteID ?? "",
+        assetId: selectedOperator.AssetID ?? "",
+        isActive: selectedOperator.IsActive ?? true,
+        assetCode: selectedOperator.assetCode,
+      });
     }
 
     if (mode === "add") {
-        setFormData({
+      setFormData({
         operatorName: "",
         mobileNo: "",
         licenseNo: "",
-        rfidcard: "",
         siteId: "",
+        assetId: "",
         isActive: true,
-        assetCode:""
-        });
+        assetCode: "",
+      });
     }
-}, [selectedOperator, mode]);
+  }, [selectedOperator, mode]);
 
-
-
-const handleSubmit = () => {
-  if (mode === "add") {
-    createOperatorMutation.mutate(formData, {
-      onSuccess: () => {
-        onClose(); // ✅ Save Operator ke baad modal close
-      },
-    });
-  }
-
-  if (mode === "edit") {
-    updateOperatorMutation.mutate(
-      {
-        operatorId: selectedOperator.OperatorID,
-        operatorData: formData,
-      },
-      
-      {
+  const handleSubmit = () => {
+    if (mode === "add") {
+      createOperatorMutation.mutate(formData, {
         onSuccess: () => {
-          onClose(); // ✅ Update Operator ke baad modal close
+          onClose(); // ✅ Save Operator ke baad modal close
         },
-      }
-    );
-  }
-};
-console.log("formData",formData)
+      });
+    }
+
+    if (mode === "edit") {
+      updateOperatorMutation.mutate(
+        {
+          operatorId: selectedOperator.OperatorID,
+          operatorData: formData,
+        },
+
+        {
+          onSuccess: () => {
+            onClose(); // ✅ Update Operator ke baad modal close
+          },
+        },
+      );
+    }
+  };
+  console.log("formData", formData);
   return (
-   <Modal isOpen={isOpen} onClose={onClose}>
-    <h2 className="text-2xl font-semibold mb-3">
-       {modalConfig[mode].title}
-      </h2>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <h2 className="text-2xl font-semibold mb-3">{modalConfig[mode].title}</h2>
       <div className="grid grid-cols-2 gap-5">
         <div>
-          <label className="mb-2 block text-sm font-medium">Operator Name</label>
+          <label className="mb-2 block text-sm font-medium">
+            Operator Name
+          </label>
 
           <InputField
             placeholder="Enter Site Name"
@@ -129,7 +140,9 @@ console.log("formData",formData)
           />
         </div>
         <div>
-          <label className="mb-2 block text-sm font-medium">License Number</label>
+          <label className="mb-2 block text-sm font-medium">
+            License Number
+          </label>
 
           <InputField
             type="email"
@@ -143,7 +156,7 @@ console.log("formData",formData)
             }
           />
         </div>
-        <div>
+        {/* <div>
           <label className="mb-2 block text-sm font-medium">Asset Code</label>
 
           <InputField
@@ -156,9 +169,9 @@ console.log("formData",formData)
               })
             }
           />
-        </div>
+        </div> */}
 
-         {/* <div>
+        {/* <div>
           <Label>Asset Type</Label>
           <Select
             options={assetTypeOptions}
@@ -177,14 +190,33 @@ console.log("formData",formData)
 
           <Select
             options={siteOptions}
-            placeholder="Select Site"
             value={formData.siteId}
+            placeholder="Select Site"
+            onChange={(value) => {
+              console.log("Selected site:", value);
+
+              setFormData((prev) => ({
+                ...prev,
+                siteId: value,
+                assetId: "",
+              }));
+            }}
+          />
+        </div>
+        <div>
+          <Label>Assigned Asset</Label>
+
+          <Select
+            options={assetOptions}
+            placeholder={formData.siteId ? "Select Asset" : "Select site first"}
+            value={formData.assetId}
             onChange={(value) =>
               setFormData({
                 ...formData,
-                siteId: value,
+                assetId: value,
               })
             }
+            disabled={!formData.siteId}
           />
         </div>
         <div>
@@ -199,7 +231,7 @@ console.log("formData",formData)
                 name="status"
                 value="Active"
                 label="Active"
-                checked={formData.isActive }
+                checked={formData.isActive}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
@@ -213,7 +245,7 @@ console.log("formData",formData)
                 name="status"
                 value="Inactive"
                 label="Inactive"
-                checked={!formData.isActive }
+                checked={!formData.isActive}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
@@ -225,26 +257,18 @@ console.log("formData",formData)
           </div>
         </div>
       </div>
-        {/* Buttons */}
+      {/* Buttons */}
       <div className="flex justify-between mt-5">
-
         {/* ✅ Cancel also closes modal */}
-        <Button
-          size="md"
-          variant="outline"
-          onClick={onClose}
-        >
+        <Button size="md" variant="outline" onClick={onClose}>
           Cancel
         </Button>
 
         {/* Save / Update */}
-        <Button onClick={handleSubmit}>
-          {modalConfig[mode].buttonText}
-        </Button>
-
+        <Button onClick={handleSubmit}>{modalConfig[mode].buttonText}</Button>
       </div>
-   </Modal>
-  )
-}
+    </Modal>
+  );
+};
 
 export default OperatorModal;

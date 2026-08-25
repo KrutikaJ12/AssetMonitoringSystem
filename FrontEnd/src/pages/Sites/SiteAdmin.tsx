@@ -16,82 +16,19 @@ import Buttons from "../UiElements/Buttons";
 import SiteModal from "./SiteModal";
 import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
 import { useSites } from "../../hooks/useSites";
+import { useNavigate } from "react-router";
 
-const sitesData = [
-  {
-    siteId: 1,
-    siteName: "Mumbai Warehouse",
-    city: "Mumbai",
-    state: "Maharashtra",
-    location: "Andheri East",
-    status: "Active",
-    siteManager: "John",
-  },
-  {
-    siteId: 2,
-    siteName: "Pune Plant",
-    city: "Pune",
-    state: "Maharashtra",
-    location: "Chakan",
-    status: "Active",
-    siteManager: "Mike",
-  },
-  {
-    siteId: 3,
-    siteName: "Delhi Construction Site",
-    city: "New Delhi",
-    state: "Delhi",
-    location: "Dwarka",
-    status: "Active",
-    siteManager: "David",
-  },
-  {
-    siteId: 4,
-    siteName: "Jamnagar Yard",
-    city: "Jamnagar",
-    state: "Gujarat",
-    location: "GIDC Phase 2",
-    status: "Maintenance",
-    siteManager: "Rajesh",
-  },
-  {
-    siteId: 5,
-    siteName: "Nagpur Depot",
-    city: "Nagpur",
-    state: "Maharashtra",
-    location: "Hingna",
-    status: "Active",
-    siteManager: "Amit",
-  },
-  {
-    siteId: 6,
-    siteName: "Ahmedabad Depot",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    location: "Sanand",
-    status: "Inactive",
-    siteManager: "Vikram",
-  },
-  {
-    siteId: 7,
-    siteName: "Chennai Yard",
-    city: "Chennai",
-    state: "Tamil Nadu",
-    location: "Ambattur",
-    status: "Active",
-    siteManager: "Priya",
-  },
-];
+
 // interface Asset {
-  // assetId: string;
-  // assetName: string;
-  // category: string;
-  // site: string;
-  // status: string;
-  // operator: string;
-  // engineHours: number;
-  // idleHours: number;
-  // fuelLevel: number;
+// assetId: string;
+// assetName: string;
+// category: string;
+// site: string;
+// status: string;
+// operator: string;
+// engineHours: number;
+// idleHours: number;
+// fuelLevel: number;
 // }
 // const asset = {
 //   assetId: "EX001",
@@ -119,17 +56,17 @@ const sitesData = [
 // }
 const SiteAdmin = (Asset) => {
   const { data, isLoading, error } = useSites();
-  console.log("siteData",data)
+  console.log("siteData", data);
   const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedSite, setSelectedSite] = useState("");
-    const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
+  const [selectedSite, setSelectedSite] = useState("");
+  const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   console.log("modelopen", isModalOpen);
   const [mode, setMode] = useState<
     "add" | "edit" | "view" | "delete" | "reset-password"
   >("add");
   const [search, setSearch] = useState("");
-  
+  const navigate = useNavigate()
   const [status, setStatus] = useState("");
   const hasFilters = search || selectedSite || status;
   const [isSelectedAsset, setSelectedAsset] = useState<Asset | null>(null);
@@ -142,9 +79,11 @@ const SiteAdmin = (Asset) => {
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
-   const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
+    const matchSite = selectedSiteFilter
+      ? data.site === selectedSiteFilter
+      : true;
     // return matchesSearch && matchSite;
-    return matchSite
+    return matchSite;
   });
 
   console.log(filteredData, "filter");
@@ -159,7 +98,7 @@ const SiteAdmin = (Asset) => {
   };
   const onDelete = () => {
     console.log("Deleted sucessfully");
-    setIsDeleteModalOpen(false)
+    setIsDeleteModalOpen(false);
   };
   return (
     <>
@@ -258,7 +197,7 @@ const SiteAdmin = (Asset) => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Radius
+                  Asset Count
                 </TableCell>
                 <TableCell
                   isHeader
@@ -281,8 +220,6 @@ const SiteAdmin = (Asset) => {
                     Actions
                   </TableCell>
                 )}
-
-                
               </TableRow>
             </TableHeader>
 
@@ -310,21 +247,26 @@ const SiteAdmin = (Asset) => {
                       </div>
                     </div>
                   </TableCell>
-                  
+
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {site.LocationName}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {site.Latitude},{site.Longitude}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.RadiusMeters} m
+                  <TableCell>
+                    <button
+                      onClick={() => navigate(`/admin/assets?siteId=${site.SiteID}`)}
+                      className="font-medium text-brand-500 hover:underline"
+                    >
+                      {site.AssetCount}
+                    </button>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        `${site.IsActive}` 
+                        `${site.IsActive}`
                           ? "success"
                           : site.status === "Maintenance"
                             ? "warning"
@@ -335,14 +277,14 @@ const SiteAdmin = (Asset) => {
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.siteManager}
+                    {site.SiteManagerName || "Not Assigned"}
                   </TableCell>
 
                   {hasPermission("ASSET_VIEW") && (
                     <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <button
                         onClick={() => {
-                          setSelectedSite(site)
+                          setSelectedSite(site);
                           setIsModalOpen(true);
                           setMode("view");
                         }}
@@ -351,7 +293,7 @@ const SiteAdmin = (Asset) => {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedSite(site)
+                          setSelectedSite(site);
                           setIsModalOpen(true);
                           setMode("edit");
                         }}
