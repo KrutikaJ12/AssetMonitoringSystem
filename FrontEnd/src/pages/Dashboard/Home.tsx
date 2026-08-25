@@ -6,6 +6,7 @@ import SiteSummary from "../../components/dashboard/SiteSummary";
 // import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import PageMeta from "../../components/common/PageMeta";
 import StatisticsMetrics from "../../components/dashboard/StatisticsMetrics";
+import BatteryChart from "../../components/dashboard/BatteryChart";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
@@ -109,6 +110,9 @@ export default function Home() {
             </SectionCard>
             <div className="">
               <StatisticsChart data={data.fuelConsumption}/>
+            </div>
+            <div>
+            <BatteryChart />
             </div>
           </div>
         </div>
