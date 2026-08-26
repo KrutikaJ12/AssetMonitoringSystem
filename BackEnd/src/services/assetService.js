@@ -38,7 +38,9 @@ async function getAssets(customerId, siteId) {
       am.Status, 
       am.ProtocolType, 
       ais.SiteID, 
-      sm.SiteName,     
+      sm.SiteName,  
+      om.OperatorID,
+      om.OperatorName,   
       ROUND(COALESCE(ads.EngineMinutes, 0) / 60.0, 2) AS EngineHours, 
       ROUND(COALESCE(ads.IdleMinutes, 0) / 60.0, 2) AS IdleHours 
 
@@ -52,6 +54,9 @@ async function getAssets(customerId, siteId) {
 
     LEFT JOIN SiteMaster sm 
       ON ais.SiteID = sm.SiteID 
+    
+    LEFT JOIN OperatorMaster om
+    ON am.AssetID = om.AssetID
 
     LEFT JOIN AssetDailyUsageSummary ads 
       ON am.AssetID = ads.AssetID 
