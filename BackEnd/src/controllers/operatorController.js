@@ -26,23 +26,24 @@ async function getOperators (req,res) {
 async function createOperator (req,res) {
   try{
     const customerId = req.auth.customerId;
+    const userId = req.auth.userId;
     const {
     operatorName,
     mobileNo,
     licenseNo,
-    rfidcard,
     siteId,
+    assetId,
     isActive
-} = req.body
+} = req.body;
     const result= await operatorService.createOperator(
        {
     operatorName,
     mobileNo,
     licenseNo,
-    rfidcard,
     siteId,
+    assetId,
     isActive
-    } ,customerId
+    } ,customerId,userId,req.ip
     );
    
      return res.status(200).json({
@@ -61,7 +62,8 @@ async function updateOperator (req,res) {
    try{
     const customerId = req.auth.customerId;
     const operatorId = req.params.id;
-    const result= await operatorService.updateOperator(operatorId,customerId,req.body)
+    const userId = req.auth.userId;
+    const result= await operatorService.updateOperator(operatorId,customerId,req.body,userId,req.ip)
     return res.status(200).json({
       success : true,
       operator : result,

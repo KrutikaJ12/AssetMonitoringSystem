@@ -1,11 +1,9 @@
-const {sql,getPool} = require("../config/db");
-
+const { sql, getPool } = require("../config/db");
+const {createAuditLog} = require("../services/auditLogService");
 async function getAssets(customerId, siteId) {
   const pool = await getPool();
 
-  const request = pool
-    .request()
-    .input("CustomerID", sql.Int, customerId);
+  const request = pool.request().input("CustomerID", sql.Int, customerId);
 
   let siteCondition = "";
 
@@ -70,17 +68,11 @@ async function getAssets(customerId, siteId) {
 
   return result.recordset;
 }
-async function createAsset(assetData, customerId) {
+async function createAsset(assetData, customerId, userId, ipAddress) {
   const pool = await getPool();
 
-  const {
-    assetCode,
-    assetName,
-    assetTypeId,
-    regNo,
-    siteId,
-    status
-  } = assetData;
+  const { assetCode, assetName, assetTypeId, regNo, siteId, status } =
+    assetData;
 
   // Validation
   if (!assetCode || !assetCode.trim()) {
@@ -108,10 +100,10 @@ async function createAsset(assetData, customerId) {
   }
 
   const transaction = new sql.Transaction(pool);
-
+  let transactionStarted = false;
   try {
     await transaction.begin();
-
+    transactionStarted = true;
     const request = new sql.Request(transaction);
 
     // 1. Insert into AssetMaster
@@ -121,8 +113,7 @@ async function createAsset(assetData, customerId) {
       .input("AssetCode", sql.NVarChar(100), assetCode.trim())
       .input("AssetName", sql.NVarChar(100), assetName.trim())
       .input("RegistrationNo", sql.NVarChar(100), regNo.trim())
-      .input("Status", sql.NVarChar(50), status)
-      .query(`
+      .input("Status", sql.NVarChar(50), status).query(`
         INSERT INTO AssetMaster
         (
           CustomerID,
@@ -149,8 +140,7 @@ async function createAsset(assetData, customerId) {
     // 2. Insert into AssetInSite
     await new sql.Request(transaction)
       .input("AssetID", sql.Int, assetId)
-      .input("SiteID", sql.Int, siteId)
-      .query(`
+      .input("SiteID", sql.Int, siteId).query(`
         INSERT INTO AssetInSite
         (
           AssetID,
@@ -164,7 +154,26 @@ async function createAsset(assetData, customerId) {
       `);
 
     await transaction.commit();
-
+    transactionStarted = false;
+    await createAuditLog({
+      customerId,
+      userId,
+      action: "CREATE",
+      module: "ASSET",
+      recordId: assetId,
+      description: `Asset ${assetCode.trim()} was created`,
+      oldValues: null,
+      newValues: {
+        AssetID: assetId,
+        AssetCode: assetCode.trim(),
+        AssetName: assetName.trim(),
+        AssetTypeID: assetTypeId,
+        RegistrationNo: regNo.trim(),
+        SiteID: siteId,
+        Status: status,
+      },
+      ipAddress,
+    });
     return {
       AssetID: assetId,
       AssetCode: assetCode,
@@ -172,26 +181,21 @@ async function createAsset(assetData, customerId) {
       AssetTypeID: assetTypeId,
       RegistrationNo: regNo,
       SiteID: siteId,
-      Status: status
+      Status: status,
     };
-
   } catch (error) {
-    await transaction.rollback();
+    if (transactionStarted) {
+      await transaction.rollback();
+    }
     throw error;
   }
 }
-async function updateAsset(assetId,customerId,assetData){
-  const pool= await getPool();
-  const {
-    assetCode,
-    assetName,
-    assetTypeId,
-    regNo,
-    siteId,
-    status
-  } = assetData;
+async function updateAsset(assetId, customerId, assetData, userId, ipAddress) {
+  const pool = await getPool();
+  const { assetCode, assetName, assetTypeId, regNo, siteId, status } =
+    assetData;
 
-   if (!assetCode || !assetCode.trim()) {
+  if (!assetCode || !assetCode.trim()) {
     throw new Error("Asset code is required.");
   }
 
@@ -216,10 +220,35 @@ async function updateAsset(assetId,customerId,assetData){
   }
 
   const transaction = new sql.Transaction(pool);
-
-try {
+  let transactionStarted = false;
+  try {
     await transaction.begin();
-   const request = new sql.Request(transaction);
+    transactionStarted = true;
+    const request = new sql.Request(transaction);
+    const oldAssetResponse = await new sql.Request(transaction)
+      .input("AssetID", sql.Int, assetId)
+      .input("CustomerID", sql.Int, customerId).query(`
+    SELECT
+      am.AssetID,
+      am.CustomerID,
+      am.AssetTypeID,
+      am.AssetCode,
+      am.AssetName,
+      am.RegistrationNo,
+      am.Status,
+      ais.SiteID
+    FROM AssetMaster am
+    LEFT JOIN AssetInSite ais
+      ON am.AssetID = ais.AssetID
+    WHERE am.AssetID = @AssetID
+      AND am.CustomerID = @CustomerID;
+  `);
+
+    if (oldAssetResponse.recordset.length === 0) {
+      throw new Error("Asset not found.");
+    }
+
+    const oldValues = oldAssetResponse.recordset[0];
     const assetResponse = await request
       .input("AssetID", sql.Int, assetId)
       .input("CustomerID", sql.Int, customerId)
@@ -228,8 +257,7 @@ try {
       .input("AssetName", sql.NVarChar(100), assetName.trim())
       .input("RegistrationNo", sql.NVarChar(100), regNo.trim())
       .input("SiteID", sql.Int, siteId)
-      .input("Status", sql.NVarChar(50), status)
-      .query(`
+      .input("Status", sql.NVarChar(50), status).query(`
     UPDATE AssetMaster
     SET
         AssetCode = @AssetCode,
@@ -245,34 +273,55 @@ try {
         SiteID = @SiteID
     WHERE AssetID = @AssetID;
 
-    SELECT
-        AssetID,
-        CustomerID,
-        AssetTypeID,
-        AssetCode,
-        AssetName,
-        RegistrationNo,
-        Status
-    FROM AssetMaster
-    WHERE AssetID = @AssetID
-      AND CustomerID = @CustomerID;
-`)
-    // UPDATE AssetMaster
-    // UPDATE AssetInSite
+       SELECT 
+       am.AssetID,
+       am.CustomerID,
+       am.AssetTypeID,
+       am.AssetCode,
+       am.AssetName,
+       am.RegistrationNo,
+       am.Status,
+       ais.SiteID
+    FROM AssetMaster am
+    LEFT JOIN AssetInSite ais
+    ON am.AssetID = ais.AssetID
+WHERE am.AssetID = @AssetID
+  AND am.CustomerID = @CustomerID;
+`);
+    const newValues = assetResponse.recordset[0];
+
+    const onlyStatusChanged =
+      oldValues.AssetCode === newValues.AssetCode &&
+      oldValues.AssetName === newValues.AssetName &&
+      oldValues.AssetTypeID === newValues.AssetTypeID &&
+      oldValues.RegistrationNo === newValues.RegistrationNo &&
+      oldValues.SiteID === newValues.SiteID &&
+      oldValues.Status !== newValues.Status;
+
+    const action = onlyStatusChanged ? "STATUS_CHANGE" : "UPDATE";
 
     await transaction.commit();
-    return {
-      AssetID: assetId,
-      AssetCode: assetCode,
-      AssetName: assetName,
-      AssetTypeID: assetTypeId,
-      RegistrationNo: regNo,
-      SiteID: siteId,
-      Status: status
-    };
-} catch (error) {
-    await transaction.rollback();
+    transactionStarted = false;
+    await createAuditLog({
+      customerId,
+      userId,
+      action,
+      module: "ASSET",
+      recordId: assetId,
+      description:
+        action === "STATUS_CHANGE"
+          ? `Asset ${newValues.AssetCode} status changed`
+          : `Asset ${newValues.AssetCode} was updated`,
+      oldValues,
+      newValues,
+      ipAddress,
+    });
+    return newValues;
+  } catch (error) {
+    if (transactionStarted) {
+      await transaction.rollback();
+    }
     throw error;
+  }
 }
-}
-module.exports = {getAssets,createAsset,updateAsset}
+module.exports = { getAssets, createAsset, updateAsset };

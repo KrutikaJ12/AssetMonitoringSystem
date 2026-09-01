@@ -29,6 +29,7 @@ async function getAssets(req,res){
 async function createAsset(req,res){
    try{
      const customerId = req.auth.customerId;
+     const userId = req.auth.userId;
      const {
     assetCode,
     assetName,
@@ -45,7 +46,10 @@ async function createAsset(req,res){
     regNo,
     siteId,
     status
-  },customerId
+    },
+    customerId,
+    userId,
+    req.ip
    );
 
    return res.status(200).json({
@@ -65,8 +69,9 @@ async function createAsset(req,res){
 async function updateAsset(req,res){
    try{
     const customerId=req.auth.customerId;
+    const userId = req.auth.userId;
     const assetId=req.params.id;
-    const assets= await assetService.updateAsset(assetId,customerId,req.body);
+    const assets= await assetService.updateAsset(assetId,customerId,req.body,userId,req.ip);
     return res.status(200).json({
         success:true,
         assets:assets
