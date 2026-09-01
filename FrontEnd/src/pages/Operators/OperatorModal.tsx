@@ -24,7 +24,6 @@ const OperatorModal = ({
     siteId: "",
     assetId: "",
     isActive: true,
-    assetCode: "",
   });
   // console.log("formData.siteId:", formData.siteId);
   // const { data } = useGetAssets(formData.siteId);
@@ -45,10 +44,80 @@ const OperatorModal = ({
   };
   //This are actually the assets assigned to the operator on that particular site
   //but we have to get the data from assets api for the available assets api in future
-  const assetOptions = (operators || [])?.map((asset) => ({
-    value: asset.AssetID,
-    label: `${asset.AssetCode} - ${asset.AssetName} (${asset.AssetTypeName})`,
-  }));
+  // const assetOptions = (operators || [])?.map((asset) => ({
+  //   value: asset.AssetID,
+  //   label: `${asset.AssetCode} - ${asset.AssetName} (${asset.AssetTypeName})`,
+  // }));
+  const assetOptions = [
+  {
+    value: "2",
+    label: "FL001 - Forklift-01 (Forklift)",
+  },
+  {
+    value: "3",
+    label: "FL002 - Forklift-02 (Forklift)",
+  },
+  {
+    value: "4",
+    label: "EFL001 - Electric Forklift-01 (Electric Forklift)",
+  },
+  {
+    value: "5",
+    label: "EFL002 - Electric Forklift-02 (Electric Forklift)",
+  },
+  {
+    value: "6",
+    label: "DFL001 - Diesel Forklift-01 (Diesel Forklift)",
+  },
+  {
+    value: "7",
+    label: "EX001 - Excavator-01 (Excavator)",
+  },
+  {
+    value: "8",
+    label: "BL001 - Backhoe Loader-01 (Backhoe Loader)",
+  },
+  {
+    value: "9",
+    label: "FL006 - Forklift-06 (Forklift)",
+  },
+  {
+    value: "10",
+    label: "Saquib - aba (Forklift)",
+  },
+  {
+    value: "11",
+    label: "22333 - Pune (Forklift)",
+  },
+  {
+    value: "12",
+    label: "343456 - Mumbai (Excavator)",
+  },
+  {
+    value: "13",
+    label: "6767 - Nirmal (Backhoe Loader)",
+  },
+  {
+    value: "14",
+    label: "A0004 - Forklift (Electric Forklift)",
+  },
+  {
+    value: "15",
+    label: "TEST001 - Test Forklift (Forklift)",
+  },
+  {
+    value: "16",
+    label: "TEST001 - Test Forklift (Forklift)",
+  },
+  {
+    value: "17",
+    label: "TEST001 - Test Forklift (Forklift)",
+  },
+  {
+    value: "18",
+    label: "TEST001 - Test Forklift-01 (Forklift)",
+  },
+];
   console.log("Assetoptions",assetOptions)
   const siteOptions = operators?.map((site) => ({
     value: site.SiteID,
@@ -63,7 +132,6 @@ const OperatorModal = ({
         siteId: selectedOperator.SiteID ?? "",
         assetId: selectedOperator.AssetID ?? "",
         isActive: selectedOperator.IsActive ?? true,
-        assetCode: selectedOperator.assetCode,
       });
     }
 
@@ -75,7 +143,6 @@ const OperatorModal = ({
         siteId: "",
         assetId: "",
         isActive: true,
-        assetCode: "",
       });
     }
   }, [selectedOperator, mode]);
