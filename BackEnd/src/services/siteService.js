@@ -1,12 +1,10 @@
 const { sql, getPool } = require("../config/db");
-
+const { createAuditLog } = require("../services/auditLogService");
 async function getSites(customerId) {
   const pool = await getPool();
 
-  const result = await pool
-  .request()
-  .input("CustomerID", sql.Int, customerId)
-  .query(`
+  const result = await pool.request().input("CustomerID", sql.Int, customerId)
+    .query(`
     SELECT 
         sm.SiteID, 
         sm.SiteName, 
@@ -70,20 +68,13 @@ async function getSites(customerId) {
     ORDER BY sm.SiteID;
   `);
 
-return result.recordset;
+  return result.recordset;
 }
-async function createSite(siteData, customerId) {
+async function createSite(siteData, customerId, userId, ipAddress) {
   // validate
   // INSERT into SiteMaster
   const pool = await getPool();
-  const {
-    siteName,
-    locationName,
-    latitude,
-    longitude,
-    radiusMeters,
-    isActive,
-  } = siteData;
+  const { siteName, locationName, latitude, longitude, isActive } = siteData;
   // Validation
   if (!siteName || !siteName.trim()) {
     throw new Error("Site name is required.");
@@ -101,10 +92,6 @@ async function createSite(siteData, customerId) {
     throw new Error("Longitude is required.");
   }
 
-  if (radiusMeters === undefined || radiusMeters === null) {
-    throw new Error("Radius is required.");
-  }
-
   if (typeof isActive !== "boolean") {
     throw new Error("Status is required.");
   }
@@ -116,7 +103,6 @@ async function createSite(siteData, customerId) {
     .input("LocationName", sql.NVarChar(400), locationName.trim())
     .input("Latitude", sql.Decimal(18, 8), latitude)
     .input("Longitude", sql.Decimal(18, 8), longitude)
-    .input("RadiusMeters", sql.Int, radiusMeters)
     .input("IsActive", sql.Bit, isActive).query(`
             INSERT INTO SiteMaster
             (
@@ -125,7 +111,6 @@ async function createSite(siteData, customerId) {
                 LocationName,
                 Latitude,
                 Longitude,
-                RadiusMeters,
                 IsActive
             )
             VALUES
@@ -134,7 +119,6 @@ async function createSite(siteData, customerId) {
                 @LocationName,
                 @Latitude,
                 @Longitude,
-                @RadiusMeters,
                 @IsActive
             );
 
@@ -144,24 +128,36 @@ async function createSite(siteData, customerId) {
                 LocationName,
                 Latitude,
                 Longitude,
-                RadiusMeters,
                 IsActive
             FROM SiteMaster
             WHERE SiteID = SCOPE_IDENTITY();
         `);
 
+  const siteId = result.recordset[0].SiteID;
+  await createAuditLog({
+    customerId,
+    userId,
+    action: "CREATE",
+    module: "SITE",
+    recordId: siteId,
+    description: `Site ${siteName.trim()} was created`,
+    oldValues: null,
+    newValues: {
+      SiteID: siteId,
+      SiteName: siteName.trim(),
+      LocationName: locationName.trim(),
+      Latitude: latitude,
+      Longitude: longitude,
+      IsActive: isActive,
+    },
+    ipAddress,
+  });
+
   return result.recordset[0];
 }
-async function updateSite(siteId, siteData, customerId) {
+async function updateSite(siteId, siteData, customerId, userId, ipAddress) {
   const pool = await getPool();
-  const {
-    siteName,
-    locationName,
-    latitude,
-    longitude,
-    radiusMeters,
-    isActive,
-  } = siteData;
+  const { siteName, locationName, latitude, longitude, isActive } = siteData;
 
   if (!siteName || !siteName.trim()) {
     throw new Error("Site name is required.");
@@ -179,13 +175,67 @@ async function updateSite(siteId, siteData, customerId) {
     throw new Error("Longitude is required.");
   }
 
-  if (radiusMeters === undefined || radiusMeters === null) {
-    throw new Error("Radius is required.");
-  }
-
   if (typeof isActive !== "boolean") {
     throw new Error("Status is required.");
   }
+  // const result = await pool
+  //   .request()
+  //   .input("SiteID", sql.BigInt, siteId)
+  //   .input("CustomerID", sql.Int, customerId)
+  //   .input("SiteName", sql.NVarChar(300), siteName.trim())
+  //   .input("LocationName", sql.NVarChar(400), locationName.trim())
+  //   .input("Latitude", sql.Decimal(18, 8), latitude)
+  //   .input("Longitude", sql.Decimal(18, 8), longitude)
+  //   .input("RadiusMeters", sql.Int, radiusMeters)
+  //   .input("IsActive", sql.Bit, isActive).query(`
+  //           UPDATE SiteMaster
+  //           SET
+  //               SiteName = @SiteName,
+  //               LocationName = @LocationName,
+  //               Latitude = @Latitude,
+  //               Longitude = @Longitude,
+  //               RadiusMeters = @RadiusMeters,
+  //               IsActive = @IsActive
+  //           WHERE SiteID = @SiteID
+  //             AND CustomerID = @CustomerID;
+
+  //           SELECT
+  //               SiteID,
+  //               SiteName,
+  //               LocationName,
+  //               Latitude,
+  //               Longitude,
+  //               RadiusMeters,
+  //               IsActive
+  //           FROM SiteMaster
+  //           WHERE SiteID = @SiteID
+  //           AND CustomerID = @CustomerID;
+  //       `);
+
+  // return result.recordset[0];
+
+  const oldSiteResponse = await pool
+    .request()
+    .input("SiteID", sql.BigInt, siteId)
+    .input("CustomerID", sql.Int, customerId).query(`
+    SELECT
+      SiteID,
+      SiteName,
+      LocationName,
+      Latitude,
+      Longitude,
+      IsActive
+    FROM SiteMaster
+    WHERE SiteID = @SiteID
+      AND CustomerID = @CustomerID;
+  `);
+
+  if (oldSiteResponse.recordset.length === 0) {
+    throw new Error("Site not found.");
+  }
+
+  const oldValues = oldSiteResponse.recordset[0];
+
   const result = await pool
     .request()
     .input("SiteID", sql.BigInt, siteId)
@@ -194,31 +244,57 @@ async function updateSite(siteId, siteData, customerId) {
     .input("LocationName", sql.NVarChar(400), locationName.trim())
     .input("Latitude", sql.Decimal(18, 8), latitude)
     .input("Longitude", sql.Decimal(18, 8), longitude)
-    .input("RadiusMeters", sql.Int, radiusMeters)
     .input("IsActive", sql.Bit, isActive).query(`
-            UPDATE SiteMaster
-            SET
-                SiteName = @SiteName,
-                LocationName = @LocationName,
-                Latitude = @Latitude,
-                Longitude = @Longitude,
-                RadiusMeters = @RadiusMeters,
-                IsActive = @IsActive
-            WHERE SiteID = @SiteID
-              AND CustomerID = @CustomerID;
+    UPDATE SiteMaster
+    SET
+      SiteName = @SiteName,
+      LocationName = @LocationName,
+      Latitude = @Latitude,
+      Longitude = @Longitude,
+      IsActive = @IsActive
+    WHERE SiteID = @SiteID
+      AND CustomerID = @CustomerID;
 
-            SELECT
-                SiteID,
-                SiteName,
-                LocationName,
-                Latitude,
-                Longitude,
-                RadiusMeters,
-                IsActive
-            FROM SiteMaster
-            WHERE SiteID = @SiteID
-            AND CustomerID = @CustomerID;
-        `);
-  return result.recordset[0];
+    SELECT
+      SiteID,
+      SiteName,
+      LocationName,
+      Latitude,
+      Longitude,
+      IsActive
+    FROM SiteMaster
+    WHERE SiteID = @SiteID
+      AND CustomerID = @CustomerID;
+  `);
+
+  const newValues = result.recordset[0];
+  const onlyStatusChanged =
+  oldValues.SiteName === newValues.SiteName &&
+  oldValues.LocationName === newValues.LocationName &&
+  Number(oldValues.Latitude) === Number(newValues.Latitude) &&
+  Number(oldValues.Longitude) === Number(newValues.Longitude) &&
+  oldValues.RadiusMeters === newValues.RadiusMeters &&
+  oldValues.IsActive !== newValues.IsActive;
+
+  const action = onlyStatusChanged
+  ? "STATUS_CHANGE"
+  : "UPDATE";
+
+  await createAuditLog({
+    customerId,
+    userId,
+    action,
+    module: "SITE",
+    recordId: siteId,
+    description:
+      action === "STATUS_CHANGE"
+        ? `Site ${newValues.SiteName} status changed`
+        : `Site ${newValues.SiteName} was updated`,
+    oldValues,
+    newValues,
+    ipAddress,
+  });
+
+  return newValues;
 }
 module.exports = { getSites, createSite, updateSite };

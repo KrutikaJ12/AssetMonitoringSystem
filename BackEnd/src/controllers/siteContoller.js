@@ -28,13 +28,12 @@ async function getSites(req,res){
 async function createSite(req, res) {
     try {
         const customerId = req.auth.customerId;
-
+        const userId = req.auth.userId;
         const {
             siteName,
             locationName,
             latitude,
             longitude,
-            radiusMeters,
             isActive
         } = req.body;
 
@@ -44,10 +43,11 @@ async function createSite(req, res) {
                 locationName,
                 latitude,
                 longitude,
-                radiusMeters,
                 isActive
             },
-            customerId
+            customerId,
+            userId,
+            req.ip
         );
 
         return res.status(201).json({
@@ -69,11 +69,13 @@ async function updateSite(req, res) {
     try {
         const siteId = req.params.id;
         const customerId = req.auth.customerId;
-
+        const userId = req.auth.userId;
         const result = await siteService.updateSite(
             siteId,
             req.body,
-            customerId
+            customerId,
+            userId,
+            req.ip
         );
 
         return res.status(200).json({

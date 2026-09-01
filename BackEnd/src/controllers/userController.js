@@ -27,7 +27,7 @@ async function getUsers(req,res){
 async function createUser(req, res) {
   try {
     const customerId = req.auth.customerId;
-
+    const userId = req.auth.userId;
     const {
       fullName,
       mobileNo,
@@ -50,7 +50,9 @@ async function createUser(req, res) {
         roleId,
         siteIds,
         isActive,
-      }
+      },
+      userId,
+      req.ip
     );
 
     return res.status(201).json({
@@ -94,7 +96,8 @@ async function updateUser(req,res){
         roleId,
         siteIds,
         isActive,
-      }
+      },
+      req.ip
     );
 
     return res.status(201).json({

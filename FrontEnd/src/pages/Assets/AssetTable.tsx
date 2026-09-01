@@ -385,7 +385,7 @@ export function AssetTable(Asset: AssetTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.operator}
+                    {asset.OperatorName ?? "-"}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.EngineHours}

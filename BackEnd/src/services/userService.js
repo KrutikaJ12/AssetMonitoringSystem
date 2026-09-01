@@ -1,13 +1,12 @@
-const { sql,getPool} = require("../config/db");
-
-async function getUsers(customerId){
-   const pool = await getPool();
+const { sql, getPool } = require("../config/db");
+const createAuditLog = require("../services/auditLogService");
+async function getUsers(customerId) {
+  const pool = await getPool();
 
   // 1. Get users
   const usersResponse = await pool
     .request()
-    .input("CustomerID", sql.Int, customerId)
-    .query(`
+    .input("CustomerID", sql.Int, customerId).query(`
       SELECT
         UserID,
         FullName,
@@ -21,9 +20,7 @@ async function getUsers(customerId){
     `);
 
   // 2. Get user roles
-  const rolesResponse = await pool
-    .request()
-    .query(`
+  const rolesResponse = await pool.request().query(`
       SELECT
         urm.UserID,
         r.RoleID,
@@ -38,8 +35,7 @@ async function getUsers(customerId){
   // 3. Get user sites
   const sitesResponse = await pool
     .request()
-    .input("CustomerID", sql.Int, customerId)
-    .query(`
+    .input("CustomerID", sql.Int, customerId).query(`
       SELECT
         usa.UserID,
         s.SiteID,
@@ -79,10 +75,9 @@ async function getUsers(customerId){
         siteName: site.SiteName,
       })),
   }));
-
 }
 
-async function createUser(customerId, userData) {
+async function createUser(customerId, userData, userId, ipAddress) {
   const pool = await getPool();
 
   const {
@@ -129,10 +124,10 @@ async function createUser(customerId, userData) {
   // -------------------------
 
   const transaction = new sql.Transaction(pool);
-
+  let transactionStarted = false;
   try {
     await transaction.begin();
-
+    transactionStarted = true;
     // ==========================================
     // 1. Create User
     // ==========================================
@@ -147,8 +142,7 @@ async function createUser(customerId, userData) {
       .input("UserName", sql.NVarChar(100), userName.trim())
       .input("RoleID", sql.Int, Number(roleId))
       .input("IsActive", sql.Bit, isActive)
-      .input("CreatedBy", sql.BigInt, customerId)
-      .query(`
+      .input("CreatedBy", sql.BigInt, customerId).query(`
         INSERT INTO AppUser
         (
           CustomerID,
@@ -193,8 +187,7 @@ async function createUser(customerId, userData) {
 
     await roleRequest
       .input("UserID", sql.BigInt, userId)
-      .input("RoleID", sql.Int, roleId)
-      .query(`
+      .input("RoleID", sql.Int, roleId).query(`
         INSERT INTO UserRoleMapping
         (
           UserID,
@@ -221,8 +214,7 @@ async function createUser(customerId, userData) {
       await siteRequest
         .input("CustomerID", sql.Int, customerId)
         .input("UserID", sql.BigInt, userId)
-        .input("SiteID", sql.BigInt, siteId)
-        .query(`
+        .input("SiteID", sql.BigInt, siteId).query(`
           INSERT INTO UserSiteAccess
           (
             CustomerID,
@@ -247,7 +239,28 @@ async function createUser(customerId, userData) {
     // ==========================================
 
     await transaction.commit();
+    transactionStarted = false;
 
+    await createAuditLog({
+      customerId,
+      userId,
+      action: "CREATE",
+      module: "USER",
+      recordId: userId,
+      description: `User ${userName.trim()} was created`,
+      oldValues: null,
+      newValues: {
+        UserID: userId,
+        FullName: fullName.trim(),
+        MobileNo: mobileNo,
+        EmailID: emailId.trim(),
+        UserName: userName.trim(),
+        RoleID: roleId,
+        SiteIDs: siteIds,
+        IsActive: isActive,
+      },
+      ipAddress,
+    });
     return {
       userId,
       fullName: fullName.trim(),
@@ -258,19 +271,14 @@ async function createUser(customerId, userData) {
       siteIds,
       isActive,
     };
-
   } catch (error) {
-
-    // ==========================================
-    // Rollback
-    // ==========================================
-
-    await transaction.rollback();
-
+    if (transactionStarted) {
+      await transaction.rollback();
+    }
     throw error;
   }
 }
-async function updateUser(userId, customerId, userData) {
+async function updateUser(userId, customerId, userData, ipAddress) {
   const pool = await getPool();
 
   const {
@@ -283,9 +291,9 @@ async function updateUser(userId, customerId, userData) {
     isActive,
   } = userData;
 
-  // -------------------------
+  // ==========================================
   // Validation
-  // -------------------------
+  // ==========================================
 
   if (!fullName || !fullName.trim()) {
     throw new Error("Full name is required.");
@@ -312,17 +320,97 @@ async function updateUser(userId, customerId, userData) {
   }
 
   const transaction = new sql.Transaction(pool);
+  let transactionStarted = false;
 
   try {
     await transaction.begin();
+    transactionStarted = true;
 
     // ==========================================
-    // 1. Update UserMaster
+    // 1. Get OLD USER values
     // ==========================================
 
-    const userRequest = new sql.Request(transaction);
+    const oldUserResponse = await new sql.Request(transaction)
+      .input("UserID", sql.BigInt, userId)
+      .input("CustomerID", sql.Int, customerId)
+      .query(`
+        SELECT
+          UserID,
+          CustomerID,
+          FullName,
+          MobileNo,
+          EmailID,
+          UserName,
+          IsActive
+        FROM AppUser
+        WHERE UserID = @UserID
+          AND CustomerID = @CustomerID;
+      `);
 
-    const userResponse = await userRequest
+    if (oldUserResponse.recordset.length === 0) {
+      throw new Error("User not found.");
+    }
+
+    const oldUser = oldUserResponse.recordset[0];
+
+    // ==========================================
+    // 2. Get OLD ROLE
+    // ==========================================
+
+    const oldRoleResponse = await new sql.Request(transaction)
+      .input("UserID", sql.BigInt, userId)
+      .query(`
+        SELECT RoleID
+        FROM UserRoleMapping
+        WHERE UserID = @UserID
+          AND IsActive = 1;
+      `);
+
+    const oldRoleId =
+      oldRoleResponse.recordset.length > 0
+        ? Number(oldRoleResponse.recordset[0].RoleID)
+        : null;
+
+    // ==========================================
+    // 3. Get OLD SITE ACCESS
+    // ==========================================
+
+    const oldSitesResponse = await new sql.Request(transaction)
+      .input("UserID", sql.BigInt, userId)
+      .input("CustomerID", sql.Int, customerId)
+      .query(`
+        SELECT SiteID
+        FROM UserSiteAccess
+        WHERE UserID = @UserID
+          AND CustomerID = @CustomerID
+          AND IsActive = 1;
+      `);
+
+    const oldSiteIds = oldSitesResponse.recordset.map(
+      row => Number(row.SiteID)
+    );
+
+    // ==========================================
+    // 4. Build OLD VALUES
+    // ==========================================
+
+    const oldValues = {
+      UserID: Number(oldUser.UserID),
+      CustomerID: Number(oldUser.CustomerID),
+      FullName: oldUser.FullName,
+      MobileNo: oldUser.MobileNo,
+      EmailID: oldUser.EmailID,
+      UserName: oldUser.UserName,
+      IsActive: Boolean(oldUser.IsActive),
+      RoleID: oldRoleId,
+      SiteIDs: [...oldSiteIds].sort((a, b) => a - b),
+    };
+
+    // ==========================================
+    // 5. UPDATE USER
+    // ==========================================
+
+    const userResponse = await new sql.Request(transaction)
       .input("UserID", sql.BigInt, userId)
       .input("CustomerID", sql.Int, customerId)
       .input("FullName", sql.NVarChar(100), fullName.trim())
@@ -355,18 +443,13 @@ async function updateUser(userId, customerId, userData) {
           AND CustomerID = @CustomerID;
       `);
 
-    if (userResponse.recordset.length === 0) {
-      throw new Error("User not found.");
-    }
+    const updatedUser = userResponse.recordset[0];
 
     // ==========================================
-    // 2. Update Role Mapping
+    // 6. UPDATE ROLE
     // ==========================================
 
-    // Deactivate existing role mappings
-    const deactivateRolesRequest = new sql.Request(transaction);
-
-    await deactivateRolesRequest
+    await new sql.Request(transaction)
       .input("UserID", sql.BigInt, userId)
       .query(`
         UPDATE UserRoleMapping
@@ -374,10 +457,7 @@ async function updateUser(userId, customerId, userData) {
         WHERE UserID = @UserID;
       `);
 
-    // Add selected role
-    const roleRequest = new sql.Request(transaction);
-
-    await roleRequest
+    await new sql.Request(transaction)
       .input("UserID", sql.BigInt, userId)
       .input("RoleID", sql.Int, Number(roleId))
       .query(`
@@ -398,13 +478,10 @@ async function updateUser(userId, customerId, userData) {
       `);
 
     // ==========================================
-    // 3. Update Site Access
+    // 7. UPDATE SITE ACCESS
     // ==========================================
 
-    // Deactivate existing site access
-    const deactivateSitesRequest = new sql.Request(transaction);
-
-    await deactivateSitesRequest
+    await new sql.Request(transaction)
       .input("UserID", sql.BigInt, userId)
       .query(`
         UPDATE UserSiteAccess
@@ -412,11 +489,8 @@ async function updateUser(userId, customerId, userData) {
         WHERE UserID = @UserID;
       `);
 
-    // Add currently selected sites
     for (const siteId of siteIds) {
-      const siteRequest = new sql.Request(transaction);
-
-      await siteRequest
+      await new sql.Request(transaction)
         .input("CustomerID", sql.Int, customerId)
         .input("UserID", sql.BigInt, userId)
         .input("SiteID", sql.BigInt, Number(siteId))
@@ -441,32 +515,101 @@ async function updateUser(userId, customerId, userData) {
     }
 
     // ==========================================
-    // 4. Commit
+    // 8. Build NEW VALUES
+    // ==========================================
+
+    const newValues = {
+      UserID: Number(updatedUser.UserID),
+      CustomerID: Number(updatedUser.CustomerID),
+      FullName: updatedUser.FullName,
+      MobileNo: updatedUser.MobileNo,
+      EmailID: updatedUser.EmailID,
+      UserName: updatedUser.UserName,
+      IsActive: Boolean(updatedUser.IsActive),
+      RoleID: Number(roleId),
+      SiteIDs: siteIds
+        .map(Number)
+        .sort((a, b) => a - b),
+    };
+
+    // ==========================================
+    // 9. Check what changed
+    // ==========================================
+
+    const statusChanged =
+      oldValues.IsActive !== newValues.IsActive;
+
+    const otherFieldsChanged =
+      oldValues.FullName !== newValues.FullName ||
+      oldValues.MobileNo !== newValues.MobileNo ||
+      oldValues.EmailID !== newValues.EmailID ||
+      oldValues.UserName !== newValues.UserName ||
+      oldValues.RoleID !== newValues.RoleID ||
+      JSON.stringify(oldValues.SiteIDs) !==
+        JSON.stringify(newValues.SiteIDs);
+
+    // ==========================================
+    // 10. Decide Audit Action
+    // ==========================================
+
+    let action = "UPDATE";
+
+    if (statusChanged && !otherFieldsChanged) {
+      action = "STATUS_CHANGE";
+    }
+
+    // ==========================================
+    // 11. Commit
     // ==========================================
 
     await transaction.commit();
+    transactionStarted = false;
+
+    // ==========================================
+    // 12. Create Audit Log
+    // ==========================================
+
+    await createAuditLog({
+      customerId,
+      userId,
+      action,
+      module: "USER",
+      recordId: userId,
+
+      description:
+        action === "STATUS_CHANGE"
+          ? `User ${newValues.UserName} status was changed`
+          : `User ${newValues.UserName} was updated`,
+
+      oldValues,
+      newValues,
+
+      ipAddress,
+    });
+
+    // ==========================================
+    // 13. Return
+    // ==========================================
 
     return {
       userId,
-      fullName: fullName.trim(),
-      mobileNo,
-      emailId: emailId.trim(),
-      userName: userName.trim(),
-      roleId: Number(roleId),
-      siteIds: siteIds.map(Number),
-      isActive,
+      fullName: newValues.FullName,
+      mobileNo: newValues.MobileNo,
+      emailId: newValues.EmailID,
+      userName: newValues.UserName,
+      roleId: newValues.RoleID,
+      siteIds: newValues.SiteIDs,
+      isActive: newValues.IsActive,
     };
 
   } catch (error) {
 
-    // ==========================================
-    // Rollback
-    // ==========================================
-
-    await transaction.rollback();
+    if (transactionStarted) {
+      await transaction.rollback();
+    }
 
     throw error;
   }
 }
 
-module.exports = { getUsers,createUser,updateUser}
+module.exports = { getUsers, createUser, updateUser };
