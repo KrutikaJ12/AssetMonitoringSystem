@@ -52,14 +52,15 @@ const getDashboardData = async () => {
     SUM(IdleMinutes) AS TotalIdleMinutes,
     SUM(StoppedMinutes) AS TotalStoppedMinutes,
     SUM(OfflineMinutes) AS TotalOfflineMinutes
-       FROM AssetDailyUsageSummary
+       FROM AssetDailyUsage
        WHERE UsageDate = '2026-07-07';`),
 
-      sql.query(`SELECT Top 5
+      sql.query(`
+        SELECT Top 5
        am.AssetID AS AssetID,
        am.AssetName,
        SUM(ads.WorkingMinutes) AS TotalWorkingMinutes
-       FROM AssetDailyUsageSummary ads
+       FROM AssetDailyUsage ads
        INNER JOIN AssetMaster am
        ON ads.AssetID = am.AssetID
       WHERE ads.UsageDate = '2026-07-07'
@@ -79,7 +80,7 @@ const getDashboardData = async () => {
           ISNULL(
           ROUND(
         SUM(ads.WorkingMinutes) * 100.0 /
-        NULLIF(SUM(ads.EngineMinutes), 0),
+        NULLIF(SUM(ads.EngineOnMinutes), 0),
         2
     ),
     0
@@ -91,7 +92,7 @@ const getDashboardData = async () => {
     ON ais.AssetID = am.AssetID
       LEFT JOIN OperatorMaster om
     ON sm.SiteID = om.SiteID
-      LEFT JOIN AssetDailyUsageSummary ads
+      LEFT JOIN AssetDailyUsage ads
     ON am.AssetID = ads.AssetID
       WHERE sm.CustomerID = 1
       AND ads.UsageDate = '2026-07-07'
@@ -100,6 +101,7 @@ const getDashboardData = async () => {
     sm.SiteName
       ORDER BY
     sm.SiteID;`),
+
       sql.query(`
       SELECT TOP 3
     al.AlertID,
@@ -136,13 +138,13 @@ ORDER BY al.AlertDateTime DESC;`),
         assetType: item.AssetTypeName,
         count: item.Total,
       })),
-      recentAlerts:  recentAlerts.recordset.map((alert) => ({
-      alertId: alert.AlertID,
-      assetName: alert.AssetName,
-      alertType: alert.AlertType,
-      alertLevel: alert.AlertLevel,
-      alertMessage: alert.AlertMessage,
-      alertDateTime: alert.AlertDateTime,
+      recentAlerts: recentAlerts.recordset.map((alert) => ({
+        alertId: alert.AlertID,
+        assetName: alert.AssetName,
+        alertType: alert.AlertType,
+        alertLevel: alert.AlertLevel,
+        alertMessage: alert.AlertMessage,
+        alertDateTime: alert.AlertDateTime,
       })),
       workingHours: {
         summary: {
