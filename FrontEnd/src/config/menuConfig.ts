@@ -93,11 +93,24 @@ export const adminMenu: NavItem[] = [
     path: "/admin/alerts",
     moduleCode: "ALERTS",
   },
+
+  // Defines the Reports submenu and routes for Asset Summary and Asset Daily Usage reports.
   {
-    name: "Reports",
-    path: "/admin/reports",
-    moduleCode: "REPORTS",
-  },
+  name: "Reports",
+  moduleCode: "REPORTS",
+  subItems: [
+    {
+      name: "Asset Summary Report",
+      path: "/admin/reports/summary",
+      pro: false,
+    },
+    {
+      name: "Asset Daily Usage Report",
+      path: "/admin/reports/daily-usage",
+      pro: false,
+    },
+  ],
+},
   {
     name: "Users",
     path: "/admin/users",

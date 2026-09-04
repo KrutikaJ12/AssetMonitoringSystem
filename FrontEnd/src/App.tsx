@@ -31,7 +31,7 @@ import ForbiddenPage from "./pages/OtherPage/ForbiddenPage";
 import SiteAdmin from "./pages/Sites/SiteAdmin";
 import UsersPage from "./pages/Users/UsersPage";
 import OperatorsPage from "./pages/Operators/OperatorsPage";
-
+import ReportDetails from "./pages/Reports/ReportDetails";
 
 export default function App() {
   return (
@@ -39,10 +39,7 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
-         <Route
-  path="/"
-  element={<Navigate to="/signin" replace />}
-/>
+          <Route path="/" element={<Navigate to="/signin" replace />} />
           {/* Dashboard Layout */}
           <Route
             element={
@@ -59,7 +56,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/admin/dashboard"
               element={
@@ -70,7 +66,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/admin/assets"
               element={
@@ -81,39 +76,36 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            
-             <Route
+            <Route
               path="/admin/sites"
               element={
                 <ProtectedRoute>
                   <PermissionRoute permission="SITE_VIEW">
-                    <SiteAdmin/>
+                    <SiteAdmin />
                   </PermissionRoute>
                 </ProtectedRoute>
               }
             />
-               <Route
+            <Route
               path="/admin/operators"
               element={
                 <ProtectedRoute>
                   <PermissionRoute permission="OPERATOR_VIEW">
-                    <OperatorsPage/>
+                    <OperatorsPage />
                   </PermissionRoute>
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/admin/users"
               element={
                 <ProtectedRoute>
                   <PermissionRoute permission="USER_VIEW">
-                    <UsersPage/>
+                    <UsersPage />
                   </PermissionRoute>
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/admin/alerts"
               element={
@@ -122,8 +114,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            <Route
+            {/* <Route
               path="/admin/reports"
               element={
                 <ProtectedRoute>
@@ -132,8 +123,40 @@ export default function App() {
                   </PermissionRoute>
                 </ProtectedRoute>
               }
+            /> */}
+            // {/*Route for the Asset Summary Report.*/}
+            <Route
+              path="/admin/reports/summary"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <Reports />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
             />
-
+            {/*Route for the Asset Daily Usage Report.*/}
+            <Route
+              path="/admin/reports/daily-usage"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <Reports />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+            {/*Route for viewing report details of a specific asset.*/}
+            <Route
+              path="/admin/reports/:vehicleNo"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <ReportDetails />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/users"
               element={
@@ -144,7 +167,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* <Route path="/admin" element={<AdminDashboard />} /> */}
             <Route path="/siteManager" element={<SiteManagerDashboard />} />
             <Route path="/operator" element={<OperatorDashboard />} />
@@ -152,13 +174,10 @@ export default function App() {
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
-
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
-
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
-
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
@@ -166,7 +185,6 @@ export default function App() {
             <Route path="/buttons" element={<Buttons />} />
             <Route path="/images" element={<Images />} />
             <Route path="/videos" element={<Videos />} />
-
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />

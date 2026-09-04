@@ -14,6 +14,7 @@ import { Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useAuth } from "../../hooks/useAuth";
+import { Link, useLocation } from "react-router";
 
 interface Reports {
   siteName: string;
@@ -130,14 +131,28 @@ const handlePdfExport = () => {
 const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const{hasPermission}=useAuth()
+
+  // Displays the heading based on the selected report type.
+const location = useLocation();
+
+  const { hasPermission } = useAuth();
+
+  const reportHeading =
+  location.pathname === "/admin/reports/daily-usage"
+    ? "Assets Daily Usage Reports"
+    : "Assets Summary Reports";
+
   return (
     <div>
+      {/*Displays the selected report heading at the top of the Reports page.*/}
+       <h1 className="mb-5 ml-3 text-2xl font-semibold text-gray-800 dark:text-white">
+        {reportHeading}
+      </h1>
       <div className="flex w-full gap-5">
         <div className="flex flex-col gap-1  ml-3">
-          <label>Vehicle No:</label>
+          <label>Asset ID:</label>
           <input
-            placeholder="Vehicle No"
+            placeholder="Asset ID"
             className="border h-10 rounded-lg pl-2"
           />
         </div>
@@ -197,7 +212,7 @@ const Reports = () => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Vehicle No
+                  Asset ID
                 </TableCell>
                 <TableCell
                   isHeader
@@ -263,9 +278,14 @@ const Reports = () => {
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {site.siteName}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.vehicaleNo}
-                  </TableCell>
+           <TableCell className="py-3 text-theme-sm">
+  <Link
+    to={`/admin/reports/${site.vehicaleNo}`}
+    className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+  >
+    {site.vehicaleNo}
+  </Link>
+</TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {site.startDate}
                   </TableCell>
