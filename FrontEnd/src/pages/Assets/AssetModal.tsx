@@ -71,7 +71,7 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
 //         (item) => item.value === option.value
 //       )
 //   );
-  console.log("formData", formData,assetTypeOptions);
+  console.log("formData", formData,selectedAsset,assetTypeOptions);
   useEffect(() => {
     if (selectedAsset && (mode === "edit" || mode === "view")) {
       setFormData({
@@ -81,7 +81,7 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
         regNo: selectedAsset.RegistrationNo ?? "",
         siteId: selectedAsset.SiteID ?? "",
         status: selectedAsset.Status ?? true,
-        operator:selectedAsset.Operator ?? true,
+        operator:selectedAsset.OperatorName ?? "",
         
       });
     }
