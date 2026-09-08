@@ -32,6 +32,7 @@ import SiteAdmin from "./pages/Sites/SiteAdmin";
 import UsersPage from "./pages/Users/UsersPage";
 import OperatorsPage from "./pages/Operators/OperatorsPage";
 import ReportDetails from "./pages/Reports/ReportDetails";
+import SpeedViolationReport from "./pages/Reports/SpeedViolationReport";
 
 export default function App() {
   return (
@@ -157,6 +158,18 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Route for Speed Violation Report */}
+<Route
+  path="/admin/reports/SpeedViolationReport"
+  element={
+    <ProtectedRoute>
+      <PermissionRoute permission="REPORT_VIEW">
+        <SpeedViolationReport />
+      </PermissionRoute>
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/users"
               element={
