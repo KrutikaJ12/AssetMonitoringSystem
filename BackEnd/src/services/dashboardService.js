@@ -31,11 +31,12 @@ const getDashboardData = async () => {
       `),
 
       sql.query(`
-    SELECT
-        Status,
+     SELECT
+        als.CurrentStatus AS Status,
         COUNT(*) AS Total
-    FROM AssetMaster
-    GROUP BY Status
+    FROM AssetLiveStatus als
+    WHERE als.CustomerID = 1
+    GROUP BY als.CurrentStatus
    `),
       sql.query(`
             SELECT
@@ -69,7 +70,8 @@ const getDashboardData = async () => {
           am.AssetName 
       ORDER BY TotalWorkingMinutes Desc;`),
 
-      sql.query(`SELECT
+      sql.query(`
+        SELECT TOP 5
           sm.SiteID,
           sm.SiteName,
           COUNT(DISTINCT ais.AssetID) AS TotalAssets,
@@ -94,8 +96,8 @@ const getDashboardData = async () => {
     ON sm.SiteID = om.SiteID
       LEFT JOIN AssetDailyUsage ads
     ON am.AssetID = ads.AssetID
+    AND ads.UsageDate = '2026-07-07'
       WHERE sm.CustomerID = 1
-      AND ads.UsageDate = '2026-07-07'
       GROUP BY
     sm.SiteID,
     sm.SiteName
@@ -116,7 +118,6 @@ INNER JOIN AssetMaster am
 WHERE al.CustomerID = 1
 ORDER BY al.AlertDateTime DESC;`),
     ]);
-    // console.log(workingHours, topWorkingAssets);
     const runningAssets =
       assetStatus.recordset.find((item) => item.Status === "RUNNING")?.Total ||
       0;
