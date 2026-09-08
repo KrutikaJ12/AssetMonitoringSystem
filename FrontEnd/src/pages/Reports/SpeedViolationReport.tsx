@@ -105,91 +105,130 @@ const SpeedViolationReport = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+     {/* Table */}
+<div className=" w-full  mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
 
-        {/* Table Header */}
-        <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Speed Violation Records
-          </h2>
-        </div>
+  {/* Table Header */}
+  <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+      Speed Violation Records
+    </h2>
+  </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800">
+  {/* Table */}
+  <div className="overflow-x-auto">
+    <table className="w-full table-fixed border-collapse">
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Sr No
-                </th>
+      <thead>
+        <tr className="border-b border-gray-200 dark:border-gray-800">
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Asset ID
-                </th>
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Sr No
+          </th>
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Date
-                </th>
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Asset ID
+          </th>
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Time
-                </th>
+          {/* Department */}
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Department
+          </th>
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Speed
-                </th>
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Date
+          </th>
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Speed Limit
-                </th>
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Time
+          </th>
 
-                <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Status
-                </th>
+          {/* Location */}
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Location
+          </th>
 
-              </tr>
-            </thead>
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Speed
+          </th>
 
-            <tbody>
-              <tr className="border-b border-gray-100 dark:border-gray-800">
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Speed Limit
+          </th>
 
-                <td className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
-                  1
-                </td>
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Status
+          </th>
 
-                <td className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white">
-                  ASSET-001
-                </td>
+          {/* Driver Name */}
+          <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            Driver Name
+          </th>
 
-                <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
-                  08-09-2026
-                </td>
+        </tr>
+      </thead>
 
-                <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
-                  10:30 AM
-                </td>
+      <tbody>
+        <tr className="border-b border-gray-100 dark:border-gray-800">
 
-                <td className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white">
-                  85 km/h
-                </td>
+          {/* Sr No */}
+          <td className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
+            1
+          </td>
 
-                <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
-                  60 km/h
-                </td>
+          {/* Asset ID */}
+          <td className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white">
+            ASSET-001
+          </td>
 
-                <td className="px-5 py-4">
-                  <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 dark:bg-red-500/10 dark:text-red-400">
-                    Violation
-                  </span>
-                </td>
+          {/* Department */}
+          <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
+            Logistics
+          </td>
 
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {/* Date */}
+          <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
+            08-09-2026
+          </td>
+
+          {/* Time */}
+          <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
+            10:30 AM
+          </td>
+
+          {/* Location */}
+          <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
+            Mumbai
+          </td>
+
+          {/* Speed */}
+          <td className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white">
+            85 km/h
+          </td>
+
+          {/* Speed Limit */}
+          <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400">
+            60 km/h
+          </td>
+
+          {/* Status */}
+          <td className="px-5 py-4">
+            <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 dark:bg-red-500/10 dark:text-red-400">
+              Violation
+            </span>
+          </td>
+
+          {/* Driver Name */}
+          <td className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white">
+            Rahul Sharma
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+</div>
     </div>
   );
 };
