@@ -15,7 +15,7 @@ async function getAssets(customerId, siteId) {
     `;
   }
 
-  const result = await request.query(`
+ const result = await request.query(`
     SELECT 
       am.AssetID, 
       am.AssetCode, 
@@ -23,7 +23,18 @@ async function getAssets(customerId, siteId) {
       am.AssetTypeID, 
       atm.AssetTypeName, 
       atm.Category, 
-      am.FuelPercentage, 
+
+      -- LIVE DATA
+      als.FuelPercentage,
+      als.CurrentStatus AS Status,
+      als.LastReceivedDateTimeUtc AS LastReportingTime,
+      als.EngineHours,
+      als.SpeedKph,
+      -- TODAY'S USAGE
+      ROUND(ISNULL(als.TodayWorkingMinutes, 0) / 60.0, 2) AS WorkingHours,
+      ROUND(ISNULL(als.TodayIdleMinutes, 0) / 60.0, 2) AS IdleHours,
+
+      -- MASTER DATA
       am.RegistrationNo, 
       am.Make, 
       am.Model, 
@@ -33,14 +44,11 @@ async function getAssets(customerId, siteId) {
       am.TankCapacityLitres, 
       am.OpeningEngineHours, 
       am.OpeningOdometer, 
-      am.Status, 
       am.ProtocolType, 
       ais.SiteID, 
       sm.SiteName,  
       om.OperatorID,
-      om.OperatorName,   
-      ROUND(COALESCE(ads.EngineOnMinutes, 0) / 60.0, 2) AS EngineHours, 
-      ROUND(COALESCE(ads.IdleMinutes, 0) / 60.0, 2) AS IdleHours 
+      om.OperatorName
 
     FROM AssetMaster am 
 
@@ -54,17 +62,17 @@ async function getAssets(customerId, siteId) {
       ON ais.SiteID = sm.SiteID 
     
     LEFT JOIN OperatorMaster om
-    ON am.AssetID = om.AssetID
+      ON am.AssetID = om.AssetID
 
-    LEFT JOIN AssetDailyUsage ads 
-      ON am.AssetID = ads.AssetID 
-      AND ads.UsageDate = CAST(GETDATE() AS DATE) 
+    LEFT JOIN AssetLiveStatus als
+      ON am.AssetID = als.AssetID
+      AND am.CustomerID = als.CustomerID
 
     WHERE am.CustomerID = @CustomerID
       ${siteCondition}
 
     ORDER BY am.AssetID;
-  `);
+`);
 
   return result.recordset;
 }

@@ -280,12 +280,12 @@ export function AssetTable(Asset: AssetTableProps) {
                 >
                   Asset Type
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
                   Category
-                </TableCell>
+                </TableCell> */}
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -296,13 +296,25 @@ export function AssetTable(Asset: AssetTableProps) {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Status
+                  Operator
                 </TableCell>
                 <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Operator
+                  LastReporting Time
+                </TableCell>
+                 <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                 Speed
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
+                  Status
                 </TableCell>
                 <TableCell
                   isHeader
@@ -363,13 +375,21 @@ export function AssetTable(Asset: AssetTableProps) {
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.AssetTypeName}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.Category}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.SiteName}
                   </TableCell>
-
+                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {asset.OperatorName ?? "-"}
+                  </TableCell>
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {asset.LastReportingTime ?? "-"}
+                  </TableCell>
+                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {asset.SpeedKph ?? "-"}
+                  </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
@@ -383,9 +403,6 @@ export function AssetTable(Asset: AssetTableProps) {
                     >
                       {asset.Status}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.OperatorName ?? "-"}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.EngineHours}
