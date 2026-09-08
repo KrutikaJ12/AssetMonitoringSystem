@@ -606,10 +606,10 @@ export default function ReportDetails() {
 
           </table>
 
-        </div>
+        </div> 
 
       </div>
 
     </div>
-  );
-}
+  ); 
+} 

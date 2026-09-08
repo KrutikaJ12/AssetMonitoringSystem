@@ -109,6 +109,11 @@ export const adminMenu: NavItem[] = [
       path: "/admin/reports/daily-usage",
       pro: false,
     },
+    {
+      name: "Speed Violation Report",
+      path: "/admin/reports/speed-violation",
+      pro: false,
+    },
   ],
 },
   {
