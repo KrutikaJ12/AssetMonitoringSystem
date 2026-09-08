@@ -291,7 +291,7 @@ const location = useLocation();
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {site.endDate}
-                  </TableCell>
+                  </TableCell> 
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {site.duration}
                   </TableCell>
