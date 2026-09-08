@@ -142,31 +142,7 @@ const SpeedViolationReport = () => {
       <ReportFilter />
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="mt-5 mx-5 flex justify-start gap-6">
-          {hasPermission("REPORT_EXPORT") && (
-            <button
-              onClick={handleExport}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
-            >
-              <Download size={16} />
-              Export
-            </button>
-          )}
 
-          {hasPermission("REPORT_EXPORT") && (
-            <button
-              onClick={handlePdfExport}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
-            >
-              <Download size={16} />
-              Pdf
-            </button>
-          )}
-        </div>
-      </div>
-
-     {/* Table */}
-<div className=" w-full  mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
 
   {/* Table Header */}
   <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
@@ -176,8 +152,8 @@ const SpeedViolationReport = () => {
   </div>
 
         {/* Table */}
-        <div className="over flow-x-auto">
-          <table className="w-full table-auto min-w-[900px]">
+        <div className="overflow-x-auto">
+          <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
@@ -287,7 +263,7 @@ const SpeedViolationReport = () => {
     </table>
   </div>
 </div>
-    </div>
+</div>
   );
 };
 
