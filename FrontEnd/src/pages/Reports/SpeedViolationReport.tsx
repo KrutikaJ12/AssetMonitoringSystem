@@ -1,12 +1,62 @@
 import { useState } from "react";
 import DatePicker from "../../components/form/date-picker";
+import ReportFilter from "../../components/Reports/ReportFilter";
+import { Download } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
+interface Reports {
+  siteName: string;
+  vehicaleNo: string;
+  startDate: string;
+  endDate: string;
+  duration: string;
+}
+
+const reportsData: Reports[] = [
+  {
+    siteName: "Mumbai",
+    vehicaleNo: "MH43CK3346",
+    startDate: "2026-06-15 08:00 AM",
+    endDate: "2026-06-15 05:30 PM",
+    duration: "9h 30m",
+  },
+  {
+    siteName: "Pune",
+    vehicaleNo: "MH12AB5678",
+    startDate: "2026-06-14 07:45 AM",
+    endDate: "2026-06-14 04:15 PM",
+    duration: "8h 30m",
+  },
+  {
+    siteName: "Nashik",
+    vehicaleNo: "MH15XY9087",
+    startDate: "2026-06-13 09:00 AM",
+    endDate: "2026-06-13 06:00 PM",
+    duration: "9h",
+  },
+  {
+    siteName: "Nagpur",
+    vehicaleNo: "MH31PQ1122",
+    startDate: "2026-06-12 08:30 AM",
+    endDate: "2026-06-12 05:00 PM",
+    duration: "8h 30m",
+  },
+  {
+    siteName: "Mumbai",
+    vehicaleNo: "MH01ZZ7788",
+    startDate: "2026-06-11 07:00 AM",
+    endDate: "2026-06-11 03:30 PM",
+    duration: "8h 30m",
+  },
+];
 const SpeedViolationReport = () => {
   const [assetId, setAssetId] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [speedLimit, setSpeedLimit] = useState("");
-
+  const { hasPermission } = useAuth();
   const handleGenerate = () => {
     console.log({
       assetId,
@@ -14,6 +64,65 @@ const SpeedViolationReport = () => {
       endDate,
       speedLimit,
     });
+  };
+
+  // ================= xL EXPORT FUNCTION =================
+  const handleExport = () => {
+    const headers = [
+      "Site Name",
+      "Vehicle No",
+      "Start Date",
+      "End Date",
+      "Duration",
+    ];
+
+    const csvData = reportsData
+      .map((rdata) =>
+        [
+          rdata.siteName,
+          rdata.vehicaleNo,
+          rdata.startDate,
+          rdata.endDate,
+          rdata.duration,
+        ].join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob([[headers.join(","), csvData].join("\n")], {
+      type: "text/csv",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "reports_data.csv";
+    link.click();
+
+    // setToastType("success");
+    // setToastMessage("Data exported successfully!");
+    // setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // ================= PDF EXPORT FUNCTION =================
+  const handlePdfExport = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("Vehicle Reports", 14, 15);
+
+    autoTable(doc, {
+      startY: 25,
+      head: [["Site Name", "Vehicle No", "Start Date", "End Date", "Duration"]],
+      body: reportsData.map((item) => [
+        item.siteName,
+        item.vehicaleNo,
+        item.startDate,
+        item.endDate,
+        item.duration,
+      ]),
+      theme: "grid",
+    });
+
+    doc.save("Vehicle_Reports.pdf");
   };
 
   return (
@@ -30,84 +139,30 @@ const SpeedViolationReport = () => {
       </div>
 
       {/* Filter Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5 lg:items-end">
-
-          {/* Asset ID */}
-          <div className="w-full">
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Asset ID
-            </label>
-
-            <select
-              value={assetId}
-              onChange={(e) => setAssetId(e.target.value)}
-              className="h-11 mb-5 w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-            >
-              <option value="">Select Asset ID</option>
-              <option value="ASSET-001">ASSET-001</option>
-              <option value="ASSET-002">ASSET-002</option>
-              <option value="ASSET-003">ASSET-003</option>
-              <option value="ASSET-004">ASSET-004</option>
-              <option value="ASSET-005">ASSET-005</option>
-            </select>
-          </div>
-
-          {/* Start Date */}
-          <div className="w-full">
-            <DatePicker
-              id="start-date"
-              label="From"
-              placeholder="Start date"
-              mode="single"
-              onChange={(dates) => setStartDate(dates[0])}
-            />
-          </div>
-
-          {/* End Date */}
-          <div className="w-full">
-            <DatePicker
-              id="end-date"
-              label="To"
-              placeholder="End date"
-              mode="single"
-              onChange={(dates) => setEndDate(dates[0])}
-            />
-          </div>
-
-          {/* Speed Limit */}
-          <div className="w-full">
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Speed Limit
-            </label>
-
-            <input
-              type="number"
-              min="0"
-              value={speedLimit}
-              onChange={(e) => setSpeedLimit(e.target.value)}
-              placeholder="Enter Speed Limit"
-              className="h-11 mb-5 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
-            />
-          </div>
-
-          {/* Generate Button */}
-          <div className="w-full">
-            <button
-              type="button"
-              onClick={handleGenerate}
-              className="h-11 mb-5 w-full rounded-lg bg-brand-500 px-6 text-sm font-medium text-white transition hover:bg-brand-600"
-            >
-              Generate
-            </button>
-          </div>
-
-        </div>
-      </div>
-
+      <ReportFilter />
       {/* Table */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="mt-5 mx-5 flex justify-start gap-6">
+          {hasPermission("REPORT_EXPORT") && (
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+            >
+              <Download size={16} />
+              Export
+            </button>
+          )}
 
+          {hasPermission("REPORT_EXPORT") && (
+            <button
+              onClick={handlePdfExport}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+            >
+              <Download size={16} />
+              Pdf
+            </button>
+          )}
+        </div>
         {/* Table Header */}
         <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
@@ -116,11 +171,10 @@ const SpeedViolationReport = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
+        <div className="over flow-x-auto">
+          <table className="w-full table-auto min-w-[900px]">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
-
                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
                   Sr No
                 </th>
@@ -148,13 +202,11 @@ const SpeedViolationReport = () => {
                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500">
                   Status
                 </th>
-
               </tr>
             </thead>
 
             <tbody>
               <tr className="border-b border-gray-100 dark:border-gray-800">
-
                 <td className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
                   1
                 </td>
@@ -184,7 +236,6 @@ const SpeedViolationReport = () => {
                     Violation
                   </span>
                 </td>
-
               </tr>
             </tbody>
           </table>

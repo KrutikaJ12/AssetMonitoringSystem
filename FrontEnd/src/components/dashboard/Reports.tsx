@@ -15,6 +15,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useAuth } from "../../hooks/useAuth";
 import { Link, useLocation } from "react-router";
+import ReportFilter from "../Reports/ReportFilter";
 
 interface Reports {
   siteName: string;
@@ -62,46 +63,43 @@ const reportsData: Reports[] = [
   },
 ];
 
+// ================= xL EXPORT FUNCTION =================
+const handleExport = () => {
+  const headers = [
+    "Site Name",
+    "Vehicle No",
+    "Start Date",
+    "End Date",
+    "Duration",
+  ];
 
- // ================= xL EXPORT FUNCTION =================
- const handleExport = () => {
-      const headers = [
-        "Site Name",
-        "Vehicle No",
-        "Start Date",
-        "End Date",
-        "Duration",
-      ];
+  const csvData = reportsData
+    .map((rdata) =>
+      [
+        rdata.siteName,
+        rdata.vehicaleNo,
+        rdata.startDate,
+        rdata.endDate,
+        rdata.duration,
+      ].join(","),
+    )
+    .join("\n");
 
-      const csvData = reportsData
-        .map((rdata) =>
-          [
-            rdata.siteName,
-            rdata.vehicaleNo,
-            rdata.startDate,
-            rdata.endDate,
-            rdata.duration,
-          ].join(","),
-        )
-        .join("\n");
+  const blob = new Blob([[headers.join(","), csvData].join("\n")], {
+    type: "text/csv",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "reports_data.csv";
+  link.click();
 
-      const blob = new Blob([[headers.join(","), csvData].join("\n")], {
-        type: "text/csv",
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "reports_data.csv";
-      link.click();
+  // setToastType("success");
+  // setToastMessage("Data exported successfully!");
+  // setTimeout(() => setToastMessage(null), 3000);
+};
 
-      // setToastType("success");
-      // setToastMessage("Data exported successfully!");
-      // setTimeout(() => setToastMessage(null), 3000);
-    };
-
-
-
-    // ================= PDF EXPORT FUNCTION =================
+// ================= PDF EXPORT FUNCTION =================
 const handlePdfExport = () => {
   const doc = new jsPDF();
 
@@ -125,30 +123,27 @@ const handlePdfExport = () => {
 };
 // =======================================================
 
-
-
-
 const Reports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
   // Displays the heading based on the selected report type.
-const location = useLocation();
+  const location = useLocation();
 
   const { hasPermission } = useAuth();
 
   const reportHeading =
-  location.pathname === "/admin/reports/daily-usage"
-    ? "Assets Daily Usage Reports"
-    : "Assets Summary Reports";
+    location.pathname === "/admin/reports/daily-usage"
+      ? "Assets Daily Usage Reports"
+      : "Assets Summary Reports";
 
   return (
     <div>
       {/*Displays the selected report heading at the top of the Reports page.*/}
-       <h1 className="mb-5 ml-3 text-2xl font-semibold text-gray-800 dark:text-white">
+      <h1 className="mb-5 ml-3 text-2xl font-semibold text-gray-800 dark:text-white">
         {reportHeading}
       </h1>
-      <div className="flex w-full gap-5">
+      {/* <div className="flex w-full gap-5">
         <div className="flex flex-col gap-1  ml-3">
           <label>Asset ID:</label>
           <input
@@ -174,71 +169,74 @@ const location = useLocation();
         <Button className="h-11 mt-6 " >
           Generate
         </Button>
-      </div>
-      <SectionCard>
-        <div className="mb-5 flex justify-start gap-6">
-          {hasPermission("REPORT_EXPORT") && (
-             <button
-            onClick={handleExport}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
-        >
-          <Download size={16} />
-          Export
-        </button>
-          )}
-          
-        {hasPermission("REPORT_EXPORT") && (
-        <button
-  onClick={handlePdfExport}
-  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
->
-  <Download size={16} />
-  Pdf
-</button>)}
-        </div>
+      </div> */}
+      <ReportFilter />
+      <div className=" mt-6">
+        <SectionCard>
+          <div className="mb-5 flex justify-start gap-6">
+            {hasPermission("REPORT_EXPORT") && (
+              <button
+                onClick={handleExport}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+              >
+                <Download size={16} />
+                Export
+              </button>
+            )}
 
-        <div className="max-w-full overflow-x-auto">
-          <Table>
-            {/* Table Header */}
-            <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
-              <TableRow>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Site Name
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Asset ID
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Start Date
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  End Date
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Duration
-                </TableCell>
-                {/* <TableCell
+            {hasPermission("REPORT_EXPORT") && (
+              <button
+                onClick={handlePdfExport}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+              >
+                <Download size={16} />
+                Pdf
+              </button>
+            )}
+          </div>
+
+          <div className="max-w-full overflow-x-auto">
+            <Table>
+              {/* Table Header */}
+              <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
+                <TableRow>
+                  <TableCell
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Site Name
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Asset ID
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Start Date
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    End Date
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Duration
+                  </TableCell>
+                  {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
                   View
                 </TableCell> */}
-                {/* <TableCell
+                  {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
@@ -256,16 +254,16 @@ const location = useLocation();
                 >
                   View
                 </TableCell> */}
-              </TableRow>
-            </TableHeader>
+                </TableRow>
+              </TableHeader>
 
-            {/* Table Body */}
+              {/* Table Body */}
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {reportsData.map((site) => (
-                <TableRow className="">
-                  {/* <TableCell className="py-3"> */}
-                  {/* <div className="flex items-center gap-3">
+              <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {reportsData.map((site) => (
+                  <TableRow className="">
+                    {/* <TableCell className="py-3"> */}
+                    {/* <div className="flex items-center gap-3">
                       {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
                       <img
                         src={site.image}
@@ -273,30 +271,30 @@ const location = useLocation();
                         alt={site.name}
                       />
                     </div> */}
-                  {/* </div>  */}
-                  {/* </TableCell> */}
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.siteName}
-                  </TableCell>
-           <TableCell className="py-3 text-theme-sm">
-  <Link
-    to={`/admin/reports/${site.vehicaleNo}`}
-    className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-  >
-    {site.vehicaleNo}
-  </Link>
-</TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.startDate}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.endDate}
-                  </TableCell> 
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.duration}
-                  </TableCell>
+                    {/* </div>  */}
+                    {/* </TableCell> */}
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      {site.siteName}
+                    </TableCell>
+                    <TableCell className="py-3 text-theme-sm">
+                      <Link
+                        to={`/admin/reports/${site.vehicaleNo}`}
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        {site.vehicaleNo}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      {site.startDate}
+                    </TableCell>
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      {site.endDate}
+                    </TableCell>
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      {site.duration}
+                    </TableCell>
 
-                  {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
@@ -310,15 +308,16 @@ const location = useLocation();
                       {site.status}
                     </Badge>
                   </TableCell> */}
-                  {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Eye />
                   </TableCell> */}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </SectionCard>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </SectionCard>
+      </div>
     </div>
   );
 };
