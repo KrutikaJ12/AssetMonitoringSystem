@@ -77,7 +77,7 @@ const ReportFilter = () => {
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  className="h-11 mb-5 w-full rounded-lg bg-red-400 px-6 text-sm font-medium text-white transition hover:bg-brand-600"
+                  className="h-11 mb-5 w-full rounded-lg bg-red-400 px-6 text-sm font-medium text-white transition hover:bg-red-300"
                 >
                   Generate
                 </button>
