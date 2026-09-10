@@ -6,9 +6,9 @@ import autoTable from "jspdf-autotable";
 // =======================================================
 // SPEED VIOLATION DATA TYPE
 // =======================================================
+
 interface SpeedViolationData {
   assetId: string;
-  department: string;
   date: string;
   time: string;
   location: string;
@@ -17,56 +17,62 @@ interface SpeedViolationData {
   status: string;
   driverName: string;
 }
- // =====================================================
-  // DUMMY DATA
-  // Replace this with your API data later
-  // =====================================================
-  const reportsData: SpeedViolationData[] = [
-    {
-      assetId: "ASSET-001",
-      department: "Logistics",
-      date: "08-09-2026",
-      time: "10:30 AM",
-      location: "Mumbai",
-      speed: "85 km/h",
-      speedLimit: "60 km/h",
-      status: "Violation",
-      driverName: "Rahul Sharma",
-    },
-    {
-      assetId: "ASSET-002",
-      department: "Transport",
-      date: "08-09-2026",
-      time: "11:15 AM",
-      location: "Thane",
-      speed: "92 km/h",
-      speedLimit: "60 km/h",
-      status: "Violation",
-      driverName: "Amit Kumar",
-    },
-    {
-      assetId: "ASSET-003",
-      department: "Operations",
-      date: "08-09-2026",
-      time: "12:45 PM",
-      location: "Navi Mumbai",
-      speed: "78 km/h",
-      speedLimit: "60 km/h",
-      status: "Violation",
-      driverName: "Vikas Singh",
-    },
-  ];
+
+// =======================================================
+// DUMMY DATA
+// Replace this with your API data later
+// =======================================================
+
+const reportsData: SpeedViolationData[] = [
+  {
+    assetId: "ASSET-001",
+
+    date: "08-09-2026",
+    time: "10:30 AM",
+    location: "Mumbai",
+    speed: "85 km/h",
+    speedLimit: "60 km/h",
+    status: "Violation",
+    driverName: "Rahul Sharma",
+  },
+  {
+    assetId: "ASSET-002",
+
+    date: "08-09-2026",
+    time: "11:15 AM",
+    location: "Thane",
+    speed: "92 km/h",
+    speedLimit: "60 km/h",
+    status: "Violation",
+    driverName: "Amit Kumar",
+  },
+  {
+    assetId: "ASSET-003",
+
+    date: "08-09-2026",
+    time: "12:45 PM",
+    location: "Navi Mumbai",
+    speed: "78 km/h",
+    speedLimit: "60 km/h",
+    status: "Violation",
+    driverName: "Vikas Singh",
+  },
+];
+
+// =======================================================
+// COMPONENT
+// =======================================================
 
 const SpeedViolationReport = () => {
   const [assetId, setAssetId] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [speedLimit, setSpeedLimit] = useState("");
- 
 
   // =====================================================
   // GENERATE REPORT
   // =====================================================
+
   const handleGenerate = () => {
     console.log({
       assetId,
@@ -79,11 +85,11 @@ const SpeedViolationReport = () => {
   // =====================================================
   // CSV EXPORT FUNCTION
   // =====================================================
+
   const handleExport = () => {
     const headers = [
       "Sr No",
       "Asset ID",
-      "Department",
       "Date",
       "Time",
       "Location",
@@ -97,7 +103,7 @@ const SpeedViolationReport = () => {
       [
         index + 1,
         item.assetId,
-        item.department,
+
         item.date,
         item.time,
         item.location,
@@ -106,7 +112,7 @@ const SpeedViolationReport = () => {
         item.status,
         item.driverName,
       ]
-        .map((value) => `"${value ?? ""}"`)
+        .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
         .join(","),
     );
 
@@ -135,6 +141,7 @@ const SpeedViolationReport = () => {
   // =====================================================
   // PDF EXPORT FUNCTION
   // =====================================================
+
   const handlePdfExport = () => {
     const doc = new jsPDF("landscape");
 
@@ -150,7 +157,6 @@ const SpeedViolationReport = () => {
         [
           "Sr No",
           "Asset ID",
-          "Department",
           "Date",
           "Time",
           "Location",
@@ -164,7 +170,6 @@ const SpeedViolationReport = () => {
       body: reportsData.map((item, index) => [
         index + 1,
         item.assetId,
-        item.department,
         item.date,
         item.time,
         item.location,
@@ -182,21 +187,39 @@ const SpeedViolationReport = () => {
         overflow: "linebreak",
       },
 
+      // PDF TABLE HEADER CENTER
       headStyles: {
         fontSize: 8,
         fontStyle: "bold",
+        halign: "center",
       },
     });
 
     doc.save("Speed_Violation_Report.pdf");
   };
 
+  // =====================================================
+  // TABLE CLASSES
+  // =====================================================
+
+  // ONLY TABLE HEADINGS ARE CENTERED
+  const headerClass =
+    "whitespace-nowrap px-1 py-3 text-center text-[9px] font-medium uppercase text-gray-500 dark:text-gray-400";
+
+  // TABLE BODY REMAINS NORMAL / LEFT ALIGNED
+  const cellClass =
+    "px-2 py-3 text-center text-xs leading-tight break-words text-gray-600 dark:text-gray-400";
+
+  // =====================================================
+  // UI
+  // =====================================================
+
   return (
     <div className="w-full p-4 md:p-6">
-
       {/* =================================================
           PAGE HEADER
       ================================================== */}
+
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
           Speed Violation Report
@@ -207,26 +230,33 @@ const SpeedViolationReport = () => {
         </p>
       </div>
 
-      {/* Filter Card */}
-      <ReportFilter />
-      {/* Table */}
+      {/* =================================================
+          FILTER
+      ================================================== */}
+
+      <ReportFilter showSpeedLimit={true} />
+
+      {/* =================================================
+          TABLE CARD
+      ================================================== */}
+
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-
-
         {/* =================================================
             TABLE HEADER
         ================================================== */}
-        <div className="flex w-full items-center justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
 
+        <div className="flex w-full items-center justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
           {/* LEFT - TITLE */}
+
           <h2 className="whitespace-nowrap text-lg font-semibold text-gray-800 dark:text-white">
             Speed Violation Records
           </h2>
 
           {/* RIGHT - EXPORT BUTTONS */}
-          <div className="flex shrink-0 items-center gap-3">
 
+          <div className="flex shrink-0 items-center gap-3">
             {/* Export PDF */}
+
             <button
               type="button"
               onClick={handlePdfExport}
@@ -236,6 +266,7 @@ const SpeedViolationReport = () => {
             </button>
 
             {/* Export CSV */}
+
             <button
               type="button"
               onClick={handleExport}
@@ -243,119 +274,64 @@ const SpeedViolationReport = () => {
             >
               Export CSV
             </button>
-
           </div>
         </div>
 
         {/* =================================================
             TABLE
         ================================================== */}
+
         <div className="w-full overflow-hidden">
-
           <table className="w-full table-auto border-collapse">
-
             {/* =================================================
                 TABLE HEADER
             ================================================== */}
+
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Sr No
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Asset ID
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Department
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Date
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Time
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Location
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Speed
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Speed Limit
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Status
-                </th>
-
-                <th className="whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Driver Name
-                </th>
-
+                <th className={headerClass}>Sr No</th>
+                <th className={headerClass}>Asset ID</th>
+                <th className={headerClass}>Date</th>
+                <th className={headerClass}>Time</th>
+                <th className={headerClass}>Location</th>
+                <th className={headerClass}>Speed</th>
+                <th className={headerClass}>Speed Limit</th>
+                <th className={headerClass}>Status</th>
+                <th className={headerClass}>Driver Name</th>
               </tr>
             </thead>
 
             {/* =================================================
                 TABLE BODY
             ================================================== */}
-            <tbody>
 
+            <tbody>
               {reportsData.map((item, index) => (
                 <tr
                   key={`${item.assetId}-${index}`}
                   className="border-b border-gray-100 dark:border-gray-800"
                 >
+                  <td className={cellClass}>{index + 1}</td>
 
-                  {/* Sr No */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-700 dark:text-gray-300">
-                    {index + 1}
-                  </td>
-
-                  {/* Asset ID */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs font-medium text-gray-800 dark:text-white">
+                  <td
+                    className={`${cellClass} font-medium text-gray-800 dark:text-white`}
+                  >
                     {item.assetId}
                   </td>
 
-                  {/* Department */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-600 dark:text-gray-400">
-                    {item.department}
-                  </td>
+                  <td className={cellClass}>{item.date}</td>
+                  <td className={cellClass}>{item.time}</td>
+                  <td className={cellClass}>{item.location}</td>
 
-                  {/* Date */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-600 dark:text-gray-400">
-                    {item.date}
-                  </td>
-
-                  {/* Time */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-600 dark:text-gray-400">
-                    {item.time}
-                  </td>
-
-                  {/* Location */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-600 dark:text-gray-400">
-                    {item.location}
-                  </td>
-
-                  {/* Speed */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs font-medium text-gray-800 dark:text-white">
+                  <td
+                    className={`${cellClass} font-medium text-gray-800 dark:text-white`}
+                  >
                     {item.speed}
                   </td>
 
-                  {/* Speed Limit */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-600 dark:text-gray-400">
-                    {item.speedLimit}
-                  </td>
+                  <td className={cellClass}>{item.speedLimit}</td>
 
-                  {/* Status */}
-                  <td className="whitespace-nowrap px-3 py-4">
+                  <td className="px-2 py-2 text-center">
                     <span
                       className={`inline-flex rounded-full px-2 py-1 text-[10px] font-medium ${
                         item.status === "Violation"
@@ -367,16 +343,14 @@ const SpeedViolationReport = () => {
                     </span>
                   </td>
 
-                  {/* Driver Name */}
-                  <td className="whitespace-nowrap px-3 py-4 text-xs font-medium text-gray-800 dark:text-white">
+                  <td
+                    className={`${cellClass} font-medium text-gray-800 dark:text-white`}
+                  >
                     {item.driverName}
                   </td>
-
                 </tr>
               ))}
-
             </tbody>
-
           </table>
         </div>
       </div>

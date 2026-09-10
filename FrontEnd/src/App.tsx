@@ -33,6 +33,9 @@ import UsersPage from "./pages/Users/UsersPage";
 import OperatorsPage from "./pages/Operators/OperatorsPage";
 import ReportDetails from "./pages/Reports/ReportDetails";
 import SpeedViolationReport from "./pages/Reports/SpeedViolationReport";
+import StartStopReport from "./pages/Reports/StartStopReport";
+import MovementReport from "./pages/Reports/MovementReport";
+import StopReport from "./pages/Reports/StopReport";
 
 export default function App() {
   return (
@@ -158,18 +161,50 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
+            {/* Route for Start-Stop Report */}
+            <Route
+              path="/admin/reports/startstopreport"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <StartStopReport />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+            {/* Route for Movement Report */}
+            <Route
+              path="/admin/reports/movementreport"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <MovementReport />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+            {/* Route for Stop Report */}
+            <Route
+              path="/admin/reports/stopreport"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <StopReport />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
             {/* Route for Speed Violation Report */}
-<Route
-  path="/admin/reports/SpeedViolationReport"
-  element={
-    <ProtectedRoute>
-      <PermissionRoute permission="REPORT_VIEW">
-        <SpeedViolationReport />
-      </PermissionRoute>
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="/admin/reports/SpeedViolationReport"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="REPORT_VIEW">
+                    <SpeedViolationReport />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/users"
               element={
