@@ -418,73 +418,41 @@ export default function Home() {
      DASHBOARD DATA
   ======================================================= */
 
+  console.log('dashboarddata',data)
   const assetStatusLabels =
-    data?.assetStatus?.map(
-      (asset) => asset.status
-    ) ?? [];
-
+    data?.data?.assetStatus?.map((asset) => asset.status) ?? [];
   const assetStatusSeries =
-    data?.assetStatus?.map(
-      (asset) => asset.count
-    ) ?? [];
-
-  const assetTypes =
-    data?.assetTypes?.map(
-      (asset) => asset.assetType
-    ) ?? [];
-
-  const assetTypesSeries =
-    data?.assetTypes?.map(
-      (asset) => asset.count
-    ) ?? [];
-
-  /* =======================================================
-     ADMIN METRICS
-  ======================================================= */
-
+    data?.data?.assetStatus?.map((asset) => asset.count) ?? [];
+  const assetTypes = data?.data?.assetTypes?.map((asset) => asset.assetType) ?? [];
+  const assetTypesSeries = data?.data?.assetTypes?.map((asset) => asset.count) ?? [];
   const adminMetrics = [
     {
       title: "Total Assets",
-
-      value:
-        data?.summary?.totalAssets ?? 0,
-
+      value: data?.data?.summary?.totalAssets ?? 0,
       icon: <GroupIcon />,
     },
 
     {
       title: "Active Assets",
-
-      value:
-        data?.summary?.activeAssets ?? 0,
-
+      value: data?.data?.summary?.runningAssets ?? 0,
       icon: <GroupIcon />,
     },
 
     {
       title: "Idle Assets",
-
-      value:
-        data?.summary?.idleAssets ?? 0,
-
+      value: data?.data?.summary?.idleAssets ?? 0,
       icon: <GroupIcon />,
     },
 
     {
       title: "Total Sites",
-
-      value:
-        data?.summary?.totalSites ?? 0,
-
+      value:data?.data?.summary?.totalSites ?? 0,
       icon: <GroupIcon />,
     },
 
     {
       title: "Active Operators",
-
-      value:
-        data?.summary?.activeOperators ?? 0,
-
+      value: data?.data?.summary?.activeOperators ?? 0,
       icon: <GroupIcon />,
     },
   ];
@@ -716,18 +684,8 @@ export default function Home() {
                   height={300}
                 />
               </SectionCard>
-
-              {/* ===========================================
-                  RECENT ALERTS
-              =========================================== */}
-
-              <SectionCard
-                title="Recents Alerts"
-                actionText="View Alerts"
-              >
-                <RecentAlerts
-                  data={data.recentAlerts}
-                />
+              <SectionCard title="Recents Alerts" actionText="View Alerts">
+                <RecentAlerts data={data.data.recentAlerts}/>
               </SectionCard>
             </div>
 
