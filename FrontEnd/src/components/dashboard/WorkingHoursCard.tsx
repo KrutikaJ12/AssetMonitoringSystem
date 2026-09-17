@@ -59,14 +59,28 @@ export default function WorkingHoursCard({data}:any) {
     },
     labels: ["Progress"],
   };
-  let topAssets=data?.topAssets;
-  const maxHours = Math.max(
-  ...topAssets.map((asset) => asset.workingHours)
+//   let topAssets=data?.topAssets;
+//   const maxHours = Math.max(
+//   ...topAssets.map((asset) => asset.workingHours)
+// );
+//    topAssets=topAssets.map((asset)=>({
+//     ...asset,
+//      percentage: (asset.workingHours / maxHours) * 100,
+//    }))
+   let topAssets = data || [];
+
+const maxHours = Math.max(
+  ...topAssets.map((asset) => asset.workingHours),
+  0
 );
-   topAssets=topAssets.map((asset)=>({
-    ...asset,
-     percentage: (asset.workingHours / maxHours) * 100,
-   }))
+
+ topAssets = topAssets.map((asset) => ({
+  ...asset,
+  percentage:
+    maxHours > 0
+      ? (asset.workingHours / maxHours) * 100
+      : 0,
+}));
   return (
     <div className="flex justify-evenly w-full">
       <div className=" border shadow-xl shadow-gray-200 rounded-xl p-8">
