@@ -182,7 +182,7 @@ export default function SiteSummary({data}:SiteSummaryProps) {
                   {site.operators}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {site.totalFuelConsumed}
+                  {site.fuelConsumption}
                 </TableCell>
                 {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   <Badge
@@ -203,7 +203,7 @@ export default function SiteSummary({data}:SiteSummaryProps) {
                     <div className="h-2 w-20 rounded-full bg-gray-200">
                       <div
                         className="h-2 rounded-full bg-red-500"
-                        style={{ width: `${site.utilizationPercentage}%` }}
+                        style={{ width: `${site.utilization}%` }}
                       />
                     </div>
 
