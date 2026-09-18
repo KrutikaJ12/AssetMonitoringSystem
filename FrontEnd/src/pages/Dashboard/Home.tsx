@@ -240,7 +240,7 @@ export default function Home() {
 
     const intervalId = window.setInterval(() => {
       checkNotifications();
-    }, 1000);
+    }, 30000);
 
     /* =====================================================
        CLEANUP
@@ -695,7 +695,7 @@ export default function Home() {
 
             <SectionCard title="Working Hours">
               <WorkingHoursCard
-                data={data.workingHours}
+                data={data.data.workingHours}
               />
             </SectionCard>
 
