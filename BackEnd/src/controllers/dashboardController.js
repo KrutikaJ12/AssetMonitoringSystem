@@ -87,6 +87,10 @@ async function getSummary(req, res, next) {
       req.auth.userId,
       req.auth.customerId,
     );
+    // const siteSummary = await dashboardRepository.getSiteSummary(
+    //   req.auth.userId,
+    //   req.auth.customerId,
+    // );
     return res.status(200).json({
       success: true,
 
@@ -125,6 +129,7 @@ async function getSummary(req, res, next) {
             engineHours: Number(summary?.TodayEngineHours || 0),
             workingHours: Number(summary?.TodayWorkingHours || 0),
             idleHours: Number(summary?.TodayIdleHours || 0),
+            stoppedHours: Number(summary?.TodayStoppedHours || 0),
           },
         },
         assetTypes: assetTypes.map((item) => ({
@@ -140,6 +145,17 @@ async function getSummary(req, res, next) {
           alertMessage: alert.AlertMessage,
           alertDateTime: alert.AlertDateTime,
         })),
+        // siteSummary: siteSummary.map((site) => ({
+        //   siteId: site.SiteID,
+        //   siteName: site.SiteName,
+        //   totalAssets: Number(site.TotalAssets || 0),
+        //   activeAssets: Number(site.ActiveAssets || 0),
+        //   idleAssets: Number(site.IdleAssets || 0),
+        //   operators: Number(site.Operators || 0),
+        //   maintenance: 0,
+        //   fuelConsumption: 0,
+        //   utilization: 0,
+        // })),
       },
     });
   } catch (error) {
