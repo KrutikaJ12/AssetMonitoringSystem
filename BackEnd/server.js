@@ -14,6 +14,7 @@ const opratorRoutes = require("./src/routes/operatorRoutes");
 const assetRoutes = require("./src/routes/assetRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const { connectDB } = require("./src/config/db")
+const reportRoutes = require("./src/routes/reportRoutes");
 // connectDB();
 
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api",siteRoutes)
 app.use("/api",opratorRoutes)
 app.use("/api",assetRoutes);
 app.use("/api",userRoutes)
+app.use("/api/reports", reportRoutes);
 const PORT = process.env.PORT;
 
 const startServer = async () => {
