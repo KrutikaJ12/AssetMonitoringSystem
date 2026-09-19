@@ -695,7 +695,7 @@ export default function Home() {
 
             <SectionCard title="Working Hours">
               <WorkingHoursCard
-                data={data.workingHours}
+                data={data.data.workingHours}
               />
             </SectionCard>
 
@@ -725,7 +725,7 @@ export default function Home() {
 
         <div className="col-span-12 mt-4 xl:col-span-7">
           <SiteSummary
-            data={data.siteSummary}
+            data={data.data.siteSummary}
           />
         </div>
       </div>
