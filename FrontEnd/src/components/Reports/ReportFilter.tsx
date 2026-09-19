@@ -3,10 +3,12 @@ import DatePicker from "../form/date-picker";
 
 interface ReportFilterProps {
   showSpeedLimit?: boolean;
+  showReportType?: boolean;
 }
 
-const ReportFilter = ({ showSpeedLimit = false }: ReportFilterProps) => {
+const ReportFilter = ({ showSpeedLimit = false,showReportType = false, }: ReportFilterProps) => {
   const [assetId, setAssetId] = useState("");
+  const [reportType, setReportType] = useState("day");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [speedLimit, setSpeedLimit] = useState("");
@@ -23,10 +25,32 @@ const ReportFilter = ({ showSpeedLimit = false }: ReportFilterProps) => {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       <div
-        className={`grid grid-cols-1 gap-4 lg:items-end ${
-          showSpeedLimit ? "lg:grid-cols-5" : "lg:grid-cols-4"
+       className={`grid grid-cols-1 gap-4 lg:items-end ${
+          showSpeedLimit && showReportType
+            ? "lg:grid-cols-6"
+            : showSpeedLimit || showReportType
+              ? "lg:grid-cols-5"
+              : "lg:grid-cols-4"
         }`}
       >
+         {/* Report Type */}
+        {showReportType && (
+          <div className="w-full">
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Report Type
+            </label>
+
+            <select
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value)}
+              className="mb-5 h-11 w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            >
+              <option value="day">Day-wise</option>
+              <option value="week">Weekly</option>
+              <option value="month">Monthly</option>
+            </select>
+          </div>
+        )}
         {/* Asset ID */}
         <div className="w-full">
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">

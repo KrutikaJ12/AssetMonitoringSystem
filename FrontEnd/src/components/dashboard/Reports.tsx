@@ -170,7 +170,7 @@ const Reports = () => {
           Generate
         </Button>
       </div> */}
-      <ReportFilter />
+      <ReportFilter showReportType />
       <div className=" mt-6">
         <SectionCard>
           <div className="mb-5 flex justify-start gap-6">
