@@ -725,7 +725,7 @@ export default function Home() {
 
         <div className="col-span-12 mt-4 xl:col-span-7">
           <SiteSummary
-            data={data.siteSummary}
+            data={data.data.siteSummary}
           />
         </div>
       </div>
