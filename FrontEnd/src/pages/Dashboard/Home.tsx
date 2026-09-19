@@ -240,7 +240,7 @@ export default function Home() {
 
     const intervalId = window.setInterval(() => {
       checkNotifications();
-    }, 1000);
+    }, 30000);
 
     /* =====================================================
        CLEANUP
