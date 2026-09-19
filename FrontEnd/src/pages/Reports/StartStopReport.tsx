@@ -4,7 +4,7 @@ import ReportFilter from "../../components/Reports/ReportFilter";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import { useStopReports } from "../../hooks/useReports";
+import { useStartStopReports } from "../../hooks/useReports";
 
 // =======================================================
 // STOP REPORT DATA TYPE
@@ -43,8 +43,7 @@ const StartStopReport= () => {
     isLoading,
     isError,
     error,
-  } = useStopReports();
-
+  } = useStartStopReports();
   // =====================================================
   // API RESPONSE MAPPING
   // =====================================================
@@ -80,8 +79,7 @@ const StartStopReport= () => {
     driverName: item.DriverName ?? "",
   }));
 
-  console.log("data");
-  console.log("STOP REPORT DATA:", reportsData);
+  console.log("Start-STOP REPORT DATA:", reportsData);
 
   // =====================================================
   // GENERATE REPORT
