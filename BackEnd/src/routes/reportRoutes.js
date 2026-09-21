@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
+    getAssetSummaryReports,
     getSpeedViolationReports,
     getStartStopReports,
     getMovementReports,
@@ -11,6 +12,12 @@ const {
 
 const authenticateToken = require("../middleware/authenticateToken");
 
+//Asset-Summary Report
+router.post(
+    "/assets-summary",
+    authenticateToken,
+    getAssetSummaryReports
+);
 
 // Speed Violation Report
 router.get(

@@ -1,5 +1,30 @@
 const reportService = require("../services/reportService");
+// ======================================================
+// ASSET SUMMARY REPORT
+// ======================================================
 
+async function getAssetSummaryReports(req, res) {
+    try {
+
+        const reports = await reportService.getAssetSummaryReports(
+            req.body
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: reports
+        });
+
+    } catch (error) {
+
+        console.error("Get asset summary reports error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to fetch asset summary reports."
+        });
+    }
+}
 
 // ======================================================
 // SPEED VIOLATION REPORT
@@ -109,5 +134,6 @@ module.exports = {
     getSpeedViolationReports,
     getStartStopReports,
     getMovementReports,
-    getStopReports
+    getStopReports,
+    getAssetSummaryReports
 };
