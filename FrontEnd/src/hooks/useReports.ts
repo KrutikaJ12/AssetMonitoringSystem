@@ -1,13 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
     getSpeedViolationReports,
     getStartStopReports,
     getMovementReports,
     getStopReports,
+    getAssetSummaryReports,
 } from "../api/reportsApi";
 
-
+// Asset Summary Report
+export const useAssetSummaryReports = () => {
+    return useMutation({
+        mutationFn: getAssetSummaryReports,
+    });
+};
 // Speed Violation Report
 export const useSpeedViolationReports = () => {
     return useQuery({

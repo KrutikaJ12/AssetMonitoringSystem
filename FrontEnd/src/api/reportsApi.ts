@@ -1,5 +1,18 @@
 import { httpRequest, HttpMethods } from "../services";
 
+// Asset Summary Report
+export const getAssetSummaryReports = (data: {
+    assetId: number;
+    fromDate: string;
+    toDate: string;
+    reportType: "day" | "week" | "month";
+}) => {
+    return httpRequest({
+        url: "/reports/assets-summary",
+        method: HttpMethods.POST,
+        payload:data,
+    });
+};
 // Speed Violation Report
 export const getSpeedViolationReports = () => {
     return httpRequest({

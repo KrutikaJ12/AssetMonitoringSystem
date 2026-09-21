@@ -16,6 +16,7 @@ import autoTable from "jspdf-autotable";
 import { useAuth } from "../../hooks/useAuth";
 import { Link, useLocation } from "react-router";
 import ReportFilter from "../Reports/ReportFilter";
+import { useAssetSummaryReports } from "../../hooks/useReports";
 
 interface Reports {
   siteName: string;
@@ -25,43 +26,43 @@ interface Reports {
   duration: string;
 }
 
-const reportsData: Reports[] = [
-  {
-    siteName: "Mumbai",
-    vehicaleNo: "MH43CK3346",
-    startDate: "2026-06-15 08:00 AM",
-    endDate: "2026-06-15 05:30 PM",
-    duration: "9h 30m",
-  },
-  {
-    siteName: "Pune",
-    vehicaleNo: "MH12AB5678",
-    startDate: "2026-06-14 07:45 AM",
-    endDate: "2026-06-14 04:15 PM",
-    duration: "8h 30m",
-  },
-  {
-    siteName: "Nashik",
-    vehicaleNo: "MH15XY9087",
-    startDate: "2026-06-13 09:00 AM",
-    endDate: "2026-06-13 06:00 PM",
-    duration: "9h",
-  },
-  {
-    siteName: "Nagpur",
-    vehicaleNo: "MH31PQ1122",
-    startDate: "2026-06-12 08:30 AM",
-    endDate: "2026-06-12 05:00 PM",
-    duration: "8h 30m",
-  },
-  {
-    siteName: "Mumbai",
-    vehicaleNo: "MH01ZZ7788",
-    startDate: "2026-06-11 07:00 AM",
-    endDate: "2026-06-11 03:30 PM",
-    duration: "8h 30m",
-  },
-];
+// const reportsData: Reports[] = [
+//   {
+//     siteName: "Mumbai",
+//     vehicaleNo: "MH43CK3346",
+//     startDate: "2026-06-15 08:00 AM",
+//     endDate: "2026-06-15 05:30 PM",
+//     duration: "9h 30m",
+//   },
+//   {
+//     siteName: "Pune",
+//     vehicaleNo: "MH12AB5678",
+//     startDate: "2026-06-14 07:45 AM",
+//     endDate: "2026-06-14 04:15 PM",
+//     duration: "8h 30m",
+//   },
+//   {
+//     siteName: "Nashik",
+//     vehicaleNo: "MH15XY9087",
+//     startDate: "2026-06-13 09:00 AM",
+//     endDate: "2026-06-13 06:00 PM",
+//     duration: "9h",
+//   },
+//   {
+//     siteName: "Nagpur",
+//     vehicaleNo: "MH31PQ1122",
+//     startDate: "2026-06-12 08:30 AM",
+//     endDate: "2026-06-12 05:00 PM",
+//     duration: "8h 30m",
+//   },
+//   {
+//     siteName: "Mumbai",
+//     vehicaleNo: "MH01ZZ7788",
+//     startDate: "2026-06-11 07:00 AM",
+//     endDate: "2026-06-11 03:30 PM",
+//     duration: "8h 30m",
+//   },
+// ];
 
 // ================= xL EXPORT FUNCTION =================
 const handleExport = () => {
@@ -131,7 +132,16 @@ const Reports = () => {
   const location = useLocation();
 
   const { hasPermission } = useAuth();
+const {
+    mutate: generateAssetSummary,
+    data: reportsData,
+    isPending,
+} = useAssetSummaryReports();
 
+const handleGenerate = (filters) => {
+    generateAssetSummary(filters);
+};
+console.log("reports",reportsData)
   const reportHeading =
     location.pathname === "/admin/reports/daily-usage"
       ? "Assets Daily Usage Reports"
@@ -170,7 +180,7 @@ const Reports = () => {
           Generate
         </Button>
       </div> */}
-      <ReportFilter showReportType />
+      <ReportFilter showReportType onGenerate={handleGenerate}/>
       <div className=" mt-6">
         <SectionCard>
           <div className="mb-5 flex justify-start gap-6">
@@ -260,7 +270,7 @@ const Reports = () => {
               {/* Table Body */}
 
               <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {reportsData.map((site) => (
+                {reportsData?.data?.map((data) => (
                   <TableRow className="">
                     {/* <TableCell className="py-3"> */}
                     {/* <div className="flex items-center gap-3">
@@ -274,24 +284,24 @@ const Reports = () => {
                     {/* </div>  */}
                     {/* </TableCell> */}
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {site.siteName}
+                      {data.SiteName}
                     </TableCell>
                     <TableCell className="py-3 text-theme-sm">
                       <Link
-                        to={`/admin/reports/${site.vehicaleNo}`}
+                        to={`/admin/reports/${data.AssetID}`}
                         className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                       >
-                        {site.vehicaleNo}
+                        {data.AssetID}
                       </Link>
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {site.startDate}
+                      {data.StartDate}
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {site.endDate}
+                      {data.EndDate}
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {site.duration}
+                      {data.Duration}
                     </TableCell>
 
                     {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
