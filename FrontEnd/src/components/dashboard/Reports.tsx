@@ -238,14 +238,14 @@ console.log("reports",reportsData)
                     isHeader
                     className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                   >
-                    Duration
+                    Working Hours
                   </TableCell>
-                  {/* <TableCell
+                  <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  View
-                </TableCell> */}
+                  Fuel Consumption
+                </TableCell>
                   {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -301,9 +301,11 @@ console.log("reports",reportsData)
                       {data.EndDate}
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {data.Duration}
+                      {data.WorkingHours}
                     </TableCell>
-
+                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      {data.FuelConsumedLitres || '-'}
+                    </TableCell>
                     {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
