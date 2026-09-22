@@ -150,17 +150,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            {/*Route for viewing report details of a specific asset.*/}
-            <Route
-              path="/admin/reports/:vehicleNo"
-              element={
-                <ProtectedRoute>
-                  <PermissionRoute permission="REPORT_VIEW">
-                    <ReportDetails />
-                  </PermissionRoute>
-                </ProtectedRoute>
-              }
-            />
+          
             {/* Route for Start-Stop Report */}
             <Route
               path="/admin/reports/startstopreport"
@@ -205,6 +195,19 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+
+              {/*Route for viewing report details of a specific asset.*/}
+           <Route
+  path="/admin/reports/:assetId"
+  element={
+    <ProtectedRoute>
+      <PermissionRoute permission="REPORT_VIEW">
+        <ReportDetails />
+      </PermissionRoute>
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/users"
               element={

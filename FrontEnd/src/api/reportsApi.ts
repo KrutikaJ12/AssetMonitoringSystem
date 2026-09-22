@@ -44,3 +44,13 @@ export const getStopReports = () => {
         method: HttpMethods.GET,
     });
 };
+
+// =====================================================
+// Asset Report Details
+// =====================================================
+export const getAssetReportDetails = (assetId: string) => {
+  return httpRequest({
+    url: `/reports/asset-summary/${assetId}`,
+    method: HttpMethods.GET,
+  });
+};

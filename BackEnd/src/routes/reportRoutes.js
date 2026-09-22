@@ -7,7 +7,8 @@ const {
     getSpeedViolationReports,
     getStartStopReports,
     getMovementReports,
-    getStopReports
+    getStopReports,
+     getAssetReportDetails
 } = require("../controllers/reportController");
 
 const authenticateToken = require("../middleware/authenticateToken");
@@ -49,6 +50,18 @@ router.get(
     authenticateToken,
     getStopReports
 );
+
+
+// ======================================================
+// ASSET DETAIL REPORT
+// ======================================================
+
+router.get(
+    "/asset-summary/:assetId",
+    authenticateToken,
+    getAssetReportDetails
+);
+
 
 
 module.exports = router;
