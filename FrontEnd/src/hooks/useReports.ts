@@ -6,6 +6,7 @@ import {
     getMovementReports,
     getStopReports,
     getAssetSummaryReports,
+     getAssetReportDetails,
 } from "../api/reportsApi";
 
 // Asset Summary Report
@@ -47,4 +48,12 @@ export const useStopReports = () => {
         queryKey: ["stop-reports"],
         queryFn: getStopReports,
     });
+};
+
+export const useAssetReportDetails = (assetId?: string) => {
+  return useQuery({
+    queryKey: ["asset-report-details", assetId],
+    queryFn: () => getAssetReportDetails(assetId!),
+    enabled: !!assetId,
+  });
 };
