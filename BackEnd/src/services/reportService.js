@@ -16,13 +16,12 @@ async function getAssetSummaryReports({
   });
   const pool = await getPool();
 
- if (reportType === "day") {
+  if (reportType === "day") {
     const response = await pool
-        .request()
-        .input("assetId", sql.Int, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+      .request()
+      .input("assetId", sql.Int, assetId)
+      .input("fromDate", sql.Date, fromDate)
+      .input("toDate", sql.Date, toDate).query(`
             SELECT
                 sm.SiteName,
                 adu.AssetID,
@@ -44,11 +43,11 @@ async function getAssetSummaryReports({
                     ) % 60,
                     'm'
                 ) AS Duration,
-
+                 CONCAT( adu.WorkingMinutes / 60,'h ',
+                       adu.WorkingMinutes % 60,'m') AS WorkingHours,
+                adu.FuelConsumedLitres AS FuelConsumedLitres,
                 adu.UsageDate,
-
                 adu.EngineOnMinutes,
-                adu.WorkingMinutes,
                 adu.IdleMinutes,
                 adu.StoppedMinutes,
                 adu.OfflineMinutes
@@ -69,90 +68,90 @@ async function getAssetSummaryReports({
         `);
 
     return response.recordset;
-}
-//this is for weekely
-// WITH WeeklyData AS (
-//                 SELECT
-//                     DATEADD(
-//                         DAY,
-//                         (DATEDIFF(DAY, @fromDate, UsageDate) / 7) * 7,
-//                         @fromDate
-//                     ) AS PeriodStart,
+  }
+  //this is for weekely
+  // WITH WeeklyData AS (
+  //                 SELECT
+  //                     DATEADD(
+  //                         DAY,
+  //                         (DATEDIFF(DAY, @fromDate, UsageDate) / 7) * 7,
+  //                         @fromDate
+  //                     ) AS PeriodStart,
 
-//                     UsageDate,
-//                     AssetID,
-//                     FirstEventDateTimeUtc,
-//                     LastEventDateTimeUtc,
-//                     EngineOnMinutes,
-//                     WorkingMinutes,
-//                     IdleMinutes,
-//                     StoppedMinutes,
-//                     OfflineMinutes
+  //                     UsageDate,
+  //                     AssetID,
+  //                     FirstEventDateTimeUtc,
+  //                     LastEventDateTimeUtc,
+  //                     EngineOnMinutes,
+  //                     WorkingMinutes,
+  //                     IdleMinutes,
+  //                     StoppedMinutes,
+  //                     OfflineMinutes
 
-//                 FROM dbo.AssetDailyUsage
+  //                 FROM dbo.AssetDailyUsage
 
-//                 WHERE AssetID = @assetId
-//                   AND UsageDate >= @fromDate
-//                   AND UsageDate <= @toDate
-//             )
+  //                 WHERE AssetID = @assetId
+  //                   AND UsageDate >= @fromDate
+  //                   AND UsageDate <= @toDate
+  //             )
 
-//             SELECT
-//                 sm.SiteName,
-//                 WeeklyData.AssetID AS AssetID,
+  //             SELECT
+  //                 sm.SiteName,
+  //                 WeeklyData.AssetID AS AssetID,
 
-//                 MIN(FirstEventDateTimeUtc) AS StartDate,
-//                 MAX(LastEventDateTimeUtc) AS EndDate,
+  //                 MIN(FirstEventDateTimeUtc) AS StartDate,
+  //                 MAX(LastEventDateTimeUtc) AS EndDate,
 
-//                 CONCAT(
-//                     DATEDIFF(
-//                         MINUTE,
-//                         MIN(FirstEventDateTimeUtc),
-//                         MAX(LastEventDateTimeUtc)
-//                     ) / 60,
-//                     'h ',
-//                     DATEDIFF(
-//                         MINUTE,
-//                         MIN(FirstEventDateTimeUtc),
-//                         MAX(LastEventDateTimeUtc)
-//                     ) % 60,
-//                     'm'
-//                 ) AS Duration,
+  //                 CONCAT(
+  //                     DATEDIFF(
+  //                         MINUTE,
+  //                         MIN(FirstEventDateTimeUtc),
+  //                         MAX(LastEventDateTimeUtc)
+  //                     ) / 60,
+  //                     'h ',
+  //                     DATEDIFF(
+  //                         MINUTE,
+  //                         MIN(FirstEventDateTimeUtc),
+  //                         MAX(LastEventDateTimeUtc)
+  //                     ) % 60,
+  //                     'm'
+  //                 ) AS Duration,
 
-//                 WeeklyData.PeriodStart,
+  //                 WeeklyData.PeriodStart,
 
-//                 CASE
-//                     WHEN DATEADD(DAY, 6, WeeklyData.PeriodStart) > @toDate
-//                         THEN @toDate
-//                     ELSE DATEADD(DAY, 6, WeeklyData.PeriodStart)
-//                 END AS PeriodEnd,
+  //                 CASE
+  //                     WHEN DATEADD(DAY, 6, WeeklyData.PeriodStart) > @toDate
+  //                         THEN @toDate
+  //                     ELSE DATEADD(DAY, 6, WeeklyData.PeriodStart)
+  //                 END AS PeriodEnd,
 
-//                 SUM(EngineOnMinutes) AS EngineOnMinutes,
-//                 SUM(WorkingMinutes) AS WorkingMinutes,
-//                 SUM(IdleMinutes) AS IdleMinutes,
-//                 SUM(StoppedMinutes) AS StoppedMinutes,
-//                 SUM(OfflineMinutes) AS OfflineMinutes
+  //                 SUM(EngineOnMinutes) AS EngineOnMinutes,
+  //                 SUM(WorkingMinutes) AS WorkingMinutes,
+  //                 SUM(IdleMinutes) AS IdleMinutes,
+  //                 SUM(StoppedMinutes) AS StoppedMinutes,
+  //                 SUM(OfflineMinutes) AS OfflineMinutes
 
-//             FROM WeeklyData
+  //             FROM WeeklyData
 
-//             LEFT JOIN dbo.AssetInSite ais
-//                 ON ais.AssetID = WeeklyData.AssetID
+  //             LEFT JOIN dbo.AssetInSite ais
+  //                 ON ais.AssetID = WeeklyData.AssetID
 
-//             LEFT JOIN dbo.SiteMaster sm
-//                 ON sm.SiteID = ais.SiteID
+  //             LEFT JOIN dbo.SiteMaster sm
+  //                 ON sm.SiteID = ais.SiteID
 
-//             GROUP BY
-//                 sm.SiteName,
-//                 WeeklyData.AssetID,
-//                 WeeklyData.PeriodStart
+  //             GROUP BY
+  //                 sm.SiteName,
+  //                 WeeklyData.AssetID,
+  //                 WeeklyData.PeriodStart
 
-//             ORDER BY WeeklyData.PeriodStart;
+  //             ORDER BY WeeklyData.PeriodStart;
 
-if (reportType === "week") {
-    const response = await pool.request()
-        .input("assetId", sql.Int, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+  if (reportType === "week") {
+    const response = await pool
+      .request()
+      .input("assetId", sql.Int, assetId)
+      .input("fromDate", sql.Date, fromDate)
+      .input("toDate", sql.Date, toDate).query(`
             WITH WeeklyData AS (
                 SELECT
                     DATEADD(
@@ -169,7 +168,8 @@ if (reportType === "week") {
                     WorkingMinutes,
                     IdleMinutes,
                     StoppedMinutes,
-                    OfflineMinutes
+                    OfflineMinutes,
+                    FuelConsumedLitres
 
                 FROM dbo.AssetDailyUsage
 
@@ -217,8 +217,11 @@ if (reportType === "week") {
                 END AS PeriodEnd,
 
                 -- Aggregated usage data
+                SUM(FuelConsumedLitres) AS FuelConsumedLitres,
                 SUM(EngineOnMinutes) AS EngineOnMinutes,
-                SUM(WorkingMinutes) AS WorkingMinutes,
+                CONCAT(SUM(WorkingMinutes) / 60,'h ',
+                       SUM(WorkingMinutes) % 60,'m') AS WorkingHours,
+                 SUM(WorkingMinutes) AS WorkingMinutes,
                 SUM(IdleMinutes) AS IdleMinutes,
                 SUM(StoppedMinutes) AS StoppedMinutes,
                 SUM(OfflineMinutes) AS OfflineMinutes
@@ -240,13 +243,13 @@ if (reportType === "week") {
         `);
 
     return response.recordset;
-}
- if (reportType === "month") {
-    const response = await pool.request()
-        .input("assetId", sql.Int, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+  }
+  if (reportType === "month") {
+    const response = await pool
+      .request()
+      .input("assetId", sql.Int, assetId)
+      .input("fromDate", sql.Date, fromDate)
+      .input("toDate", sql.Date, toDate).query(`
             WITH MonthlyData AS (
                 SELECT
                     CASE
@@ -269,7 +272,8 @@ if (reportType === "week") {
                     WorkingMinutes,
                     IdleMinutes,
                     StoppedMinutes,
-                    OfflineMinutes
+                    OfflineMinutes,
+                    FuelConsumedLitres
 
                 FROM dbo.AssetDailyUsage
 
@@ -317,7 +321,10 @@ if (reportType === "week") {
                 END AS PeriodEnd,
 
                 -- Aggregated usage data
+                SUM(FuelConsumedLitres) AS FuelConsumedLitres,
                 SUM(EngineOnMinutes) AS EngineOnMinutes,
+                CONCAT(SUM(WorkingMinutes) / 60,'h ',
+                       SUM(WorkingMinutes) % 60,'m') AS WorkingHours,
                 SUM(WorkingMinutes) AS WorkingMinutes,
                 SUM(IdleMinutes) AS IdleMinutes,
                 SUM(StoppedMinutes) AS StoppedMinutes,
@@ -345,7 +352,7 @@ if (reportType === "week") {
         `);
 
     return response.recordset;
-}
+  }
 }
 
 // ======================================================
