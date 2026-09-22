@@ -429,6 +429,72 @@ async function getMovementReports() {
   return response.recordset;
 }
 
+
+
+// ======================================================
+// ASSET DETAIL REPORT
+// ======================================================
+
+async function getAssetReportDetails(assetId) {
+    const pool = await getPool();
+
+    const response = await pool
+        .request()
+        .input("assetId", sql.Int, Number(assetId))
+        .query(`
+            SELECT
+                sm.SiteName,
+                adu.AssetID,
+
+                MIN(adu.FirstEventDateTimeUtc) AS StartDate,
+
+                MAX(adu.LastEventDateTimeUtc) AS EndDate,
+
+                CONCAT(
+                    DATEDIFF(
+                        MINUTE,
+                        MIN(adu.FirstEventDateTimeUtc),
+                        MAX(adu.LastEventDateTimeUtc)
+                    ) / 60,
+                    'h ',
+                    DATEDIFF(
+                        MINUTE,
+                        MIN(adu.FirstEventDateTimeUtc),
+                        MAX(adu.LastEventDateTimeUtc)
+                    ) % 60,
+                    'm'
+                ) AS Duration
+
+            FROM dbo.AssetDailyUsage adu
+
+            LEFT JOIN dbo.AssetInSite ais
+                ON ais.AssetID = adu.AssetID
+
+            LEFT JOIN dbo.SiteMaster sm
+                ON sm.SiteID = ais.SiteID
+
+            WHERE adu.AssetID = @assetId
+
+            GROUP BY
+                sm.SiteName,
+                adu.AssetID;
+        `);
+
+    const summary = response.recordset?.[0];
+
+    if (!summary) {
+        return null;
+    }
+
+    return {
+        SiteName: summary.SiteName,
+        AssetID: summary.AssetID,
+        StartDate: summary.StartDate,
+        EndDate: summary.EndDate,
+        Duration: summary.Duration,
+        Movements: []
+    };
+}
 // ======================================================
 // STOP REPORT
 // ======================================================
@@ -457,10 +523,14 @@ async function getStopReports() {
   return response.recordset;
 }
 
+
+
+
 module.exports = {
   getAssetSummaryReports,
   getSpeedViolationReports,
   getStartStopReports,
   getMovementReports,
   getStopReports,
+  getAssetReportDetails,
 };
