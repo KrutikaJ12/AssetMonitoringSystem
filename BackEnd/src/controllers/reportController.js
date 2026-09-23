@@ -135,46 +135,83 @@ async function getStopReports(req, res) {
 // ASSET DETAIL REPORT
 // ======================================================
 
+// async function getAssetReportDetails(req, res) {
+//     try {
+
+//         const { assetId } = req.params;
+
+//         console.log("Asset Detail Request:", assetId);
+
+//         if (!assetId) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Asset ID is required."
+//             });
+//         }
+
+//         const report =
+//             await reportService.getAssetReportDetails(assetId);
+
+//         if (!report) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Asset report details not found."
+//             });
+//         }
+
+//         return res.status(200).json({
+//             success: true,
+//             data: report
+//         });
+
+//     } catch (error) {
+
+//         console.error(
+//             "Get asset report details error:",
+//             error
+//         );
+
+//         return res.status(500).json({
+//             success: false,
+//             message: "Unable to fetch asset report details.",
+//             error: error.message
+//         });
+//     }
+// }
 async function getAssetReportDetails(req, res) {
     try {
+        const {
+            assetId,
+            fromDate,
+            toDate,
+            reportType,
+        } = req.query;
 
-        const { assetId } = req.params;
-
-        console.log("Asset Detail Request:", assetId);
-
-        if (!assetId) {
+        if (!assetId || !fromDate || !toDate || !reportType) {
             return res.status(400).json({
                 success: false,
-                message: "Asset ID is required."
+                message:
+                    "assetId, fromDate, toDate and reportType are required.",
             });
         }
 
-        const report =
-            await reportService.getAssetReportDetails(assetId);
-
-        if (!report) {
-            return res.status(404).json({
-                success: false,
-                message: "Asset report details not found."
-            });
-        }
+        const report = await reportService.getAssetReportDetails({
+            assetId: Number(assetId),
+            fromDate,
+            toDate,
+            reportType,
+        });
 
         return res.status(200).json({
             success: true,
-            data: report
+            data: report,
         });
-
     } catch (error) {
-
-        console.error(
-            "Get asset report details error:",
-            error
-        );
+        console.error("Get asset report detail error:", error);
 
         return res.status(500).json({
             success: false,
-            message: "Unable to fetch asset report details.",
-            error: error.message
+            message: "Unable to fetch asset report detail.",
         });
     }
 }

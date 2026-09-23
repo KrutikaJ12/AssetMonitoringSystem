@@ -57,7 +57,7 @@ router.get(
 // ======================================================
 
 router.get(
-    "/asset-summary/:assetId",
+    "/asset-details",
     authenticateToken,
     getAssetReportDetails
 );

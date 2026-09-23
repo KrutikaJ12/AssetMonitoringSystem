@@ -442,64 +442,274 @@ async function getMovementReports() {
 // ASSET DETAIL REPORT
 // ======================================================
 
-async function getAssetReportDetails(assetId) {
-    const pool = await getPool();
+// async function getAssetReportDetails(assetId) {
+//     const pool = await getPool();
 
-    const response = await pool
-        .request()
-        .input("assetId", sql.Int, Number(assetId))
+//     const response = await pool
+//         .request()
+//         .input("assetId", sql.Int, Number(assetId))
+//         .query(`
+//             SELECT
+//                 sm.SiteName,
+//                 adu.AssetID,
+
+//                 MIN(adu.FirstEventDateTimeUtc) AS StartDate,
+
+//                 MAX(adu.LastEventDateTimeUtc) AS EndDate,
+
+//                 CONCAT(
+//                     DATEDIFF(
+//                         MINUTE,
+//                         MIN(adu.FirstEventDateTimeUtc),
+//                         MAX(adu.LastEventDateTimeUtc)
+//                     ) / 60,
+//                     'h ',
+//                     DATEDIFF(
+//                         MINUTE,
+//                         MIN(adu.FirstEventDateTimeUtc),
+//                         MAX(adu.LastEventDateTimeUtc)
+//                     ) % 60,
+//                     'm'
+//                 ) AS Duration
+
+//             FROM dbo.AssetDailyUsage adu
+
+//             LEFT JOIN dbo.AssetInSite ais
+//                 ON ais.AssetID = adu.AssetID
+
+//             LEFT JOIN dbo.SiteMaster sm
+//                 ON sm.SiteID = ais.SiteID
+
+//             WHERE adu.AssetID = @assetId
+
+//             GROUP BY
+//                 sm.SiteName,
+//                 adu.AssetID;
+//         `);
+
+//     const summary = response.recordset?.[0];
+
+//     if (!summary) {
+//         return null;
+//     }
+
+//     return {
+//         SiteName: summary.SiteName,
+//         AssetID: summary.AssetID,
+//         StartDate: summary.StartDate,
+//         EndDate: summary.EndDate,
+//         Duration: summary.Duration,
+//         Movements: []
+//     };
+// }
+async function getAssetReportDetails({
+    assetId,
+    fromDate,
+    toDate,
+    reportType,
+}) {
+    const pool = await sql.connect();
+
+    // --------------------------------------------------
+    // 1. Summary
+    // --------------------------------------------------
+
+    const summaryResponse = await pool.request()
+        .input("assetId", sql.BigInt, assetId)
+        .input("fromDate", sql.Date, fromDate)
+        .input("toDate", sql.Date, toDate)
         .query(`
+            WITH WorkingData AS (
+                SELECT
+                    AssetID,
+                    SUM(ISNULL(WorkingMinutes, 0)) AS TotalWorkingMinutes
+                FROM dbo.AssetDailyUsage
+                WHERE AssetID = @assetId
+                  AND UsageDate >= @fromDate
+                  AND UsageDate <= @toDate
+                GROUP BY AssetID
+            ),
+            StatusData AS (
+                SELECT
+                    AssetID,
+
+                    MIN(StartDateTimeUtc) AS StartedAt,
+
+                    MAX(
+                        CASE
+                            WHEN StatusCode = 'STOPPED'
+                            THEN StartDateTimeUtc
+                        END
+                    ) AS StoppedAt
+
+                FROM dbo.AssetStatusInterval
+
+                WHERE AssetID = @assetId
+                  AND StartDateTimeUtc < DATEADD(DAY, 1, @toDate)
+                  AND (
+                      EndDateTimeUtc IS NULL
+                      OR EndDateTimeUtc >= @fromDate
+                  )
+
+                GROUP BY AssetID
+            )
+
             SELECT
+                am.AssetID,
                 sm.SiteName,
-                adu.AssetID,
-
-                MIN(adu.FirstEventDateTimeUtc) AS StartDate,
-
-                MAX(adu.LastEventDateTimeUtc) AS EndDate,
+                sd.StartedAt,
+                sd.StoppedAt,
 
                 CONCAT(
-                    DATEDIFF(
-                        MINUTE,
-                        MIN(adu.FirstEventDateTimeUtc),
-                        MAX(adu.LastEventDateTimeUtc)
-                    ) / 60,
+                    ISNULL(wd.TotalWorkingMinutes, 0) / 60,
                     'h ',
-                    DATEDIFF(
-                        MINUTE,
-                        MIN(adu.FirstEventDateTimeUtc),
-                        MAX(adu.LastEventDateTimeUtc)
-                    ) % 60,
+                    ISNULL(wd.TotalWorkingMinutes, 0) % 60,
                     'm'
-                ) AS Duration
+                ) AS TotalWorking
 
-            FROM dbo.AssetDailyUsage adu
+            FROM dbo.AssetMaster am
 
             LEFT JOIN dbo.AssetInSite ais
-                ON ais.AssetID = adu.AssetID
+                ON ais.AssetID = am.AssetID
 
             LEFT JOIN dbo.SiteMaster sm
                 ON sm.SiteID = ais.SiteID
 
-            WHERE adu.AssetID = @assetId
+            LEFT JOIN WorkingData wd
+                ON wd.AssetID = am.AssetID
 
-            GROUP BY
-                sm.SiteName,
-                adu.AssetID;
+            LEFT JOIN StatusData sd
+                ON sd.AssetID = am.AssetID
+
+            WHERE am.AssetID = @assetId;
         `);
 
-    const summary = response.recordset?.[0];
+    // --------------------------------------------------
+    // 2. Operation Calendar
+    // --------------------------------------------------
 
-    if (!summary) {
-        return null;
-    }
+    const operationCalendarResponse = await pool.request()
+        .input("assetId", sql.BigInt, assetId)
+        .input("fromDate", sql.Date, fromDate)
+        .input("toDate", sql.Date, toDate)
+        .query(`
+            SELECT
+                adu.UsageDate AS ReportDate,
+
+                CONCAT(
+                    adu.WorkingMinutes / 60,
+                    'h ',
+                    adu.WorkingMinutes % 60,
+                    'm'
+                ) AS WorkingHours,
+
+                adu.FuelConsumedLitres
+
+            FROM dbo.AssetDailyUsage adu
+
+            WHERE adu.AssetID = @assetId
+              AND adu.UsageDate >= @fromDate
+              AND adu.UsageDate <= @toDate
+
+            ORDER BY adu.UsageDate;
+        `);
+
+    // --------------------------------------------------
+    // 3. Service Time Period Analysis
+    // --------------------------------------------------
+
+    const serviceTimePeriodsResponse = await pool.request()
+        .input("assetId", sql.BigInt, assetId)
+        .input("fromDate", sql.Date, fromDate)
+        .input("toDate", sql.Date, toDate)
+        .query(`
+            SELECT
+                StatusCode,
+                StartDateTimeUtc,
+                EndDateTimeUtc,
+
+                CASE
+                    WHEN DurationSeconds IS NULL THEN NULL
+                    ELSE CONCAT(
+                        DurationSeconds / 3600,
+                        'h ',
+                        (DurationSeconds % 3600) / 60,
+                        'm'
+                    )
+                END AS Duration,
+
+                CASE
+                    WHEN EndDateTimeUtc IS NULL THEN 1
+                    ELSE 0
+                END AS IsOpen
+
+            FROM dbo.AssetStatusInterval
+
+            WHERE AssetID = @assetId
+              AND StartDateTimeUtc < DATEADD(DAY, 1, @toDate)
+              AND (
+                  EndDateTimeUtc IS NULL
+                  OR EndDateTimeUtc >= @fromDate
+              )
+
+            ORDER BY StartDateTimeUtc;
+        `);
+
+    // --------------------------------------------------
+    // 4. Asset Details
+    // --------------------------------------------------
+
+    const assetDetailsResponse = await pool.request()
+        .input("assetId", sql.BigInt, assetId)
+        .input("fromDate", sql.Date, fromDate)
+        .input("toDate", sql.Date, toDate)
+        .query(`
+            SELECT
+                aed.EventDateTimeUtc AS EventTime,
+
+                asi.StatusCode AS Status,
+
+                aed.Latitude,
+                aed.Longitude,
+
+                CASE
+                    WHEN asi.DurationSeconds IS NULL THEN NULL
+                    ELSE CONCAT(
+                        asi.DurationSeconds / 3600,
+                        'h ',
+                        (asi.DurationSeconds % 3600) / 60,
+                        'm'
+                    )
+                END AS Duration
+
+            FROM dbo.AssetEventData aed
+
+            LEFT JOIN dbo.AssetStatusInterval asi
+                ON asi.AssetID = aed.AssetID
+                AND aed.EventDateTimeUtc >= asi.StartDateTimeUtc
+                AND (
+                    aed.EventDateTimeUtc < asi.EndDateTimeUtc
+                    OR asi.EndDateTimeUtc IS NULL
+                )
+
+            WHERE aed.AssetID = @assetId
+              AND aed.EventDateTimeUtc >= @fromDate
+              AND aed.EventDateTimeUtc < DATEADD(DAY, 1, @toDate)
+
+            ORDER BY aed.EventDateTimeUtc;
+        `);
 
     return {
-        SiteName: summary.SiteName,
-        AssetID: summary.AssetID,
-        StartDate: summary.StartDate,
-        EndDate: summary.EndDate,
-        Duration: summary.Duration,
-        Movements: []
+        summary: summaryResponse.recordset[0] || null,
+
+        operationCalendar:
+            operationCalendarResponse.recordset,
+
+        serviceTimePeriods:
+            serviceTimePeriodsResponse.recordset,
+
+        assetDetails:
+            assetDetailsResponse.recordset,
     };
 }
 // ======================================================
