@@ -6,7 +6,7 @@ import {
     getMovementReports,
     getStopReports,
     getAssetSummaryReports,
-     getAssetReportDetails,
+     getAssetReportDetail,
 } from "../api/reportsApi";
 
 // Asset Summary Report
@@ -50,10 +50,19 @@ export const useStopReports = () => {
     });
 };
 
-export const useAssetReportDetails = (assetId?: string) => {
-  return useQuery({
-    queryKey: ["asset-report-details", assetId],
-    queryFn: () => getAssetReportDetails(assetId!),
-    enabled: !!assetId,
-  });
+export const useAssetReportDetails  = (params: {
+    assetId: number;
+    fromDate: string;
+    toDate: string;
+    reportType: "day" | "week" | "month";
+}) => {
+    return useQuery({
+        queryKey: ["asset-report-detail", params],
+        queryFn: () => getAssetReportDetail(params),
+        enabled:
+            !!params.assetId &&
+            !!params.fromDate &&
+            !!params.toDate &&
+            !!params.reportType,
+    });
 };

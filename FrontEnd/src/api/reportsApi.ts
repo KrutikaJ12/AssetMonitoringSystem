@@ -48,9 +48,15 @@ export const getStopReports = () => {
 // =====================================================
 // Asset Report Details
 // =====================================================
-export const getAssetReportDetails = (assetId: string) => {
-  return httpRequest({
-    url: `/reports/asset-summary/${assetId}`,
-    method: HttpMethods.GET,
-  });
+export const getAssetReportDetail = (params: {
+    assetId: number;
+    fromDate: string;
+    toDate: string;
+    reportType: "day" | "week" | "month";
+}) => {
+    return httpRequest({
+        url: "/reports/asset-details",
+        method: HttpMethods.GET,
+        params,
+    });
 };

@@ -14,9 +14,9 @@ import { Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useAuth } from "../../hooks/useAuth";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useSearchParams } from "react-router";
 import ReportFilter from "../Reports/ReportFilter";
-import { useAssetSummaryReports } from "../../hooks/useReports";
+import { useAssetReportDetails, useAssetSummaryReports } from "../../hooks/useReports";
 
 interface Reports {
   siteName: string;
@@ -125,23 +125,39 @@ const handlePdfExport = () => {
 // =======================================================
 
 const Reports = () => {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-
+  const [reportFilters, setReportFilters] = useState<{
+    assetId: number;
+    fromDate: string;
+    toDate: string;
+    reportType: "day" | "week" | "month";
+  } | null>(null);
   // Displays the heading based on the selected report type.
   const location = useLocation();
 
   const { hasPermission } = useAuth();
-const {
+  const {
     mutate: generateAssetSummary,
     data: reportsData,
     isPending,
-} = useAssetSummaryReports();
+  } = useAssetSummaryReports();
+ const [searchParams] = useSearchParams();
 
-const handleGenerate = (filters) => {
-    generateAssetSummary(filters);
+const params = {
+    assetId: Number(searchParams.get("assetId")),
+    fromDate: searchParams.get("fromDate") || "",
+    toDate: searchParams.get("toDate") || "",
+    reportType: searchParams.get("reportType") as
+        | "day"
+        | "week"
+        | "month",
 };
-console.log("reports",reportsData)
+
+const { data, isLoading, error } = useAssetReportDetails(params);
+  const handleGenerate = (filters) => {
+    setReportFilters(filters);
+    generateAssetSummary(filters);
+  };
+  console.log("reports", reportsData,data);
   const reportHeading =
     location.pathname === "/admin/reports/daily-usage"
       ? "Assets Daily Usage Reports"
@@ -180,7 +196,7 @@ console.log("reports",reportsData)
           Generate
         </Button>
       </div> */}
-      <ReportFilter showReportType onGenerate={handleGenerate}/>
+      <ReportFilter showReportType onGenerate={handleGenerate} />
       <div className=" mt-6">
         <SectionCard>
           <div className="mb-5 flex justify-start gap-6">
@@ -241,11 +257,11 @@ console.log("reports",reportsData)
                     Working Hours
                   </TableCell>
                   <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel Consumption
-                </TableCell>
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Fuel Consumption
+                  </TableCell>
                   {/* <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -288,8 +304,8 @@ console.log("reports",reportsData)
                     </TableCell>
                     <TableCell className="py-3 text-theme-sm">
                       <Link
-                        to={`/admin/reports/${data.AssetID}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                        to={`/admin/reports/asset-details?assetId=${data.AssetID}&fromDate=${reportFilters?.fromDate}&toDate=${reportFilters?.toDate}&reportType=${reportFilters?.reportType}`}
+                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
                       >
                         {data.AssetID}
                       </Link>
@@ -303,8 +319,8 @@ console.log("reports",reportsData)
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       {data.WorkingHours}
                     </TableCell>
-                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {data.FuelConsumedLitres || '-'}
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                      {data.FuelConsumedLitres || "-"}
                     </TableCell>
                     {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     <Badge
