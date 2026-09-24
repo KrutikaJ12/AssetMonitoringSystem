@@ -28,6 +28,7 @@ interface SiteSummaryProps {
 }
 
 export default function SiteSummary({data}:SiteSummaryProps) {
+  
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -182,7 +183,7 @@ export default function SiteSummary({data}:SiteSummaryProps) {
                   {site.operators}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {site.totalFuelConsumed}
+                  {site.fuelConsumption}
                 </TableCell>
                 {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   <Badge
@@ -203,7 +204,7 @@ export default function SiteSummary({data}:SiteSummaryProps) {
                     <div className="h-2 w-20 rounded-full bg-gray-200">
                       <div
                         className="h-2 rounded-full bg-red-500"
-                        style={{ width: `${site.utilizationPercentage}%` }}
+                        style={{ width: `${site.utilization}%` }}
                       />
                     </div>
 

@@ -5,69 +5,144 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
+// export const adminMenu: NavItem[] = [
+//   // {
+//   //   icon: <GridIcon />,
+//   //   name: "Dashboard",
+//   //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+//   // },
+//   {
+//     // icon: <GridIcon />,
+//     name: "Dashboard",
+//     path: "/admin/dashboard",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Sites",
+//     path: "/admin/sites",
+//   },
+
+//   // {
+//   //   name: "Assets",
+//   //   icon: <ListIcon />,
+//   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+//   // },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Assets",
+//     path: "/admin/assets",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Operators",
+//     path: "/admin/operators",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Alerts",
+//     path: "/admin/alerts",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Reports",
+//     path: "/admin/reports",
+//   },
+//   {
+//     // icon: <UserCircleIcon />,
+//     name: "Settings",
+//     path: "/admin/settings",
+//   },
+
+//   // {
+//   //   name: "Tables",
+//   //   icon: <TableIcon />,
+//   //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+//   // },
+//   // {
+//   //   name: "Pages",
+//   //   icon: <PageIcon />,
+//   //   subItems: [
+//   //     { name: "Blank Page", path: "/blank", pro: false },
+//   //     { name: "404 Error", path: "/error-404", pro: false },
+//   //   ],
+//   // },
+// ];
 export const adminMenu: NavItem[] = [
-  // {
-  //   icon: <GridIcon />,
-  //   name: "Dashboard",
-  //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  // },
   {
-    // icon: <GridIcon />,
     name: "Dashboard",
     path: "/admin/dashboard",
+    moduleCode: "DASHBOARD",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Sites",
     path: "/admin/sites",
+    moduleCode: "SITES",
   },
-
-  // {
-  //   name: "Assets",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
   {
-    // icon: <UserCircleIcon />,
     name: "Assets",
     path: "/admin/assets",
+    moduleCode: "ASSETS",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Operators",
     path: "/admin/operators",
+    moduleCode: "OPERATORS",
   },
   {
-    // icon: <UserCircleIcon />,
     name: "Alerts",
     path: "/admin/alerts",
+    moduleCode: "ALERTS",
+  },
+
+  // Defines the Reports submenu and routes for Asset Summary and Asset Daily Usage reports.
+  {
+  name: "Reports",
+  moduleCode: "REPORTS",
+  subItems: [
+    {
+      name: "Asset Summary Report",
+      path: "/admin/reports/summary",
+      pro: false,
+    },
+    {
+      name: "Asset Daily Usage Report",
+      path: "/admin/reports/daily-usage",
+      pro: false,
+    },
+    {
+      name: "Speed Violation Report",
+      path: "/admin/reports/speedviolationreport",
+      pro: false,
+    },
+
+      {
+      name: "Start-Stop Report",
+      path: "/admin/reports/startstopreport",
+      pro: false,
+    },
+    {
+      name: "Movement Report",
+      path: "/admin/reports/movementreport",
+      pro: false,
+    },
+    {
+      name: "Stop Report",
+      path: "/admin/reports/stopreport",
+      pro: false,
+    },
+  ],
+},
+  {
+    name: "Users",
+    path: "/admin/users",
+    moduleCode: "USER_MANAGEMENT",
   },
   {
-    // icon: <UserCircleIcon />,
-    name: "Reports",
-    path: "/admin/reports",
-  },
-  {
-    // icon: <UserCircleIcon />,
     name: "Settings",
     path: "/admin/settings",
+    moduleCode: "SETTINGS",
   },
-
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
 ];
-
 export const siteManagerMenu: NavItem[] = [
   {
     

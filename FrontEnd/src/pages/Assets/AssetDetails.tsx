@@ -49,7 +49,7 @@ const InfoRow = ({
   </div>
 );
 
-export default function AssetDetails({ asset }: AssetDetailsProps) {
+export default function AssetDetails({ asset }: any) {
   return (
     <div className="space-y-6 overflow-y-auto">
 
@@ -60,11 +60,11 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
         </div>
 
         <div className="flex-1">
-          <h2 className="text-xl font-semibold">{asset.name}</h2>
-          <p className="text-sm text-gray-500">{asset.assetId}</p>
+          <h2 className="text-xl font-semibold">{asset.AssetName}</h2>
+          <p className="text-sm text-gray-500">{asset.AssetCode}</p>
 
           <span className="inline-flex mt-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-            {asset.status}
+            {asset.Status}
           </span>
         </div>
       </div>
@@ -76,13 +76,13 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
           <h3 className="font-semibold">Overview</h3>
         </div>
 
-        <InfoRow label="Category" value={asset.category} />
-        <InfoRow label="Site" value={asset.site} />
+        <InfoRow label="Category" value={asset.Category} />
+        <InfoRow label="Site" value={asset.SiteName} />
         <InfoRow label="Operator" value={asset.operator} />
         <InfoRow label="Customer" value={asset.customer} />
         <InfoRow label="Purchase Date" value={asset.purchaseDate} />
-        <InfoRow label="Model" value={asset.model} />
-        <InfoRow label="Serial Number" value={asset.serialNumber} />
+        <InfoRow label="Model" value={asset.Model} />
+        <InfoRow label="Serial Number" value={asset.SerialNo} />
       </section>
 
       {/* Live Metrics */}
@@ -96,19 +96,19 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
           <MetricCard
             icon={<Clock size={18} />}
             title="Engine Hours"
-            value={`${asset.engineHours} hrs`}
+            value={`${asset.EngineHours} hrs`}
           />
 
           <MetricCard
             icon={<Clock size={18} />}
             title="Idle Hours"
-            value={`${asset.idleHours} hrs`}
+            value={`${asset.IdleHours} hrs`}
           />
 
           <MetricCard
             icon={<Fuel size={18} />}
             title="Fuel Level"
-            value={`${asset.fuelLevel}%`}
+            value={`${asset.FuelPercentage}%`}
           />
 
           <MetricCard

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { menuConfig } from "../config/menuConfig";
-
+import { useAuth } from "../hooks/useAuth"
 // Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
@@ -148,6 +148,7 @@ const othersItems: NavItem[] = [
 
 
 const AppSidebar: React.FC = () => {
+  const { hasModule } = useAuth();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
   let role = "admin";
@@ -156,8 +157,12 @@ const AppSidebar: React.FC = () => {
   } else if (location.pathname.startsWith("/operator")) {
     role = "operator";
   }
-  const navItems = menuConfig[role];
+  const navItems = menuConfig[role].filter((item) => {
+    if (!item.moduleCode) return true;
 
+    return hasModule(item.moduleCode);
+});
+console.log("navItems",navItems)
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;

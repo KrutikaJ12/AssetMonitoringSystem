@@ -59,14 +59,29 @@ export default function WorkingHoursCard({data}:any) {
     },
     labels: ["Progress"],
   };
-  let topAssets=data?.topAssets;
-  const maxHours = Math.max(
-  ...topAssets.map((asset) => asset.workingHours)
-);
-   topAssets=topAssets.map((asset)=>({
-    ...asset,
-     percentage: (asset.workingHours / maxHours) * 100,
-   }))
+//   let topAssets=data?.topAssets;
+//   const maxHours = Math.max(
+//   ...topAssets.map((asset) => asset.workingHours)
+// );
+//    topAssets=topAssets.map((asset)=>({
+//     ...asset,
+//      percentage: (asset.workingHours / maxHours) * 100,
+//    }))
+//    let topAssets = data || [];
+
+// const maxHours = Math.max(
+//   ...topAssets.map((asset) => asset.workingHours),
+//   0
+// );
+
+//  topAssets = topAssets.map((asset) => ({
+//   ...asset,
+//   percentage:
+//     maxHours > 0
+//       ? (asset.workingHours / maxHours) * 100
+//       : 0,
+// }));
+const topAssets = [];
   return (
     <div className="flex justify-evenly w-full">
       <div className=" border shadow-xl shadow-gray-200 rounded-xl p-8">
@@ -161,22 +176,22 @@ export default function WorkingHoursCard({data}:any) {
             <span className="font-semibold">{data?.summary.idleHours} h</span>
           </div>
 
-          <div className="flex items-center justify-between rounded-xl border p-4">
+          {/* <div className="flex items-center justify-between rounded-xl border p-4">
             <div className="flex items-center gap-3">
               <Wrench className="text-blue-600" />
               <span>Maintenance</span>
             </div>
 
             <span className="font-semibold">90 h</span>
-          </div>
+          </div> */}
 
           <div className="flex items-center justify-between rounded-xl border p-4">
             <div className="flex items-center gap-3">
               <XCircle className="text-red-600" />
-              <span>Offline</span>
+              <span>Stopped</span>
             </div>
 
-            <span className="font-semibold">{data?.summary.offlineHours} h</span>
+            <span className="font-semibold">{data?.summary.stoppedHours} h</span>
           </div>
         </div>
         <hr className="text-gray-600 my-6"></hr>
