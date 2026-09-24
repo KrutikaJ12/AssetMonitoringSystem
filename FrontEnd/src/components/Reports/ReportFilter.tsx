@@ -16,38 +16,48 @@ const ReportFilter = ({
   const [reportType, setReportType] = useState<"day" | "week" | "month">("day");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [selectedWeek, setSelectedWeek] = useState("1");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
   const [speedLimit, setSpeedLimit] = useState("");
   const currentYear = new Date().getFullYear();
-
+  const currentDate = new Date();
+  const [selectedYear, setSelectedYear] = useState(
+    String(currentDate.getFullYear()),
+  );
+  const [selectedMonth, setSelectedMonth] = useState(
+    String(currentDate.getMonth() + 1),
+  );
   const years = Array.from(
     { length: 3 },
     (_, index) => currentYear - 2 + index,
   );
-  const getWeekStartDate = () => {
+  // const getWeekStartDate = () => {
+  //   if (!startDate) return undefined;
+
+  //   const date = new Date(startDate);
+  //   const weekNumber = Number(selectedWeek);
+
+  //   date.setDate(date.getDate() + (weekNumber - 1) * 7);
+
+  //   return date;
+  // };
+
+  // const getWeekEndDate = () => {
+  //   const weekStart = getWeekStartDate();
+
+  //   if (!weekStart) return undefined;
+
+  //   const date = new Date(weekStart);
+  //   date.setDate(date.getDate() + 6);
+
+  //   return date;
+  // };
+  const getWeekEndDate = () => {
     if (!startDate) return undefined;
 
     const date = new Date(startDate);
-    const weekNumber = Number(selectedWeek);
-
-    date.setDate(date.getDate() + (weekNumber - 1) * 7);
-
-    return date;
-  };
-
-  const getWeekEndDate = () => {
-    const weekStart = getWeekStartDate();
-
-    if (!weekStart) return undefined;
-
-    const date = new Date(weekStart);
     date.setDate(date.getDate() + 6);
-
+    setEndDate(date);
     return date;
   };
-
   const formatDisplayDate = (date?: Date) => {
     if (!date) return "";
 
@@ -56,6 +66,19 @@ const ReportFilter = ({
     // const year = String(date.getFullYear()).slice(-2);
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
+  };
+  const handleReportTypeChange = (value: "day" | "week" | "month") => {
+    setReportType(value);
+
+    if (value === "month") {
+      const currentDate = new Date();
+
+      setSelectedYear(String(currentDate.getFullYear()));
+      setSelectedMonth(String(currentDate.getMonth() + 1));
+    } else {
+      setSelectedYear("");
+      setSelectedMonth("");
+    }
   };
   const handleGenerate = () => {
     if (!assetId) {
@@ -81,14 +104,11 @@ const ReportFilter = ({
         return;
       }
 
-      const weekStart = getWeekStartDate();
       const weekEnd = getWeekEndDate();
 
-      if (!weekStart || !weekEnd) {
-        return;
-      }
+      if (!weekEnd) return;
 
-      fromDate = formatDisplayDate(weekStart);
+      fromDate = formatDisplayDate(startDate);
       toDate = formatDisplayDate(weekEnd);
     }
 
@@ -144,11 +164,10 @@ const ReportFilter = ({
             <select
               value={reportType}
               onChange={(e) => {
-                setReportType(e.target.value as "day" | "week" | "month");
-                setSelectedWeek("1");
-                setSelectedYear("");
-                setSelectedMonth("");
-                setAssetId("")
+                handleReportTypeChange(
+                  e.target.value as "day" | "week" | "month",
+                );
+                setAssetId("");
               }}
               className="mb-3 h-11 w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             >
@@ -236,38 +255,30 @@ const ReportFilter = ({
               placeholder="Start date"
               mode="single"
               onChange={(dates) => {
-                setStartDate(dates[0]);
-                setSelectedWeek("1");
+                const selectedDate = dates[0];
+
+                setStartDate(selectedDate);
+
+                if (reportType === "week" && selectedDate) {
+                  const endDate = new Date(selectedDate);
+                  endDate.setDate(endDate.getDate() + 6);
+
+                  setEndDate(endDate);
+                }
               }}
             />
           </div>
         )}
-        {showReportType && reportType === "week" && (
+        {reportType === "week" && (
           <div className="w-full">
-            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Week
-            </label>
-
-            <select
-              value={selectedWeek}
-              onChange={(e) => setSelectedWeek(e.target.value) }
-              className="mb-3 h-11 w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-            >
-              <option value="1">Week 1</option>
-              <option value="2">Week 2</option>
-              <option value="3">Week 3</option>
-              <option value="4">Week 4</option>
-              <option value="5">Week 5</option>
-            </select>
-
-            <div className=" min-h-[20px]">
-              {startDate && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {formatDisplayDate(getWeekStartDate())} →{" "}
-                  {formatDisplayDate(getWeekEndDate())}
-                </p>
-              )}
-            </div>
+            <DatePicker
+              id="end-date"
+              label="To Date"
+              placeholder="End date"
+              mode="single"
+              defaultDate={endDate}
+              disabled
+            />
           </div>
         )}
         {/* End Date */}
@@ -303,7 +314,7 @@ const ReportFilter = ({
 
         {/* Generate Button */}
         <div className="w-full">
-         <label className="mb-2 block text-sm font-medium text-white dark:text-gray-300">
+          <label className="mb-2 block text-sm font-medium text-white dark:text-gray-300">
             Asset ID
           </label>
           <button
