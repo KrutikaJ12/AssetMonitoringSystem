@@ -123,7 +123,21 @@ const handlePdfExport = () => {
   doc.save("Vehicle_Reports.pdf");
 };
 // =======================================================
+const formatDisplayDate = (date?: Date | string) => {
+    if (!date) return "";
 
+    const parsedDate = date instanceof Date ? date : new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return "";
+    }
+
+    const day = String(parsedDate.getDate()).padStart(2, "0");
+    const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+    const year = parsedDate.getFullYear();
+
+    return `${year}-${month}-${day}`;
+};
 const Reports = () => {
   const [reportFilters, setReportFilters] = useState<{
     assetId: number;
@@ -311,10 +325,10 @@ const { data, isLoading, error } = useAssetReportDetails(params);
                       </Link>
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {data.StartDate}
+                      {formatDisplayDate(data.StartDate)}
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {data.EndDate}
+                      {formatDisplayDate(data.EndDate)}
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       {data.WorkingHours}
