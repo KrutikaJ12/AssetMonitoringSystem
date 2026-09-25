@@ -19,12 +19,8 @@ const ReportFilter = ({
   const [speedLimit, setSpeedLimit] = useState("");
   const currentYear = new Date().getFullYear();
   const currentDate = new Date();
-  const [selectedYear, setSelectedYear] = useState(
-    String(currentDate.getFullYear()),
-  );
-  const [selectedMonth, setSelectedMonth] = useState(
-    String(currentDate.getMonth() + 1),
-  );
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
   const years = Array.from(
     { length: 3 },
     (_, index) => currentYear - 2 + index,
