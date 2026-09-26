@@ -16,6 +16,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { useGetAssets } from "../../hooks/useAssets";
 import AssetModal from "./AssetModal";
 import { useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
+
 // const assetsData = [
 //   {
 //     assetId: "EX001",
@@ -123,6 +125,7 @@ export function AssetTable(Asset: AssetTableProps) {
     "add" | "edit" | "view" | "delete" | "reset-password"
   >("add");
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const navigate = useNavigate();
   const hasFilters = search || selectedAsset || status;
   const sites = [
     { code: "MUM", name: "Mumbai" },
@@ -185,6 +188,22 @@ export function AssetTable(Asset: AssetTableProps) {
     // setToastMessage("Data exported successfully!");
     // setTimeout(() => setToastMessage(null), 3000);
   };
+
+
+
+  const handleNavigateToLiveMap = (asset) => {
+  navigate("/admin/live-tracking", {
+    state: {
+      siteId: asset.SiteID || asset.id,
+      siteName: asset.SiteName,
+      locationName: asset.LocationName || asset.SiteName,
+      lat: parseFloat(asset.Latitude) || 19.076,
+      lng: parseFloat(asset.Longitude) || 72.8777,
+    },
+  });
+};
+
+
   return (
     <>
       <div className=" h-10 flex justify-end gap-4 mb-4  ">
@@ -378,9 +397,14 @@ export function AssetTable(Asset: AssetTableProps) {
                   {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.Category}
                   </TableCell> */}
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.SiteName}
-                  </TableCell>
+                <TableCell className="py-3 text-theme-sm">
+  <button
+    onClick={() => handleNavigateToLiveMap(asset)}
+    className="text-brand-600 hover:text-brand-500 dark:text-gray-300 dark:hover:text-brand-400 text-left cursor-pointer transition-colors font-medium underline underline-offset-2"
+  >
+    {asset.SiteName}
+  </button>
+</TableCell>
                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.OperatorName ?? "-"}
                   </TableCell>
