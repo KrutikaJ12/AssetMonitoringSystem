@@ -237,6 +237,17 @@ export default function App() {
             />
             {/* <Route path="/admin" element={<AdminDashboard />} /> */}
             <Route path="/siteManager" element={<SiteManagerDashboard />} />
+              <Route
+  path="/siteManager/live-tracking"
+  element={
+    <ProtectedRoute>
+      <PermissionRoute permission="SITE_VIEW">
+        <LiveTrackingPage/>
+      </PermissionRoute>
+    </ProtectedRoute>
+  }
+/>
+
             <Route path="/operator" element={<OperatorDashboard />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -264,6 +275,7 @@ export default function App() {
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
+          
         </Routes>
       </Router>
     </>
