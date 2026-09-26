@@ -12,7 +12,7 @@ async function getSites(customerId) {
         sm.Latitude, 
         sm.Longitude, 
         sm.IsActive, 
-
+        sm.RadiusMeters,
         COUNT(DISTINCT am.AssetID) AS AssetCount, 
 
         manager.UserID AS SiteManagerID, 
@@ -62,6 +62,7 @@ async function getSites(customerId) {
         sm.Latitude, 
         sm.Longitude, 
         sm.IsActive, 
+        sm.RadiusMeters,
         manager.UserID, 
         manager.FullName 
 
