@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { ArrowLeft, MapPin, RefreshCw, Search } from "lucide-react";
-import LiveMap from '../../components/common/Map/LiveMap'// Path apne folder structure ke according check kar lein
+import LiveMap from "../../components/common/Map/LiveMap"; // Path apne folder structure ke according check kar lein
 import Button from "../../components/ui/button/Button";
+import { useSites } from "../../hooks/useSites";
 
 const LiveTracking = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: sitesData, isLoading } = useSites();
+  const allSites = sitesData?.data || [];
 
+  const activeSites = allSites.filter((site) => site.IsActive);
   // 1. SiteAdmin page se passing State receive kar rahe hain
-  const siteData = location.state || {};
+  const siteData = location.state || null;
+
+  const isSingleSiteMode = Boolean(siteData);
 
   // 2. Default Coordinates (agar koi state na mile toh default Pune / Mumbai)
   const defaultCenter = {
@@ -31,7 +37,10 @@ const LiveTracking = () => {
     if (location.state) {
       setCurrentSite({
         siteName: location.state.siteName || "Selected Site",
-        locationName: location.state.locationName || location.state.siteName || "Site Location",
+        locationName:
+          location.state.locationName ||
+          location.state.siteName ||
+          "Site Location",
         lat: parseFloat(location.state.lat) || 18.52043,
         lng: parseFloat(location.state.lng) || 73.856744,
       });
@@ -56,13 +65,23 @@ const LiveTracking = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 mb-1 transition-colors"
           >
-            <ArrowLeft size={16} /> Back to Sites
+            <ArrowLeft size={16} /> Back
           </button>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-            Live Tracking: <span className="text-brand-600">{currentSite.siteName}</span>
+            Live Tracking:{" "}
+            <span className="text-brand-600">
+              {isSingleSiteMode ? currentSite.siteName : "All Sites"}
+            </span>
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">
-            Current Lat: <span className="font-semibold text-gray-700 dark:text-gray-200">{currentSite.lat.toFixed(6)}</span> | Lng: <span className="font-semibold text-gray-700 dark:text-gray-200">{currentSite.lng.toFixed(6)}</span>
+            Current Lat:{" "}
+            <span className="font-semibold text-gray-700 dark:text-gray-200">
+              {currentSite.lat.toFixed(6)}
+            </span>{" "}
+            | Lng:{" "}
+            <span className="font-semibold text-gray-700 dark:text-gray-200">
+              {currentSite.lng.toFixed(6)}
+            </span>
           </p>
         </div>
 
@@ -85,6 +104,7 @@ const LiveTracking = () => {
           center={{ lat: currentSite.lat, lng: currentSite.lng }}
           siteName={currentSite.siteName}
           locationName={currentSite.locationName}
+          sites={!isSingleSiteMode ? activeSites : undefined}
         />
       </div>
     </div>

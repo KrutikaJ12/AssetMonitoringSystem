@@ -89,6 +89,10 @@ export const adminMenu: NavItem[] = [
     moduleCode: "OPERATORS",
   },
   {
+    name: "Location",
+    path: "/admin/live-tracking",
+  },
+  {
     name: "Alerts",
     path: "/admin/alerts",
     moduleCode: "ALERTS",
