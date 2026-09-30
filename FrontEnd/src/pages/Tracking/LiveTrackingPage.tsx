@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { ArrowLeft, MapPin, RefreshCw, Search } from "lucide-react";
 import LiveMap from "../../components/common/Map/LiveMap"; // Path apne folder structure ke according check kar lein
@@ -9,14 +9,18 @@ const LiveTracking = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: sitesData, isLoading } = useSites();
+
   const allSites = sitesData?.data || [];
 
   const activeSites = allSites.filter((site) => site.IsActive);
-  // 1. SiteAdmin page se passing State receive kar rahe hain
+
   const siteData = location.state || null;
 
   const isSingleSiteMode = Boolean(siteData);
 
+  const selectedSite = siteData
+    ? allSites.find((site) => String(site.SiteID) === String(siteData.siteId))
+    : null;
   // 2. Default Coordinates (agar koi state na mile toh default Pune / Mumbai)
   const defaultCenter = {
     lat: parseFloat(siteData?.lat) || 18.52043,
@@ -30,7 +34,7 @@ const LiveTracking = () => {
     lng: defaultCenter.lng,
   });
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
 
   // State change hone par update karein
   useEffect(() => {
@@ -105,6 +109,10 @@ const LiveTracking = () => {
           siteName={currentSite.siteName}
           locationName={currentSite.locationName}
           sites={!isSingleSiteMode ? activeSites : undefined}
+          assets={isSingleSiteMode ? selectedSite?.Assets || [] : []}
+          // geofenceRadius={
+          //   isSingleSiteMode ? Number(selectedSite?.RadiusMeters) || 0 : 0
+          // }
         />
       </div>
     </div>

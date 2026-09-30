@@ -11,6 +11,48 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+const createAssetMarker = (assetType = "") => {
+  const type = assetType.toLowerCase();
+
+  let icon = "🚜";
+
+  if (type.includes("forklift")) {
+    icon = "🏗️";
+  } else if (type.includes("crane")) {
+    icon = "🏗️";
+  } else if (type.includes("excavator")) {
+    icon = "🚜";
+  } else if (type.includes("dump truck")) {
+    icon = "🚛";
+  } else if (type.includes("loader") || type.includes("tractor")) {
+    icon = "🚜";
+  } else if (type.includes("generator") || type.includes("compressor")) {
+    icon = "⚙️";
+  }
+
+  return L.divIcon({
+    className: "custom-asset-marker",
+    html: `
+      <div style="
+        width: 42px;
+        height: 42px;
+        background: white;
+        border: 2px solid #4F46E5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+      ">
+        ${icon}
+      </div>
+    `,
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
+    popupAnchor: [0, -21],
+  });
+};
 // 1. Custom SVG/Div Icon for Vehicle / Tracking Marker
 const createCustomMarker = (title = "Site") => {
   return L.divIcon({
@@ -89,16 +131,47 @@ const MapFitBounds = ({ sites }) => {
 
   return null;
 };
+const MapFitSiteAndAssets = ({ site, assets, showAssets }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!showAssets || !site) return;
+
+    const points = [
+      [Number(site.lat), Number(site.lng)],
+      ...assets
+        .filter(
+          (asset) =>
+            Number.isFinite(Number(asset.Latitude)) &&
+            Number.isFinite(Number(asset.Longitude)),
+        )
+        .map((asset) => [Number(asset.Latitude), Number(asset.Longitude)]),
+    ];
+
+    if (points.length <= 1) return;
+
+    const bounds = L.latLngBounds(points);
+
+    map.fitBounds(bounds, {
+      padding: [50, 50],
+    });
+  }, [site, assets, showAssets, map]);
+
+  return null;
+};
 const LiveMap = ({
   center,
   siteName,
   locationName,
   geofenceRadius = 700,
   sites = [],
+  assets = [],
 }) => {
   const [mapCenter, setMapCenter] = useState({ lat: 19.07609, lng: 72.877426 });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
+  const [showAssetMarkers, setShowAssetMarkers] = useState(false);
+  console.log("LiveMap assets:", assets);
   const isAllSitesMode = sites.length > 0;
   useEffect(() => {
     const parsedLat = parseFloat(center?.lat);
@@ -150,37 +223,37 @@ const LiveMap = ({
     <div className="relative w-full h-[550px] rounded-2xl overflow-hidden shadow-md border border-gray-200">
       {/* Top Left Floating Coordinate Card */}
       {!isAllSitesMode && (
-      <div className="absolute top-4 left-12 z-[1000] max-w-md bg-white/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg border border-gray-200">
-        <div className="text-[11px] font-bold uppercase text-indigo-600 mb-0.5">
-          📍 LOCATION:{" "}
-          {isAllSitesMode
-            ? "ALL SITES"
-            : siteName || locationName || "PLANT LOCATION"}
-        </div>
-        <div className="text-xs font-semibold text-gray-800 mb-2 truncate max-w-[300px]">
-          {loadingAddress ? (
-            <span className="text-gray-400 italic font-normal">
-              Fetching address...
-            </span>
-          ) : (
-            selectedLocation?.address || `${siteName || "Plant"} Location`
-          )}
-        </div>
-        <div className="flex items-center gap-3 text-xs font-mono text-gray-600 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100">
-          <div>
-            <span className="font-semibold text-gray-500">LAT:</span>{" "}
-            <span className="text-indigo-600 font-bold">
-              {activePosition.lat.toFixed(6)}
-            </span>
+        <div className="absolute top-4 left-12 z-[1000] max-w-md bg-white/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg border border-gray-200">
+          <div className="text-[11px] font-bold uppercase text-indigo-600 mb-0.5">
+            📍 LOCATION:{" "}
+            {isAllSitesMode
+              ? "ALL SITES"
+              : siteName || locationName || "PLANT LOCATION"}
           </div>
-          <div>
-            <span className="font-semibold text-gray-500">LNG:</span>{" "}
-            <span className="text-indigo-600 font-bold">
-              {activePosition.lng.toFixed(6)}
-            </span>
+          <div className="text-xs font-semibold text-gray-800 mb-2 truncate max-w-[300px]">
+            {loadingAddress ? (
+              <span className="text-gray-400 italic font-normal">
+                Fetching address...
+              </span>
+            ) : (
+              selectedLocation?.address || `${siteName || "Plant"} Location`
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-xs font-mono text-gray-600 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100">
+            <div>
+              <span className="font-semibold text-gray-500">LAT:</span>{" "}
+              <span className="text-indigo-600 font-bold">
+                {activePosition.lat.toFixed(6)}
+              </span>
+            </div>
+            <div>
+              <span className="font-semibold text-gray-500">LNG:</span>{" "}
+              <span className="text-indigo-600 font-bold">
+                {activePosition.lng.toFixed(6)}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
       )}
       <MapContainer
         center={[mapCenter.lat, mapCenter.lng]}
@@ -190,7 +263,9 @@ const LiveMap = ({
       >
         <MapRecenter center={mapCenter} />
         {isAllSitesMode && <MapFitBounds sites={sites} />}
-        <LocationMarker onLocationSelect={handleLocationSelect} />
+        {!isAllSitesMode && (
+          <LocationMarker onLocationSelect={handleLocationSelect} />
+        )}
 
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -241,6 +316,14 @@ const LiveMap = ({
           })
         ) : (
           <>
+            <MapFitSiteAndAssets
+              site={{
+                lat: activePosition.lat,
+                lng: activePosition.lng,
+              }}
+              assets={assets}
+              showAssets={showAssetMarkers}
+            />
             <Circle
               center={[activePosition.lat, activePosition.lng]}
               radius={geofenceRadius}
@@ -251,29 +334,113 @@ const LiveMap = ({
                 dashArray: "6, 8",
                 weight: 2,
               }}
-            />
-
-            <Marker
-              position={[activePosition.lat, activePosition.lng]}
-              icon={createCustomMarker(siteName)}
+              eventHandlers={{
+                mouseover: (e) => {
+                  e.target.openPopup();
+                },
+                mouseout: (e) => {
+                  e.target.closePopup();
+                },
+                click: () => {
+                  setShowAssetMarkers(true);
+                  e.target.closePopup();
+                },
+              }}
             >
+                <Marker
+                  position={[activePosition.lat, activePosition.lng]}
+                  icon={createCustomMarker(siteName)}
+                >
               <Popup>
-                <div className="text-xs font-sans">
-                  <p className="font-bold text-gray-800">
-                    {siteName || "Selected Site"}
+                <div className="min-w-[220px] text-xs font-sans">
+                  <p className="font-bold text-gray-800 text-sm">{siteName}</p>
+
+                  <p className="text-gray-500 mt-1">{locationName}</p>
+
+                  <div className="my-2 border-t border-gray-200" />
+
+                  <p className="font-semibold text-gray-700">
+                    Assigned Assets ({assets.length})
                   </p>
 
-                  <p className="text-indigo-600 font-semibold mt-0.5">
-                    Geofence: {geofenceRadius}m Active
-                  </p>
+                  {assets.length === 0 ? (
+                    <p className="text-gray-500 mt-2">
+                      No assets assigned to this site.
+                    </p>
+                  ) : (
+                    <div className="mt-2 space-y-2">
+                      {assets.map((asset) => (
+                        <div
+                          key={asset.AssetID}
+                          className="rounded-md bg-gray-50 p-2"
+                        >
+                          <p className="font-semibold text-gray-800">
+                            {asset.AssetName}
+                          </p>
 
-                  <p className="text-gray-500 text-[11px] mt-1">
-                    {activePosition.lat.toFixed(6)},{" "}
-                    {activePosition.lng.toFixed(6)}
-                  </p>
+                          <p className="text-gray-500 mt-0.5">
+                            Status:{" "}
+                            <span className="font-medium text-indigo-600">
+                              {asset.CurrentStatus}
+                            </span>
+                          </p>
+
+                          <p className="text-gray-500">
+                            Speed: {asset.SpeedKph} km/h
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Popup>
-            </Marker>
+              </Marker>
+            </Circle>
+            {showAssetMarkers &&
+              assets.map((asset) => {
+                const lat = Number(asset.Latitude);
+                const lng = Number(asset.Longitude);
+
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                  return null;
+                }
+                console.log("Rendering asset marker:", {
+                  name: asset.AssetName,
+                  lat,
+                  lng,
+                });
+
+                return (
+                  <Marker
+                    key={asset.AssetID}
+                    position={[lat, lng]}
+                    icon={createAssetMarker(asset.AssetTypeName)}
+                  >
+                    <Popup>
+                      <div className="text-xs font-sans">
+                        <p className="font-bold text-gray-800">
+                          {asset.AssetName}
+                        </p>
+
+                        <p className="text-gray-500 mt-1">
+                          {asset.AssetTypeName}
+                        </p>
+
+                        <p className="text-gray-500 mt-1">
+                          Status:{" "}
+                          <span className="font-semibold text-indigo-600">
+                            {asset.CurrentStatus}
+                          </span>
+                        </p>
+
+                        <p className="text-gray-500 mt-1">
+                          Speed: {asset.SpeedKph} km/h
+                        </p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
           </>
         )}
       </MapContainer>

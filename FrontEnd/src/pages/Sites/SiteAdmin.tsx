@@ -1,4 +1,12 @@
-import { Delete, Download, Eye, MapPin, Search, SquarePen, Trash2 } from "lucide-react";
+import {
+  Delete,
+  Download,
+  Eye,
+  MapPin,
+  Search,
+  SquarePen,
+  Trash2,
+} from "lucide-react";
 import Button from "../../components/ui/button/Button";
 import {
   Table,
@@ -75,8 +83,9 @@ const SiteAdmin = (Asset) => {
       state: {
         siteId: site.SiteID,
         siteName: site.SiteName,
-        lat: parseFloat(site.Latitude) || 19.076,
-        lng: parseFloat(site.Longitude) || 72.8777,
+        locationName: site.LocationName,
+        lat: site.Latitude,
+        lng: site.Longitude,
       },
     });
   };
@@ -84,7 +93,9 @@ const SiteAdmin = (Asset) => {
   return (
     <>
       <div className="h-10 flex justify-between mb-4">
-        <div className="text-xl font-semibold text-gray-800 dark:text-white">Sites</div>
+        <div className="text-xl font-semibold text-gray-800 dark:text-white">
+          Sites
+        </div>
         <Button
           onClick={() => {
             setIsModalOpen(true);
@@ -145,26 +156,47 @@ const SiteAdmin = (Asset) => {
           <Table>
             <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
               <TableRow>
-                <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Site Name
                 </TableCell>
-                <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Location
                 </TableCell>
-                <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Coordinates
                 </TableCell>
-                <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Asset Count
                 </TableCell>
-                <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Status
                 </TableCell>
-                <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                >
                   Site Manager
                 </TableCell>
                 {hasPermission("ASSET_VIEW") && (
-                  <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                  <TableCell
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
                     Actions
                   </TableCell>
                 )}
@@ -181,7 +213,10 @@ const SiteAdmin = (Asset) => {
                       className="group flex items-center gap-1.5 text-left font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300 hover:underline transition-all"
                     >
                       <span>{site.SiteName}</span>
-                      <MapPin size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <MapPin
+                        size={14}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
                     </button>
                   </TableCell>
 
@@ -201,7 +236,9 @@ const SiteAdmin = (Asset) => {
 
                   <TableCell>
                     <button
-                      onClick={() => navigate(`/admin/assets?siteId=${site.SiteID}`)}
+                      onClick={() =>
+                        navigate(`/admin/assets?siteId=${site.SiteID}`)
+                      }
                       className="font-medium text-brand-500 hover:underline"
                     >
                       {site.AssetCount}
@@ -215,8 +252,8 @@ const SiteAdmin = (Asset) => {
                         site.IsActive
                           ? "success"
                           : site.status === "Maintenance"
-                          ? "warning"
-                          : "error"
+                            ? "warning"
+                            : "error"
                       }
                     >
                       {site.IsActive ? "Active" : "Inactive"}
