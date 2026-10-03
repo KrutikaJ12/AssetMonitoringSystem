@@ -53,7 +53,7 @@ const createAssetMarker = (assetType = "") => {
     popupAnchor: [0, -21],
   });
 };
-// 1. Custom SVG/Div Icon for Vehicle / Tracking Marker
+
 const createCustomMarker = (title = "Site") => {
   return L.divIcon({
     className: "custom-leaflet-marker",
@@ -106,6 +106,7 @@ const LocationMarker = ({ onLocationSelect }) => {
   });
   return null;
 };
+
 const MapFitBounds = ({ sites }) => {
   const map = useMap();
 
@@ -131,6 +132,7 @@ const MapFitBounds = ({ sites }) => {
 
   return null;
 };
+
 const MapFitSiteAndAssets = ({ site, assets, showAssets }) => {
   const map = useMap();
 
@@ -159,6 +161,7 @@ const MapFitSiteAndAssets = ({ site, assets, showAssets }) => {
 
   return null;
 };
+
 const LiveMap = ({
   center,
   siteName,
@@ -171,8 +174,9 @@ const LiveMap = ({
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
   const [showAssetMarkers, setShowAssetMarkers] = useState(false);
-  console.log("LiveMap assets:", assets);
+
   const isAllSitesMode = sites.length > 0;
+
   useEffect(() => {
     const parsedLat = parseFloat(center?.lat);
     const parsedLng = parseFloat(center?.lng);
@@ -255,6 +259,7 @@ const LiveMap = ({
           </div>
         </div>
       )}
+
       <MapContainer
         center={[mapCenter.lat, mapCenter.lng]}
         zoom={14}
@@ -271,6 +276,7 @@ const LiveMap = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
         {isAllSitesMode ? (
           sites.map((site) => {
             const lat = Number(site.Latitude);
@@ -295,19 +301,17 @@ const LiveMap = ({
                   position={[lat, lng]}
                   icon={createCustomMarker(site.SiteName)}
                 >
-                  <Popup>
-                    <div className="text-xs font-sans">
-                      <p className="font-bold text-gray-800">{site.SiteName}</p>
-
-                      <p className="text-gray-500 mt-1">{site.LocationName}</p>
-
-                      <p className="text-indigo-600 font-semibold mt-1">
-                        Geofence: {radius}m Active
-                      </p>
-
-                      <p className="text-gray-500 text-[11px] mt-1">
-                        {lat.toFixed(6)}, {lng.toFixed(6)}
-                      </p>
+                  <Popup className="custom-row-popup">
+                    <div className="p-1 font-sans">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="font-bold text-gray-900 text-xs truncate">{site.SiteName}</p>
+                          <p className="text-[10px] text-gray-500">{site.LocationName}</p>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200 whitespace-nowrap">
+                          Geofence: {radius}m
+                        </span>
+                      </div>
                     </div>
                   </Popup>
                 </Marker>
@@ -324,6 +328,7 @@ const LiveMap = ({
               assets={assets}
               showAssets={showAssetMarkers}
             />
+            
             <Circle
               center={[activePosition.lat, activePosition.lng]}
               radius={geofenceRadius}
@@ -341,61 +346,76 @@ const LiveMap = ({
                 mouseout: (e) => {
                   e.target.closePopup();
                 },
-                click: () => {
+                click: (e) => {
                   setShowAssetMarkers(true);
                   e.target.closePopup();
                 },
               }}
             >
-                <Marker
-                  position={[activePosition.lat, activePosition.lng]}
-                  icon={createCustomMarker(siteName)}
-                >
-              <Popup>
-                <div className="min-w-[220px] text-xs font-sans">
-                  <p className="font-bold text-gray-800 text-sm">{siteName}</p>
+              <Marker
+                position={[activePosition.lat, activePosition.lng]}
+                icon={createCustomMarker(siteName)}
+              >
+                {/* 1. TOTAL / SITE INFOBOX (SINGLE ROW FORMAT) */}
+               {/* 1. TOTAL / SITE INFOBOX (CLEAN ROW LIST WITHOUT SCROLLBAR) */}
+<Popup className="custom-row-popup">
+  <div className="p-1 font-sans min-w-[280px]">
+    {/* Site Header */}
+    <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 mb-2">
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-gray-900 text-xs truncate">{siteName}</p>
+        <p className="text-[10px] text-gray-500 truncate">{locationName}</p>
+      </div>
+      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 whitespace-nowrap">
+        Total Assets: {assets.length}
+      </span>
+    </div>
 
-                  <p className="text-gray-500 mt-1">{locationName}</p>
+    {/* All Assets Displayed in Clean Stacked Rows */}
+    {assets.length === 0 ? (
+      <p className="text-[11px] text-gray-400 italic">No assets assigned</p>
+    ) : (
+      <div className="flex flex-col gap-1.5">
+        {assets.map((asset) => (
+          <div
+            key={asset.AssetID}
+            className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg p-2"
+          >
+            {/* Asset Name & Type */}
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-gray-800 text-[11px] truncate">
+                {asset.AssetName}
+              </span>
+              <span className="text-[9px] text-gray-400 font-medium truncate">
+                {asset.AssetTypeName || "Equipment"}
+              </span>
+            </div>
 
-                  <div className="my-2 border-t border-gray-200" />
-
-                  <p className="font-semibold text-gray-700">
-                    Assigned Assets ({assets.length})
-                  </p>
-
-                  {assets.length === 0 ? (
-                    <p className="text-gray-500 mt-2">
-                      No assets assigned to this site.
-                    </p>
-                  ) : (
-                    <div className="mt-2 space-y-2">
-                      {assets.map((asset) => (
-                        <div
-                          key={asset.AssetID}
-                          className="rounded-md bg-gray-50 p-2"
-                        >
-                          <p className="font-semibold text-gray-800">
-                            {asset.AssetName}
-                          </p>
-
-                          <p className="text-gray-500 mt-0.5">
-                            Status:{" "}
-                            <span className="font-medium text-indigo-600">
-                              {asset.CurrentStatus}
-                            </span>
-                          </p>
-
-                          <p className="text-gray-500">
-                            Speed: {asset.SpeedKph} km/h
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Popup>
+            {/* Status & Speed Badge */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span
+                className={`px-1.5 py-0.5 text-[9px] font-bold rounded uppercase ${
+                  asset.CurrentStatus?.toLowerCase() === "running"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-rose-100 text-rose-700"
+                }`}
+              >
+                {asset.CurrentStatus}
+              </span>
+              <span className="text-[10px] text-indigo-600 font-mono font-bold">
+                {asset.SpeedKph || 0} km/h
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</Popup>
               </Marker>
             </Circle>
+
+            {/* 2. SPECIFIC ASSET INFOBOX (SINGLE ROW FORMAT) */}
             {showAssetMarkers &&
               assets.map((asset) => {
                 const lat = Number(asset.Latitude);
@@ -404,11 +424,6 @@ const LiveMap = ({
                 if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
                   return null;
                 }
-                console.log("Rendering asset marker:", {
-                  name: asset.AssetName,
-                  lat,
-                  lng,
-                });
 
                 return (
                   <Marker
@@ -416,26 +431,58 @@ const LiveMap = ({
                     position={[lat, lng]}
                     icon={createAssetMarker(asset.AssetTypeName)}
                   >
-                    <Popup>
-                      <div className="text-xs font-sans">
-                        <p className="font-bold text-gray-800">
-                          {asset.AssetName}
-                        </p>
+                    <Popup className="custom-row-popup">
+                      <div className="flex items-center gap-3 p-1 font-sans min-w-[280px]">
+                        {/* Thumbnail Image */}
+                        <div className="relative shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                          <img
+                            src={asset.ImageURL || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=150&auto=format&fit=crop&q=80"}
+                            alt={asset.AssetName}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.classList.add('flex', 'items-center', 'justify-center', 'text-base');
+                              e.target.parentElement.innerHTML = '🚜';
+                            }}
+                          />
+                        </div>
 
-                        <p className="text-gray-500 mt-1">
-                          {asset.AssetTypeName}
-                        </p>
+                        {/* Details in Single Flex Row */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-bold text-gray-900 text-xs truncate">
+                              {asset.AssetName}
+                            </p>
+                            <span className="text-[9px] text-gray-400 font-medium truncate">
+                              {asset.AssetTypeName || "Equipment"}
+                            </span>
+                          </div>
 
-                        <p className="text-gray-500 mt-1">
-                          Status:{" "}
-                          <span className="font-semibold text-indigo-600">
-                            {asset.CurrentStatus}
-                          </span>
-                        </p>
+                          <div className="flex items-center justify-between gap-2 mt-1.5">
+                            {/* Status Badge */}
+                            <span
+                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                asset.CurrentStatus?.toLowerCase() === "running"
+                                  ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                  : "bg-rose-50 text-rose-600 border border-rose-200"
+                              }`}
+                            >
+                              <span
+                                className={`w-1 h-1 rounded-full ${
+                                  asset.CurrentStatus?.toLowerCase() === "running"
+                                    ? "bg-emerald-500 animate-pulse"
+                                    : "bg-rose-500"
+                                }`}
+                              />
+                              {asset.CurrentStatus}
+                            </span>
 
-                        <p className="text-gray-500 mt-1">
-                          Speed: {asset.SpeedKph} km/h
-                        </p>
+                            {/* Speed */}
+                            <span className="text-[10px] font-mono font-semibold text-indigo-600">
+                              {asset.SpeedKph || 0} km/h
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </Popup>
                   </Marker>
