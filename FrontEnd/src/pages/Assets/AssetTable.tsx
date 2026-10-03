@@ -111,11 +111,11 @@ interface AssetTableProps {
   data: Asset[];
 }
 export function AssetTable(Asset: AssetTableProps) {
-   // Read siteId on the Assets page
+  // Read siteId on the Assets page
   const [searchParams] = useSearchParams();
   const siteId = searchParams.get("siteId");
-  const {data,isLoading,error} = useGetAssets(siteId);
-  console.log("assetData",data);
+  const { data, isLoading, error } = useGetAssets(siteId);
+  console.log("assetData", data);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
@@ -136,7 +136,9 @@ export function AssetTable(Asset: AssetTableProps) {
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
-     const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
+    const matchSite = selectedSiteFilter
+      ? data.site === selectedSiteFilter
+      : true;
     // return matchesSearch && matchSite;
     return matchSite;
   });
@@ -145,7 +147,7 @@ export function AssetTable(Asset: AssetTableProps) {
     setSearch("");
     setSelectedSite("");
   };
-   const {hasPermission}=useAuth()
+  const { hasPermission } = useAuth();
   const handleExport = () => {
     const headers = [
       "Asset ID",
@@ -189,20 +191,17 @@ export function AssetTable(Asset: AssetTableProps) {
     // setTimeout(() => setToastMessage(null), 3000);
   };
 
-
-
   const handleNavigateToLiveMap = (asset) => {
-  navigate("/admin/live-tracking", {
-    state: {
-      siteId: asset.SiteID || asset.id,
-      siteName: asset.SiteName,
-      locationName: asset.LocationName || asset.SiteName,
-      lat: parseFloat(asset.Latitude) || 19.076,
-      lng: parseFloat(asset.Longitude) || 72.8777,
-    },
-  });
-};
-
+    navigate("/admin/live-tracking", {
+      state: {
+        siteId: asset.SiteID || asset.id,
+        siteName: asset.SiteName,
+        locationName: asset.LocationName || asset.SiteName,
+        lat: parseFloat(asset.Latitude) || 19.076,
+        lng: parseFloat(asset.Longitude) || 72.8777,
+      },
+    });
+  };
 
   return (
     <>
@@ -218,14 +217,13 @@ export function AssetTable(Asset: AssetTableProps) {
         </Button>
         {hasPermission("ASSET_EXPORT") && (
           <button
-          onClick={handleExport}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
-        >
-          <Download size={16} />
-          Export
-        </button>
+            onClick={handleExport}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+          >
+            <Download size={16} />
+            Export
+          </button>
         )}
-        
       </div>
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         {/* Search + City/Branch Filters */}
@@ -295,7 +293,7 @@ export function AssetTable(Asset: AssetTableProps) {
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  className=" py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
                   Asset Type
                 </TableCell>
@@ -323,11 +321,11 @@ export function AssetTable(Asset: AssetTableProps) {
                 >
                   LastReporting Time
                 </TableCell>
-                 <TableCell
+                <TableCell
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                 Speed
+                  Speed
                 </TableCell>
                 <TableCell
                   isHeader
@@ -355,11 +353,11 @@ export function AssetTable(Asset: AssetTableProps) {
                 </TableCell>
                 {hasPermission("ASSET_VIEW") && (
                   <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Actions
-                </TableCell>
+                    isHeader
+                    className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Actions
+                  </TableCell>
                 )}
               </TableRow>
             </TableHeader>
@@ -370,48 +368,51 @@ export function AssetTable(Asset: AssetTableProps) {
               {filteredData?.map((asset) => (
                 <TableRow className="">
                   {/* <TableCell className="py-3"> */}
-                    {/* <div className="flex items-center gap-3"> */}
-                      {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
+                  {/* <div className="flex items-center gap-3"> */}
+                  {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
                       <img
                         src={site.image}
                         className="h-[50px] w-[50px]"
                         alt={site.name}
                       />
                     </div> */}
-                      {/* <div> */}
-                        {/* <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                  {/* <div> */}
+                  {/* <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                           {asset.assetId}
                         </p> */}
-                        {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
+                  {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {site.totalAssets}
                       </span> */}
-                      {/* </div> */}
-                    {/* </div> */}
+                  {/* </div> */}
+                  {/* </div> */}
                   {/* </TableCell> */}
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.AssetCode}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  <TableCell className=" flex flex-row gap-3 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                    <div className="h-6 w-6 rounded-lg flex items-center justify-center text-3xl">
+                      🚜
+                    </div>
                     {asset.AssetTypeName}
                   </TableCell>
                   {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.Category}
                   </TableCell> */}
-                <TableCell className="py-3 text-theme-sm">
-  <button
-    onClick={() => handleNavigateToLiveMap(asset)}
-    className="text-brand-600 hover:text-brand-500 dark:text-gray-300 dark:hover:text-brand-400 text-left cursor-pointer transition-colors font-medium underline underline-offset-2"
-  >
-    {asset.SiteName}
-  </button>
-</TableCell>
-                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  <TableCell className="py-3 text-theme-sm">
+                    <button
+                      onClick={() => handleNavigateToLiveMap(asset)}
+                      className="text-brand-600 hover:text-brand-500 dark:text-gray-300 dark:hover:text-brand-400 text-left cursor-pointer transition-colors font-medium underline underline-offset-2"
+                    >
+                      {asset.SiteName}
+                    </button>
+                  </TableCell>
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.OperatorName ?? "-"}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.LastReportingTime ?? "-"}
                   </TableCell>
-                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.SpeedKph ?? "-"}
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
@@ -437,12 +438,12 @@ export function AssetTable(Asset: AssetTableProps) {
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {asset.FuelPercentage}%
                   </TableCell>
-                 {hasPermission("ASSET_VIEW") && (
+                  {hasPermission("ASSET_VIEW") && (
                     <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <button
                         onClick={() => {
-                          setSelectedAsset(asset)
-                          setIsDrawerOpen(true)
+                          setSelectedAsset(asset);
+                          setIsDrawerOpen(true);
                           setMode("view");
                         }}
                       >
@@ -450,7 +451,7 @@ export function AssetTable(Asset: AssetTableProps) {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedAsset(asset)
+                          setSelectedAsset(asset);
                           setIsModalOpen(true);
                           setMode("edit");
                         }}
@@ -484,7 +485,7 @@ export function AssetTable(Asset: AssetTableProps) {
               {selectedAsset && <AssetDetails asset={selectedAsset} />}
             </Modal>
           )}
-           <AssetModal
+          <AssetModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             mode={mode}
