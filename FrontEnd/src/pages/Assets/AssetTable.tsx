@@ -16,6 +16,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { useGetAssets } from "../../hooks/useAssets";
 import AssetModal from "./AssetModal";
 import { useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
+
 // const assetsData = [
 //   {
 //     assetId: "EX001",
@@ -109,11 +111,11 @@ interface AssetTableProps {
   data: Asset[];
 }
 export function AssetTable(Asset: AssetTableProps) {
-   // Read siteId on the Assets page
+  // Read siteId on the Assets page
   const [searchParams] = useSearchParams();
   const siteId = searchParams.get("siteId");
-  const {data,isLoading,error} = useGetAssets(siteId);
-  console.log("assetData",data);
+  const { data, isLoading, error } = useGetAssets(siteId);
+  console.log("assetData", data);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSiteFilter, setSelectedSiteFilter] = useState("");
@@ -123,6 +125,7 @@ export function AssetTable(Asset: AssetTableProps) {
     "add" | "edit" | "view" | "delete" | "reset-password"
   >("add");
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const navigate = useNavigate();
   const hasFilters = search || selectedAsset || status;
   const sites = [
     { code: "MUM", name: "Mumbai" },
@@ -133,7 +136,9 @@ export function AssetTable(Asset: AssetTableProps) {
     // const matchesSearch =
     //   data.assetName.toLowerCase().includes(search.toLowerCase()) ||
     //   data.category.toLowerCase().includes(search.toLowerCase());
-     const matchSite = selectedSiteFilter ? data.site === selectedSiteFilter : true;
+    const matchSite = selectedSiteFilter
+      ? data.site === selectedSiteFilter
+      : true;
     // return matchesSearch && matchSite;
     return matchSite;
   });
@@ -142,7 +147,7 @@ export function AssetTable(Asset: AssetTableProps) {
     setSearch("");
     setSelectedSite("");
   };
-   const {hasPermission}=useAuth()
+  const { hasPermission } = useAuth();
   const handleExport = () => {
     const headers = [
       "Asset ID",
@@ -185,6 +190,19 @@ export function AssetTable(Asset: AssetTableProps) {
     // setToastMessage("Data exported successfully!");
     // setTimeout(() => setToastMessage(null), 3000);
   };
+
+  const handleNavigateToLiveMap = (asset) => {
+    navigate("/admin/live-tracking", {
+      state: {
+        siteId: asset.SiteID || asset.id,
+        siteName: asset.SiteName,
+        locationName: asset.LocationName || asset.SiteName,
+        lat: parseFloat(asset.Latitude) || 19.076,
+        lng: parseFloat(asset.Longitude) || 72.8777,
+      },
+    });
+  };
+
   return (
     <>
       <div className=" h-10 flex justify-end gap-4 mb-4  ">
@@ -199,14 +217,13 @@ export function AssetTable(Asset: AssetTableProps) {
         </Button>
         {hasPermission("ASSET_EXPORT") && (
           <button
-          onClick={handleExport}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
-        >
-          <Download size={16} />
-          Export
-        </button>
+            onClick={handleExport}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-400 transition"
+          >
+            <Download size={16} />
+            Export
+          </button>
         )}
-        
       </div>
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
         {/* Search + City/Branch Filters */}
@@ -266,193 +283,184 @@ export function AssetTable(Asset: AssetTableProps) {
         <div className="max-w-full overflow-x-auto">
           <Table>
             {/* Table Header */}
-            <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
-              <TableRow>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Asset Code
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Asset Type
-                </TableCell>
-                {/* <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Category
-                </TableCell> */}
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Assigned Site
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Operator
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  LastReporting Time
-                </TableCell>
-                 <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                 Speed
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Status
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Engine Hours
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Idle Hours
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Fuel %
-                </TableCell>
-                {hasPermission("ASSET_VIEW") && (
-                  <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
-                  Actions
-                </TableCell>
-                )}
-              </TableRow>
-            </TableHeader>
+           <TableHeader className="border-y border-gray-100 dark:border-gray-800">
+  <TableRow>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Asset Code
+    </TableCell>
+    
+    {/* Corrected Asset Type Header - Indented to align with icon + text */}
+    <TableCell
+      isHeader
+      className="py-3 px-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Asset Type
+    </TableCell>
 
-            {/* Table Body */}
+    {/* <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Category
+    </TableCell> */}
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Assigned Site
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Operator
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      LastReporting Time
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Speed
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Status
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Engine Hours
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Idle Hours
+    </TableCell>
+    <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Fuel %
+    </TableCell>
+    {hasPermission("ASSET_VIEW") && (
+      <TableCell
+        isHeader
+        className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+      >
+        Actions
+      </TableCell>
+    )}
+  </TableRow>
+</TableHeader>
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {filteredData?.map((asset) => (
-                <TableRow className="">
-                  {/* <TableCell className="py-3"> */}
-                    {/* <div className="flex items-center gap-3"> */}
-                      {/* <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
-                      <img
-                        src={site.image}
-                        className="h-[50px] w-[50px]"
-                        alt={site.name}
-                      />
-                    </div> */}
-                      {/* <div> */}
-                        {/* <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {asset.assetId}
-                        </p> */}
-                        {/* <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {site.totalAssets}
-                      </span> */}
-                      {/* </div> */}
-                    {/* </div> */}
-                  {/* </TableCell> */}
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.AssetCode}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.AssetTypeName}
-                  </TableCell>
-                  {/* <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.Category}
-                  </TableCell> */}
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.SiteName}
-                  </TableCell>
-                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.OperatorName ?? "-"}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.LastReportingTime ?? "-"}
-                  </TableCell>
-                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.SpeedKph ?? "-"}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    <Badge
-                      size="sm"
-                      color={
-                        asset.Status === "RUNNING"
-                          ? "success"
-                          : asset.Status === "IDLE"
-                            ? "warning"
-                            : "error"
-                      }
-                    >
-                      {asset.Status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.EngineHours}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.IdleHours}
-                  </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {asset.FuelPercentage}%
-                  </TableCell>
-                 {hasPermission("ASSET_VIEW") && (
-                    <TableCell className="flex gap-3  py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      <button
-                        onClick={() => {
-                          setSelectedAsset(asset)
-                          setIsDrawerOpen(true)
-                          setMode("view");
-                        }}
-                      >
-                        <Eye />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedAsset(asset)
-                          setIsModalOpen(true);
-                          setMode("edit");
-                        }}
-                      >
-                        <SquarePen />
-                      </button>
-                      <button onClick={() => handleDelete(asset)}>
-                        <Trash2 />
-                      </button>
-                    </TableCell>
-                  )}
-                  {/* <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-20 rounded-full bg-gray-200">
-                        <div
-                          className="h-2 rounded-full bg-red-500"
-                          style={{ width: `${site.utilization}%` }}
-                        />
-                      </div>
+{/* Table Body */}
+<TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+  {filteredData?.map((asset, index) => (
+    <TableRow key={asset.AssetCode || index}>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.AssetCode}
+      </TableCell>
+      
+      {/* Asset Type Body Cell with Matching Padding */}
+      <TableCell className="py-3 px-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        <div className="flex items-center">
+          {asset.AssetTypeImage ? (
+            <img
+              src={asset.AssetTypeImage}
+              alt={asset.AssetTypeName}
+              className="h-6 w-6 object-contain"
+            />
+          ) : (
+            <span className="flex h-6 w-6 items-center justify-center text-lg leading-none">
+              🚜
+            </span>
+          )}
+          <span>{asset.AssetTypeName}</span>
+        </div>
+      </TableCell>
 
-                      <span>{site.utilization}%</span>
-                    </div>
-                  </TableCell> */}
-                </TableRow>
-              ))}
-            </TableBody>
+      <TableCell className="py-3 text-left text-theme-sm">
+        <button
+          onClick={() => handleNavigateToLiveMap(asset)}
+          className="cursor-pointer text-left font-medium text-brand-600 underline underline-offset-2 transition-colors hover:text-brand-500 dark:text-gray-300 dark:hover:text-brand-400"
+        >
+          {asset.SiteName}
+        </button>
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.OperatorName ?? "-"}
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.LastReportingTime ?? "-"}
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.SpeedKph ?? "-"}
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        <Badge
+          size="sm"
+          color={
+            asset.Status === "RUNNING"
+              ? "success"
+              : asset.Status === "IDLE"
+                ? "warning"
+                : "error"
+          }
+        >
+          {asset.Status}
+        </Badge>
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.EngineHours}
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.IdleHours}
+      </TableCell>
+      <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {asset.FuelPercentage}%
+      </TableCell>
+      {hasPermission("ASSET_VIEW") && (
+        <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setSelectedAsset(asset);
+                setIsDrawerOpen(true);
+                setMode("view");
+              }}
+            >
+              <Eye />
+            </button>
+            <button
+              onClick={() => {
+                setSelectedAsset(asset);
+                setIsModalOpen(true);
+                setMode("edit");
+              }}
+            >
+              <SquarePen />
+            </button>
+            <button onClick={() => handleDelete(asset)}>
+              <Trash2 />
+            </button>
+          </div>
+        </TableCell>
+      )}
+    </TableRow>
+  ))}
+</TableBody>
           </Table>
 
           {isDrawerOpen && (
@@ -460,7 +468,7 @@ export function AssetTable(Asset: AssetTableProps) {
               {selectedAsset && <AssetDetails asset={selectedAsset} />}
             </Modal>
           )}
-           <AssetModal
+          <AssetModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             mode={mode}

@@ -790,3 +790,17 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+
+/* Popup Row Styling Override */
+.custom-row-popup .leaflet-popup-content-wrapper {
+  padding: 6px 10px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(229, 231, 235, 0.9) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.custom-row-popup .leaflet-popup-content {
+  margin: 2px !important;
+  width: auto !important;
+}

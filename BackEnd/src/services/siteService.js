@@ -5,70 +5,105 @@ async function getSites(customerId) {
 
   const result = await pool.request().input("CustomerID", sql.Int, customerId)
     .query(`
-    SELECT 
-        sm.SiteID, 
-        sm.SiteName, 
-        sm.LocationName, 
-        sm.Latitude, 
-        sm.Longitude, 
-        sm.IsActive, 
+      SELECT
+          sm.SiteID,
+          sm.SiteName,
+          sm.LocationName,
+          sm.Latitude,
+          sm.Longitude,
+          sm.IsActive,
+          sm.RadiusMeters,
 
-        COUNT(DISTINCT am.AssetID) AS AssetCount, 
+          COUNT(DISTINCT am.AssetID) AS AssetCount,
 
-        manager.UserID AS SiteManagerID, 
-        manager.FullName AS SiteManagerName 
+          manager.UserID AS SiteManagerID,
+          manager.FullName AS SiteManagerName,
 
-    FROM SiteMaster sm 
+          (
+            SELECT
+                am2.AssetID,
+                am2.AssetName,
+                atm.AssetTypeName,
+                als.Latitude,
+                als.Longitude,
+                als.CurrentStatus,
+                als.SpeedKph,
+                als.UpdatedDateTimeUtc
 
-    LEFT JOIN AssetInSite ais 
-        ON sm.SiteID = ais.SiteID 
+            FROM AssetInSite ais2
 
-    LEFT JOIN AssetMaster am
-        ON ais.AssetID = am.AssetID
-        AND am.CustomerID = sm.CustomerID
+            INNER JOIN AssetMaster am2
+            ON ais2.AssetID = am2.AssetID
+            AND am2.CustomerID = sm.CustomerID
 
-    OUTER APPLY ( 
-        SELECT TOP 1 
-            u.UserID, 
-            u.FullName 
-        FROM UserSiteAccess usa 
+            LEFT JOIN AssetTypeMaster atm
+            ON am2.AssetTypeID = atm.AssetTypeID
 
-        INNER JOIN AppUser u 
-            ON usa.UserID = u.UserID 
-            AND u.IsActive = 1 
+            LEFT JOIN AssetLiveStatus als
+            ON als.AssetID = am2.AssetID
 
-        INNER JOIN UserRoleMapping urm 
-            ON u.UserID = urm.UserID 
-            AND urm.IsActive = 1 
+            WHERE ais2.SiteID = sm.SiteID
 
-        INNER JOIN RoleMaster r 
-            ON urm.RoleID = r.RoleID 
-            AND r.IsActive = 1 
+            FOR JSON PATH
+          ) AS Assets
 
-        WHERE usa.SiteID = sm.SiteID 
-          AND usa.IsActive = 1 
-          AND r.RoleCode = 'SITE_MANAGER' 
-          AND r.CustomerID = sm.CustomerID 
+      FROM SiteMaster sm
 
-        ORDER BY usa.CreatedDate DESC 
-    ) manager 
+      LEFT JOIN AssetInSite ais
+          ON sm.SiteID = ais.SiteID
 
-    WHERE sm.CustomerID = @CustomerID 
+      LEFT JOIN AssetMaster am
+          ON ais.AssetID = am.AssetID
+          AND am.CustomerID = sm.CustomerID
 
-    GROUP BY 
-        sm.SiteID, 
-        sm.SiteName, 
-        sm.LocationName, 
-        sm.Latitude, 
-        sm.Longitude, 
-        sm.IsActive, 
-        manager.UserID, 
-        manager.FullName 
+      OUTER APPLY (
+          SELECT TOP 1
+              u.UserID,
+              u.FullName
 
-    ORDER BY sm.SiteID;
-  `);
+          FROM UserSiteAccess usa
 
-  return result.recordset;
+          INNER JOIN AppUser u
+              ON usa.UserID = u.UserID
+              AND u.IsActive = 1
+
+          INNER JOIN UserRoleMapping urm
+              ON u.UserID = urm.UserID
+              AND urm.IsActive = 1
+
+          INNER JOIN RoleMaster r
+              ON urm.RoleID = r.RoleID
+              AND r.IsActive = 1
+
+          WHERE usa.SiteID = sm.SiteID
+            AND usa.IsActive = 1
+            AND r.RoleCode = 'SITE_MANAGER'
+            AND r.CustomerID = sm.CustomerID
+
+          ORDER BY usa.CreatedDate DESC
+      ) manager
+
+      WHERE sm.CustomerID = @CustomerID
+
+   GROUP BY
+    sm.SiteID,
+    sm.SiteName,
+    sm.LocationName,
+    sm.Latitude,
+    sm.Longitude,
+    sm.IsActive,
+    sm.RadiusMeters,
+    sm.CustomerID,
+    manager.UserID,
+    manager.FullName
+
+      ORDER BY sm.SiteID;
+    `);
+
+  return result.recordset.map((site) => ({
+    ...site,
+    Assets: site.Assets ? JSON.parse(site.Assets) : [],
+  }));
 }
 async function createSite(siteData, customerId, userId, ipAddress) {
   // validate
@@ -269,16 +304,14 @@ async function updateSite(siteId, siteData, customerId, userId, ipAddress) {
 
   const newValues = result.recordset[0];
   const onlyStatusChanged =
-  oldValues.SiteName === newValues.SiteName &&
-  oldValues.LocationName === newValues.LocationName &&
-  Number(oldValues.Latitude) === Number(newValues.Latitude) &&
-  Number(oldValues.Longitude) === Number(newValues.Longitude) &&
-  oldValues.RadiusMeters === newValues.RadiusMeters &&
-  oldValues.IsActive !== newValues.IsActive;
+    oldValues.SiteName === newValues.SiteName &&
+    oldValues.LocationName === newValues.LocationName &&
+    Number(oldValues.Latitude) === Number(newValues.Latitude) &&
+    Number(oldValues.Longitude) === Number(newValues.Longitude) &&
+    oldValues.RadiusMeters === newValues.RadiusMeters &&
+    oldValues.IsActive !== newValues.IsActive;
 
-  const action = onlyStatusChanged
-  ? "STATUS_CHANGE"
-  : "UPDATE";
+  const action = onlyStatusChanged ? "STATUS_CHANGE" : "UPDATE";
 
   await createAuditLog({
     customerId,

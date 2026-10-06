@@ -36,6 +36,7 @@ import SpeedViolationReport from "./pages/Reports/SpeedViolationReport";
 import StartStopReport from "./pages/Reports/StartStopReport";
 import MovementReport from "./pages/Reports/MovementReport";
 import StopReport from "./pages/Reports/StopReport";
+import LiveTrackingPage from "./pages/Tracking/LiveTrackingPage";
 
 export default function App() {
   return (
@@ -90,6 +91,22 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+              {/* 2. LIVE TRACKING ROUTE ADD KIYA GAYA HAS */}
+            <Route
+              path="/admin/live-tracking"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute permission="SITE_VIEW">
+                    <LiveTrackingPage />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
+
+
+
+
             <Route
               path="/admin/operators"
               element={
@@ -220,6 +237,17 @@ export default function App() {
             />
             {/* <Route path="/admin" element={<AdminDashboard />} /> */}
             <Route path="/siteManager" element={<SiteManagerDashboard />} />
+              <Route
+  path="/siteManager/live-tracking"
+  element={
+    <ProtectedRoute>
+      <PermissionRoute permission="SITE_VIEW">
+        <LiveTrackingPage/>
+      </PermissionRoute>
+    </ProtectedRoute>
+  }
+/>
+
             <Route path="/operator" element={<OperatorDashboard />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -247,6 +275,7 @@ export default function App() {
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
+          
         </Routes>
       </Router>
     </>

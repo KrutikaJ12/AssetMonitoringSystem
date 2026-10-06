@@ -1,6 +1,8 @@
 import { Link, useLocation, useSearchParams } from "react-router";
 import Chart from "react-apexcharts";
 import type { ApexAxisChartSeries, ApexOptions } from "apexcharts";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import { useAssetReportDetails } from "../../hooks/useReports";
 import { useEffect, useState } from "react";
@@ -337,23 +339,16 @@ export default function ReportDetails() {
 
     movements: (apiData.assetDetails || []).map((item) => ({
       time: item.EventTime || "-",
-
-      // The current API does not return a location field.
-      // Latitude/longitude are also currently NULL in the demo data.
       location: "-",
-
       status: item.Status || "-",
-
       latitude:
         item.Latitude !== null && item.Latitude !== undefined
           ? Number(item.Latitude)
           : null,
-
       longitude:
         item.Longitude !== null && item.Longitude !== undefined
           ? Number(item.Longitude)
           : null,
-
       duration: item.Duration || "-",
     })),
 
@@ -365,23 +360,16 @@ export default function ReportDetails() {
 
       return {
         date: item.ReportDate,
-
         day: calendarDate.day,
-
         dayNumber: calendarDate.dayNumber,
-
         workingMinutes: Math.round(workingHours * 60),
-
         workingHours,
-
         workingTime: item.WorkingHours || "0h 0m",
-
         fuelConsumed:
           item.FuelConsumedLitres !== null &&
           item.FuelConsumedLitres !== undefined
             ? `${item.FuelConsumedLitres}L`
             : "-L",
-
         isToday: false,
       };
     }),
@@ -397,36 +385,129 @@ export default function ReportDetails() {
     })),
   };
 
-  // =========================================================
-  // REAL API DATA ONLY
-  // =========================================================
-
   const movementData = report.movements;
   const weeklyWorkingData = report.weeklyWorking;
   const displayTotalWorking = report.totalWorking || "0h 0m";
+
+  // =====================================================
+  // CSV EXPORT FUNCTION
+  // =====================================================
+
+  const handleExport = () => {
+    if (!movementData.length) return;
+
+    const headers = [
+      "Time",
+      "Location",
+      "Status",
+      "Latitude",
+      "Longitude",
+      "Duration",
+    ];
+
+    const csvRows = movementData.map((item) =>
+      [
+        formatDateTime(item.time),
+        item.location,
+        item.status,
+        item.latitude ?? "-",
+        item.longitude ?? "-",
+        item.duration,
+      ]
+        .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+        .join(","),
+    );
+
+    const csvContent = [
+      headers.map((header) => `"${header}"`).join(","),
+      ...csvRows,
+    ].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Asset_Details_${report.assetId}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // =====================================================
+  // PDF EXPORT FUNCTION
+  // =====================================================
+
+  const handlePdfExport = () => {
+    if (!movementData.length) return;
+
+    const doc = new jsPDF("landscape");
+
+    doc.setFontSize(16);
+    doc.text(`Asset Details Report - ${report.assetId}`, 14, 15);
+
+    autoTable(doc, {
+      startY: 25,
+      head: [
+        [
+          "Time",
+          "Location",
+          "Status",
+          "Latitude",
+          "Longitude",
+          "Duration",
+        ],
+      ],
+      body: movementData.map((item) => [
+        formatDateTime(item.time),
+        item.location,
+        item.status,
+        item.latitude !== null ? item.latitude.toFixed(4) : "-",
+        item.longitude !== null ? item.longitude.toFixed(4) : "-",
+        item.duration,
+      ]),
+      theme: "grid",
+      styles: {
+        fontSize: 8,
+        cellPadding: 3,
+        overflow: "linebreak",
+      },
+      headStyles: {
+        fontSize: 8,
+        fontStyle: "bold",
+        halign: "center",
+      },
+    });
+
+    doc.save(`Asset_Details_${report.assetId}.pdf`);
+  };
+
   // =========================================================
   // SERVICE TIME PERIOD ANALYSIS CHART
   // =========================================================
-const selectedServicePeriods = report.serviceTimePeriods.filter(
-    (item) => {
-        if (!selectedDate) return false;
+  const selectedServicePeriods = report.serviceTimePeriods.filter((item) => {
+    if (!selectedDate) return false;
 
-        const itemDate = new Date(item.startTime);
+    const itemDate = new Date(item.startTime);
 
-        if (Number.isNaN(itemDate.getTime())) {
-            return false;
-        }
-
-        const year = itemDate.getUTCFullYear();
-        const month = String(itemDate.getUTCMonth() + 1).padStart(2, "0");
-        const day = String(itemDate.getUTCDate()).padStart(2, "0");
-
-        const itemDateString = `${year}-${month}-${day}`;
-
-        return itemDateString === selectedDate.slice(0, 10);
+    if (Number.isNaN(itemDate.getTime())) {
+      return false;
     }
-);
-  const serviceTimelineData =  selectedServicePeriods
+
+    const year = itemDate.getUTCFullYear();
+    const month = String(itemDate.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(itemDate.getUTCDate()).padStart(2, "0");
+
+    const itemDateString = `${year}-${month}-${day}`;
+
+    return itemDateString === selectedDate.slice(0, 10);
+  });
+
+  const serviceTimelineData = selectedServicePeriods
     .map((item) => {
       const startDate = new Date(item.startTime);
 
@@ -435,14 +516,11 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
       }
 
       const start = timeToMinutes(item.startTime);
-
       let end: number;
 
       if (item.endTime) {
         end = timeToMinutes(item.endTime);
       } else {
-        // Open interval: show it until the end of its current day
-        // for visualization purposes.
         end = 24 * 60;
       }
 
@@ -493,7 +571,6 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
       toolbar: { show: false },
       zoom: { enabled: false },
     },
-
     plotOptions: {
       bar: {
         horizontal: true,
@@ -501,40 +578,28 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
         borderRadius: 1,
       },
     },
-
-    dataLabels: {
-      enabled: false,
-    },
-
+    dataLabels: { enabled: false },
     xaxis: {
       type: "numeric",
       min: 0,
       max: 24 * 60,
       tickAmount: 12,
-
       labels: {
         formatter: (val) => {
           const hour = Math.floor(Number(val) / 60);
-
           return hour % 2 === 0 ? `${hour}` : "";
         },
-
         style: {
           colors: "#6b7280",
           fontSize: "12px",
         },
       },
-
       axisBorder: {
         show: true,
         color: "#e5e7eb",
       },
-
-      axisTicks: {
-        show: false,
-      },
+      axisTicks: { show: false },
     },
-
     yaxis: {
       labels: {
         style: {
@@ -544,32 +609,18 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
         },
       },
     },
-
     grid: {
       borderColor: "#f3f4f6",
       strokeDashArray: 0,
-
-      xaxis: {
-        lines: {
-          show: true,
-        },
-      },
-
-      yaxis: {
-        lines: {
-          show: false,
-        },
-      },
-
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: false } },
       row: {
         colors: ["#f9fafb", "#ffffff"],
         opacity: 0.5,
       },
     },
-
     tooltip: {
       enabled: true,
-
       custom: ({ seriesIndex, dataPointIndex, w }) => {
         const item = w.config.series[seriesIndex].data[dataPointIndex] as {
           x: string;
@@ -581,32 +632,25 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
           endTime?: string | null;
         };
 
-        if (!item) {
-          return "";
-        }
+        if (!item) return "";
 
         const status = item.status || "-";
         const duration = item.isOpen ? "Open interval" : item.duration || "-";
 
         return `
-                    <div class="p-3 text-xs">
-                        <div class="mb-1 font-semibold">${status}</div>
-                        <div>Day: ${item.x}</div>
-                        <div>Start: ${formatDateTime(item.startTime)}</div>
-                        <div>End: ${
-                          item.endTime
-                            ? formatDateTime(item.endTime)
-                            : "Ongoing"
-                        }</div>
-                        <div>Duration: ${duration}</div>
-                    </div>
-                `;
+          <div class="p-3 text-xs">
+            <div class="mb-1 font-semibold">${status}</div>
+            <div>Day: ${item.x}</div>
+            <div>Start: ${formatDateTime(item.startTime)}</div>
+            <div>End: ${
+              item.endTime ? formatDateTime(item.endTime) : "Ongoing"
+            }</div>
+            <div>Duration: ${duration}</div>
+          </div>
+        `;
       },
     },
-
-    legend: {
-      show: false,
-    },
+    legend: { show: false },
   };
 
   // =========================================================
@@ -704,16 +748,16 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
                   </span>
 
                   <button
-    type="button"
-    onClick={() => setSelectedDate(item.date.slice(0, 10))}
-    className={`w-full rounded-xl border p-1.5 transition-all sm:p-2 ${
-        styles.bg
-    } ${styles.border} ${
-        selectedDate === item.date.slice(0, 10)
-            ? "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800"
-            : ""
-    }`}
->
+                    type="button"
+                    onClick={() => setSelectedDate(item.date.slice(0, 10))}
+                    className={`w-full rounded-xl border p-1.5 transition-all sm:p-2 ${
+                      styles.bg
+                    } ${styles.border} ${
+                      selectedDate === item.date.slice(0, 10)
+                        ? "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800"
+                        : ""
+                    }`}
+                  >
                     <div className="my-1 flex items-center justify-center">
                       {item.isToday ? (
                         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-sm">
@@ -821,7 +865,7 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                 Asset Details
@@ -832,14 +876,37 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
               </p>
             </div>
 
-            <div className="rounded-lg bg-gray-50 px-4 py-2 dark:bg-gray-700/50">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Total Duration
-              </span>
+            <div className="flex flex-wrap items-center gap-3">
+              {/* PDF EXPORT BUTTON */}
+              <button
+                type="button"
+                onClick={handlePdfExport}
+                disabled={!movementData.length}
+                className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-600"
+              >
+                Export PDF
+              </button>
 
-              <p className="font-semibold text-gray-800 dark:text-white">
-                {report.duration}
-              </p>
+              {/* CSV EXPORT BUTTON */}
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={!movementData.length}
+                className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                Export CSV
+              </button>
+
+              {/* TOTAL DURATION */}
+              <div className="rounded-lg bg-gray-50 px-4 py-2 dark:bg-gray-700/50">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Total Duration
+                </span>
+
+                <p className="font-semibold text-gray-800 dark:text-white">
+                  {report.duration}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -891,7 +958,9 @@ const selectedServicePeriods = report.serviceTimePeriods.filter(
 
                     <td className="px-5 py-4">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusBadgeClass(item.status)}`}
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusBadgeClass(
+                          item.status,
+                        )}`}
                       >
                         {item.status}
                       </span>
