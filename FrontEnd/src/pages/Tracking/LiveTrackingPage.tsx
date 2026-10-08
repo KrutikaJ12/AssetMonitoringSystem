@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { ArrowLeft, MapPin, RefreshCw, Search } from "lucide-react";
-import LiveMap from "../../components/common/Map/LiveMap"; // Path apne folder structure ke according check kar lein
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import LiveMap from "../../components/common/Map/LiveMap"// Path apne folder structure ke according check kar lein
 import Button from "../../components/ui/button/Button";
 import { useSites } from "../../hooks/useSites";
 
