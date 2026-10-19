@@ -88,10 +88,10 @@ export const adminMenu: NavItem[] = [
     path: "/admin/operators",
     moduleCode: "OPERATORS",
   },
-  {
-    name: "Location",
-    path: "/admin/live-tracking",
-  },
+  // {
+  //   name: "Location",
+  //   path: "/admin/live-tracking",
+  // },
   {
     name: "Alerts",
     path: "/admin/alerts",
@@ -108,11 +108,11 @@ export const adminMenu: NavItem[] = [
       path: "/admin/reports/summary",
       pro: false,
     },
-    {
-      name: "Asset Daily Usage Report",
-      path: "/admin/reports/daily-usage",
-      pro: false,
-    },
+    // {
+    //   name: "Asset Daily Usage Report",
+    //   path: "/admin/reports/daily-usage",
+    //   pro: false,
+    // },
     {
       name: "Speed Violation Report",
       path: "/admin/reports/speedviolationreport",

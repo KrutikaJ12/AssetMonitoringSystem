@@ -7,6 +7,7 @@ import {
   Circle,
   useMap,
   useMapEvents,
+  Tooltip,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -462,11 +463,23 @@ const LiveMap = ({
                         </div>
                       </div>
                     </Popup>
+                    {/* Asset name always visible below its icon */}
+                    <Tooltip
+                      permanent
+                      direction="bottom"
+                      offset={[0, 12]}
+                      interactive={false}
+                      className="asset-name-tooltip"
+                    >
+                      {asset.AssetName}
+                    </Tooltip>
                   </Marker>
                 );
               })}
           </>
         )}
+
+        
       </MapContainer>
     </div>
   );

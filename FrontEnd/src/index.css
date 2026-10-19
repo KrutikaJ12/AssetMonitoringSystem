@@ -804,3 +804,19 @@ span.flatpickr-weekday,
   margin: 2px !important;
   width: auto !important;
 }
+
+.asset-name-tooltip {
+  background: red;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #1f2937;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
+  white-space: nowrap;
+}
+
+.asset-name-tooltip::before {
+  display: none;
+}

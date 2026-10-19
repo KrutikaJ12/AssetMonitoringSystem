@@ -96,14 +96,19 @@ const SiteAdmin = (Asset) => {
         <div className="text-xl font-semibold text-gray-800 dark:text-white">
           Sites
         </div>
-        <Button
-          onClick={() => {
-            setIsModalOpen(true);
-            setMode("add");
-          }}
-        >
-          + Add Sites
-        </Button>
+        <div className="flex gap-4">
+          <Button onClick={() => navigate("/admin/live-tracking")}>
+            See All
+          </Button>
+          <Button
+            onClick={() => {
+              setIsModalOpen(true);
+              setMode("add");
+            }}
+          >
+            + Add Sites
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
