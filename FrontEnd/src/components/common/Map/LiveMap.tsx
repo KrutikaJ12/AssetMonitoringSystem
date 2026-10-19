@@ -16,12 +16,8 @@ const createAssetMarker = (assetType = "") => {
 
   let icon = "🚜";
 
-  if (type.includes("forklift")) {
+  if (type.includes("forklift") || type.includes("crane")) {
     icon = "🏗️";
-  } else if (type.includes("crane")) {
-    icon = "🏗️";
-  } else if (type.includes("excavator")) {
-    icon = "🚜";
   } else if (type.includes("dump truck")) {
     icon = "🚛";
   } else if (type.includes("loader") || type.includes("tractor")) {
@@ -125,9 +121,7 @@ const MapFitBounds = ({ sites }) => {
       validSites.map((site) => [Number(site.Latitude), Number(site.Longitude)]),
     );
 
-    map.fitBounds(bounds, {
-      padding: [50, 50],
-    });
+    map.fitBounds(bounds, { padding: [50, 50] });
   }, [sites, map]);
 
   return null;
@@ -153,10 +147,7 @@ const MapFitSiteAndAssets = ({ site, assets, showAssets }) => {
     if (points.length <= 1) return;
 
     const bounds = L.latLngBounds(points);
-
-    map.fitBounds(bounds, {
-      padding: [50, 50],
-    });
+    map.fitBounds(bounds, { padding: [50, 50] });
   }, [site, assets, showAssets, map]);
 
   return null;
@@ -169,6 +160,7 @@ const LiveMap = ({
   geofenceRadius = 700,
   sites = [],
   assets = [],
+  onAssetClick,
 }) => {
   const [mapCenter, setMapCenter] = useState({ lat: 19.07609, lng: 72.877426 });
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -359,11 +351,8 @@ const LiveMap = ({
                 position={[activePosition.lat, activePosition.lng]}
                 icon={createCustomMarker(siteName)}
               >
-                {/* 1. TOTAL / SITE INFOBOX (SINGLE ROW FORMAT) */}
-                {/* 1. TOTAL / SITE INFOBOX (CLEAN ROW LIST WITHOUT SCROLLBAR) */}
                 <Popup className="custom-row-popup">
                   <div className="p-1 font-sans min-w-[280px]">
-                    {/* Site Header */}
                     <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 mb-2">
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-900 text-xs truncate">
@@ -378,7 +367,6 @@ const LiveMap = ({
                       </span>
                     </div>
 
-                    {/* All Assets Displayed in Clean Stacked Rows */}
                     {assets.length === 0 ? (
                       <p className="text-[11px] text-gray-400 italic">
                         No assets assigned
@@ -388,9 +376,9 @@ const LiveMap = ({
                         {assets.map((asset) => (
                           <div
                             key={asset.AssetID}
-                            className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg p-2"
+                            onClick={() => onAssetClick && onAssetClick(asset)}
+                            className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg p-2 cursor-pointer hover:bg-indigo-50/50 transition-colors"
                           >
-                            {/* Asset Name & Type */}
                             <div className="flex flex-col min-w-0">
                               <span className="font-bold text-gray-800 text-[11px] truncate">
                                 {asset.AssetName}
@@ -400,7 +388,6 @@ const LiveMap = ({
                               </span>
                             </div>
 
-                            {/* Status & Speed Badge */}
                             <div className="flex items-center gap-2 shrink-0">
                               <span
                                 className={`px-1.5 py-0.5 text-[9px] font-bold rounded uppercase ${
@@ -425,7 +412,7 @@ const LiveMap = ({
               </Marker>
             </Circle>
 
-            {/* 2. SPECIFIC ASSET INFOBOX (SINGLE ROW FORMAT) */}
+            {/* Asset Individual Markers */}
             {showAssetMarkers &&
               assets.map((asset) => {
                 const lat = Number(asset.Latitude);
@@ -438,32 +425,16 @@ const LiveMap = ({
                     key={asset.AssetID}
                     position={[lat, lng]}
                     icon={createAssetMarker(asset.AssetTypeName)}
+                    eventHandlers={{
+                      click: () => {
+                        if (onAssetClick) {
+                          onAssetClick(asset);
+                        }
+                      },
+                    }}
                   >
                     <Popup className="custom-row-popup">
                       <div className="flex items-center gap-3 p-1 font-sans min-w-[280px]">
-                        {/* Thumbnail Image */}
-                        <div className="relative shrink-0 w-11 h-11 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                          <img
-                            src={
-                              asset.ImageURL ||
-                              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=150&auto=format&fit=crop&q=80"
-                            }
-                            alt={asset.AssetName}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                              e.target.parentElement.classList.add(
-                                "flex",
-                                "items-center",
-                                "justify-center",
-                                "text-base",
-                              );
-                              e.target.parentElement.innerHTML = "🚜";
-                            }}
-                          />
-                        </div>
-
-                        {/* Details in Single Flex Row */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <p className="font-bold text-gray-900 text-xs truncate">
@@ -475,7 +446,6 @@ const LiveMap = ({
                           </div>
 
                           <div className="flex items-center justify-between gap-2 mt-1.5">
-                            {/* Status Badge */}
                             <span
                               className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
                                 asset.CurrentStatus?.toLowerCase() === "running"
@@ -483,18 +453,8 @@ const LiveMap = ({
                                   : "bg-rose-50 text-rose-600 border border-rose-200"
                               }`}
                             >
-                              <span
-                                className={`w-1 h-1 rounded-full ${
-                                  asset.CurrentStatus?.toLowerCase() ===
-                                  "running"
-                                    ? "bg-emerald-500 animate-pulse"
-                                    : "bg-rose-500"
-                                }`}
-                              />
                               {asset.CurrentStatus}
                             </span>
-
-                            {/* Speed */}
                             <span className="text-[10px] font-mono font-semibold text-indigo-600">
                               {asset.SpeedKph || 0} km/h
                             </span>

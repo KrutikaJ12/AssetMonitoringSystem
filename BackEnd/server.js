@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+const http = require("http"); // <-- Yeh add karo
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -15,8 +15,12 @@ const assetRoutes = require("./src/routes/assetRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const { connectDB } = require("./src/config/db")
 const reportRoutes = require("./src/routes/reportRoutes");
-// connectDB();
 
+// Socket aur Worker imports
+const { initSocket } = require("./src/sockets/socketServer");
+const { startPacketWorker } = require("./src/services/packetWorker");
+
+// connectDB();
 const app = express();
 app.use(helmet());
 app.use(cors());
@@ -32,13 +36,23 @@ app.use("/api",opratorRoutes)
 app.use("/api",assetRoutes);
 app.use("/api",userRoutes)
 app.use("/api/reports", reportRoutes);
+
+// HTTP server create karo taaki Socket.io attach ho sake
+const server = http.createServer(app);
+
+// Socket.io initialize karo
+initSocket(server);
+
 const PORT = process.env.PORT;
 
 const startServer = async () => {
     await connectDB();
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`Server running on ${PORT}`);
+
+        // Background packet processing worker start karo
+        startPacketWorker();
     });
 };
 
