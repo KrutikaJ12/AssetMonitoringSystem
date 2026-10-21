@@ -317,7 +317,7 @@ const StartStopReport= () => {
 
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
-          Stop Report
+          Start Stop Report
         </h1>
 
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -338,7 +338,7 @@ const StartStopReport= () => {
         <div className="flex w-full min-w-0 items-center justify-between gap-4 border-b border-gray-200 px-4 py-4 dark:border-gray-800 md:px-5">
 
           <h2 className="min-w-0 text-lg font-semibold text-gray-800 dark:text-white">
-            Stop Report Records
+            Start Stop Report Records
           </h2>
 
           <div className="flex shrink-0 items-center gap-2 md:gap-3">
