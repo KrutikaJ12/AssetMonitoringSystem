@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router';
+import React from "react";
+import { useNavigate } from "react-router";
 import {
   Clock,
   Fuel,
@@ -12,6 +12,7 @@ import {
   Gauge,
   RefreshCw,
 } from "lucide-react";
+import AssetCluster from "../../components/common/Cluster/AssetCluster";
 
 interface AssetDetailsProps {
   asset: {
@@ -36,10 +37,10 @@ interface AssetDetailsProps {
     lastSeen?: string;
     latitude?: number;
     longitude?: number;
-    refillData?: number | 'NA';
-    drainData?: number | 'NA';
-    tankCapacity?: number | 'NA';
-    consumptionSensor?: number | 'NA';
+    refillData?: number | "NA";
+    drainData?: number | "NA";
+    tankCapacity?: number | "NA";
+    consumptionSensor?: number | "NA";
   };
 }
 
@@ -59,13 +60,17 @@ const InfoRow = ({
 );
 
 // Futuristic Fuel Cluster Component
-const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) => {
-  const percentage = asset.FuelPercentage ?? 'NA';
-  const rotation = percentage === 'NA' ? -90 : (Number(percentage) / 100) * 180 - 90;
+const AdvancedFuelCluster = ({
+  asset,
+}: {
+  asset: AssetDetailsProps["asset"];
+}) => {
+  const percentage = asset.FuelPercentage ?? "NA";
+  const rotation =
+    percentage === "NA" ? -90 : (Number(percentage) / 100) * 180 - 90;
 
   return (
     <div className="relative rounded-2xl p-5 bg-gradient-to-b from-blue-950/90 via-slate-900/95 to-slate-950 text-white shadow-2xl overflow-hidden border border-blue-500/30">
-      
       {/* Background glowing effects */}
       <div className="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -76,7 +81,9 @@ const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) =
           <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-400/30">
             <Fuel size={20} />
           </div>
-          <h3 className="font-bold text-lg tracking-wide text-blue-100">Fuel Cluster</h3>
+          <h3 className="font-bold text-lg tracking-wide text-blue-100">
+            Fuel Cluster
+          </h3>
         </div>
         <span className="text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-cyan-300 border border-blue-400/30 font-medium animate-pulse">
           Live Sync
@@ -100,15 +107,19 @@ const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) =
           <div className="absolute inset-0 rounded-t-full border-4 border-slate-700/60 border-b-0"></div>
           <div className="absolute inset-0 rounded-t-full border-4 border-transparent border-t-cyan-400 border-r-blue-500 border-l-transparent transform -rotate-45"></div>
 
-          <div 
+          <div
             className="absolute left-1/2 bottom-0 h-24 w-0.5 bg-gradient-to-t from-transparent via-cyan-400 to-red-500 origin-bottom transition-transform duration-700 ease-out"
             style={{ transform: `translateX(-50%) rotate(${rotation}deg)` }}
           >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]"></div>
           </div>
 
-          <div className="absolute bottom-1 left-4 text-xs font-black text-red-500 tracking-wider">E</div>
-          <div className="absolute bottom-1 right-4 text-xs font-black text-green-400 tracking-wider">F</div>
+          <div className="absolute bottom-1 left-4 text-xs font-black text-red-500 tracking-wider">
+            E
+          </div>
+          <div className="absolute bottom-1 right-4 text-xs font-black text-green-400 tracking-wider">
+            F
+          </div>
         </div>
 
         <div className="mt-2 flex flex-col items-center z-10">
@@ -116,7 +127,7 @@ const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) =
             <Fuel size={22} />
           </div>
           <div className="text-2xl font-black tracking-tight text-white">
-            {percentage === 'NA' ? 'NA' : `${percentage}%`}
+            {percentage === "NA" ? "NA" : `${percentage}%`}
           </div>
         </div>
       </div>
@@ -125,15 +136,21 @@ const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) =
       <div className="space-y-2 mt-4 bg-slate-900/60 rounded-xl p-3.5 border border-slate-800 backdrop-blur-md">
         <div className="flex justify-between items-center py-1 border-b border-slate-800/80 text-sm">
           <span className="text-slate-400">Refill</span>
-          <span className="font-semibold text-green-400">{asset.refillData ?? 'NA'}</span>
+          <span className="font-semibold text-green-400">
+            {asset.refillData ?? "NA"}
+          </span>
         </div>
         <div className="flex justify-between items-center py-1 border-b border-slate-800/80 text-sm">
           <span className="text-slate-400">Drain</span>
-          <span className="font-semibold text-amber-400">{asset.drainData ?? 'NA'}</span>
+          <span className="font-semibold text-amber-400">
+            {asset.drainData ?? "NA"}
+          </span>
         </div>
         <div className="flex justify-between items-center py-1 text-sm">
           <span className="text-slate-400">Tank Capacity</span>
-          <span className="font-semibold text-white">{asset.tankCapacity ?? 'NA'} ltr</span>
+          <span className="font-semibold text-white">
+            {asset.tankCapacity ?? "NA"} ltr
+          </span>
         </div>
       </div>
 
@@ -143,7 +160,9 @@ const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) =
             <Gauge size={14} className="text-cyan-400" />
             <span>Consumption Sensor</span>
           </div>
-          <span className="text-lg font-bold text-white">{asset.consumptionSensor ?? 'NA'} ltr</span>
+          <span className="text-lg font-bold text-white">
+            {asset.consumptionSensor ?? "NA"} ltr
+          </span>
         </div>
 
         <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-800 flex flex-col justify-between relative overflow-hidden group">
@@ -151,11 +170,14 @@ const AdvancedFuelCluster = ({ asset }: { asset: AssetDetailsProps['asset'] }) =
             <span>Data Sync</span>
             <RefreshCw size={12} className="text-emerald-400 animate-spin" />
           </div>
-          <span className="text-xs font-medium text-emerald-400">last updated</span>
-          <span className="text-sm font-bold text-white">{asset.lastUpdated || '1s ago'}</span>
+          <span className="text-xs font-medium text-emerald-400">
+            last updated
+          </span>
+          <span className="text-sm font-bold text-white">
+            {asset.lastUpdated || "1s ago"}
+          </span>
         </div>
       </div>
-
     </div>
   );
 };
@@ -166,24 +188,23 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
   const handleViewOnMap = () => {
     // Check current URL to decide whether to use admin or siteManager route prefix
     const currentPath = window.location.pathname;
-    const trackingPath = currentPath.startsWith('/admin') 
-      ? '/admin/live-tracking' 
-      : currentPath.startsWith('/siteManager') 
-        ? '/siteManager/live-tracking' 
-        : '/admin/live-tracking'; // Default fallback
+    const trackingPath = currentPath.startsWith("/admin")
+      ? "/admin/live-tracking"
+      : currentPath.startsWith("/siteManager")
+        ? "/siteManager/live-tracking"
+        : "/admin/live-tracking"; // Default fallback
 
-    navigate(trackingPath, { 
-      state: { 
-        lat: asset.latitude, 
-        lng: asset.longitude, 
-        siteName: asset.currentSite || asset.SiteName 
-      } 
+    navigate(trackingPath, {
+      state: {
+        lat: asset.latitude,
+        lng: asset.longitude,
+        siteName: asset.currentSite || asset.SiteName,
+      },
     });
   };
 
   return (
     <div className="space-y-6 overflow-y-auto p-4 bg-slate-50 min-h-screen">
-
       {/* Header */}
       <div className="flex items-center gap-4 border-b pb-5 bg-white p-4 rounded-xl shadow-sm">
         <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center text-3xl">
@@ -191,7 +212,9 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
         </div>
 
         <div className="flex-1">
-          <h2 className="text-xl font-semibold text-gray-900">{asset.AssetName}</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {asset.AssetName}
+          </h2>
           <p className="text-sm text-gray-500">{asset.AssetCode}</p>
 
           <span className="inline-flex mt-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
@@ -214,8 +237,17 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
       </section>
 
       {/* Fuel Cluster */}
-      <section>
-        <AdvancedFuelCluster asset={asset} />
+      <section className="p-4">
+        <AssetCluster
+          assetType="battery"
+          chargePercent={44}
+          voltage={26.3}
+          current={0}
+          power={0}
+          temperature={24}
+          operatingHours={120.5}
+        />
+        {/* <AdvancedFuelCluster asset={asset} /> */}
       </section>
 
       {/* Live Metrics */}
@@ -253,7 +285,7 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
 
         {/* View on Map Button with Dynamic Navigation */}
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <button 
+          <button
             onClick={handleViewOnMap}
             className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1.5 cursor-pointer"
           >
@@ -261,7 +293,6 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
           </button>
         </div>
       </section>
-
     </div>
   );
 }
