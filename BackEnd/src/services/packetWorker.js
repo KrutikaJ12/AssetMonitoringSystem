@@ -228,7 +228,7 @@ function startPacketWorker() {
             .query(`UPDATE AssetRawData SET ProcessingStatus = 'PROCESSED' WHERE RawID = @rawId`);
 
           await transaction.commit();
-          console.log(`Successfully processed RawID: ${RawID} with Lat/Long`);
+          // console.log(`Successfully processed RawID: ${RawID} with Lat/Long`);
 
           // 4. Broadcast via Socket.IO
           broadcastAssetUpdate({
