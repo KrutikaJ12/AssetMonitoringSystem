@@ -5,12 +5,14 @@ import { useAssetSummaryReports } from "../../hooks/useReports";
 interface ReportFilterProps {
   showSpeedLimit?: boolean;
   showReportType?: boolean;
+  reportSection?:boolean;
 }
 
 const ReportFilter = ({
   showSpeedLimit = false,
   showReportType = false,
   onGenerate = () => {},
+  reportSection = false
 }: ReportFilterProps) => {
   const [assetId, setAssetId] = useState("");
   const [reportType, setReportType] = useState<"day" | "week" | "month">("day");
@@ -29,6 +31,7 @@ const ReportFilter = ({
     { length: 3 },
     (_, index) => currentYear - 2 + index,
   );
+ 
   // const getWeekStartDate = () => {
   //   if (!startDate) return undefined;
 
@@ -142,7 +145,8 @@ const ReportFilter = ({
       reportType,
     });
   };
-
+ console.log(showReportType,showReportType,reportType,"reportSection")
+ console.log((showReportType && reportType !== "month") || reportSection)
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       <div
@@ -247,7 +251,7 @@ const ReportFilter = ({
         </div>
 
         {/* Start Date */}
-        {showReportType && (reportType === "week" || reportType === "day") && (
+        { ((showReportType && reportType !== "month") || reportSection)  && (
           <div className="w-full">
             <DatePicker
               id="start-date"

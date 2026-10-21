@@ -328,7 +328,7 @@ const MovementReport = () => {
 
       {/* FILTER */}
 
-      <ReportFilter />
+      <ReportFilter reportSection/>
 
       {/* TABLE CARD */}
 
