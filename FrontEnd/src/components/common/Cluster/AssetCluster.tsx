@@ -39,7 +39,7 @@ export default function AssetCluster({
     value == null ? "--" : value.toFixed(decimals);
 
   return (
-    <div className="w-full max-w-2xl overflow-hidden rounded-[28px] border border-slate-700 bg-[#030a11] p-4 text-white shadow-2xl sm:p-5">
+    <div className="w-full  overflow-hidden rounded-[28px] border border-slate-700 bg-[#030a11] p-4 text-white shadow-2xl sm:p-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
