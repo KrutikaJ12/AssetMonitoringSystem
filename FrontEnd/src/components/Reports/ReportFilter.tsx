@@ -242,11 +242,13 @@ const ReportFilter = ({
             className="mb-3 h-11 w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           >
             <option value="">Select Asset ID</option>
-            <option value="2">Asset 2</option>
-            <option value="3">Asset 3</option>
-            <option value="4">Asset 4</option>
-            <option value="5">Asset 5</option>
-            <option value="6">Asset 6</option>
+            <option value="2">FL001</option>
+            <option value="3">FL002</option>
+            <option value="4">EFL001</option>
+            <option value="5">EFL002</option>
+            <option value="6">DFL001</option>
+            <option value="7">EX001</option>
+            <option value="8">BL001</option>
           </select>
         </div>
 
