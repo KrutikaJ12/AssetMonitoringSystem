@@ -177,12 +177,6 @@ const SiteAdmin = (Asset) => {
                   isHeader
                   className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Coordinates
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                >
                   Asset Count
                 </TableCell>
                 <TableCell
@@ -235,9 +229,6 @@ const SiteAdmin = (Asset) => {
                     </button>
                   </TableCell>
 
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {site.Latitude}, {site.Longitude}
-                  </TableCell>
 
                   <TableCell>
                     <button
