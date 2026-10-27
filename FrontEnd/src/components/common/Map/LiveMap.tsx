@@ -264,10 +264,13 @@ const LiveMap = ({
           <LocationMarker onLocationSelect={handleLocationSelect} />
         )}
 
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      
+<TileLayer
+  attribution="&copy; Google Maps"
+  url="https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
+  maxZoom={20}
+/>
+
 
         {isAllSitesMode ? (
           sites.map((site) => {
