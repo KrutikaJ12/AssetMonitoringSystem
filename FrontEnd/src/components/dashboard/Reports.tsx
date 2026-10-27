@@ -321,7 +321,7 @@ const { data, isLoading, error } = useAssetReportDetails(params);
                         to={`/admin/reports/asset-details?assetId=${data.AssetID}&fromDate=${reportFilters?.fromDate}&toDate=${reportFilters?.toDate}&reportType=${reportFilters?.reportType}`}
                         className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
                       >
-                        {data.AssetID}
+                        {data.AssetCode}
                       </Link>
                     </TableCell>
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">

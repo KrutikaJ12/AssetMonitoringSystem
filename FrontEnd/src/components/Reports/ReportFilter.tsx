@@ -5,12 +5,14 @@ import { useAssetSummaryReports } from "../../hooks/useReports";
 interface ReportFilterProps {
   showSpeedLimit?: boolean;
   showReportType?: boolean;
+  reportSection?:boolean;
 }
 
 const ReportFilter = ({
   showSpeedLimit = false,
   showReportType = false,
   onGenerate = () => {},
+  reportSection = false
 }: ReportFilterProps) => {
   const [assetId, setAssetId] = useState("");
   const [reportType, setReportType] = useState<"day" | "week" | "month">("day");
@@ -29,6 +31,7 @@ const ReportFilter = ({
     { length: 3 },
     (_, index) => currentYear - 2 + index,
   );
+ 
   // const getWeekStartDate = () => {
   //   if (!startDate) return undefined;
 
@@ -142,7 +145,8 @@ const ReportFilter = ({
       reportType,
     });
   };
-
+ console.log(showReportType,showReportType,reportType,"reportSection")
+ console.log((showReportType && reportType !== "month") || reportSection)
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
       <div
@@ -238,16 +242,18 @@ const ReportFilter = ({
             className="mb-3 h-11 w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           >
             <option value="">Select Asset ID</option>
-            <option value="2">Asset 2</option>
-            <option value="3">Asset 3</option>
-            <option value="4">Asset 4</option>
-            <option value="5">Asset 5</option>
-            <option value="6">Asset 6</option>
+            <option value="2">FL001</option>
+            <option value="3">FL002</option>
+            <option value="4">EFL001</option>
+            <option value="5">EFL002</option>
+            <option value="6">DFL001</option>
+            <option value="7">EX001</option>
+            <option value="8">BL001</option>
           </select>
         </div>
 
         {/* Start Date */}
-        {showReportType && (reportType === "week" || reportType === "day") && (
+        { ((showReportType && reportType !== "month") || reportSection)  && (
           <div className="w-full">
             <DatePicker
               id="start-date"

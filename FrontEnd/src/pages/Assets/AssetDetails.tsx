@@ -51,7 +51,7 @@ const InfoRow = ({
   label: string;
   value: React.ReactNode;
 }) => (
-  <div className="flex justify-between items-start py-1">
+  <div className="flex justify-between gap-2 items-start py-1 flex-col">
     <span className="text-sm text-gray-500">{label}</span>
     <span className="text-sm font-medium text-gray-900 text-right">
       {value}
@@ -206,38 +206,45 @@ export default function AssetDetails({ asset }: AssetDetailsProps) {
   return (
     <div className="space-y-6 overflow-y-auto p-4 bg-slate-50 min-h-screen">
       {/* Header */}
-      <div className="flex items-center gap-4 border-b pb-5 bg-white p-4 rounded-xl shadow-sm">
-        <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center text-3xl">
-          🚜
+      <div className="flex w-full items-start justify-between gap-4 border-b pb-5 bg-white p-4 rounded-xl shadow-sm">
+        <div className="w-[35%] px-4 flex gap-4 ">
+          <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center text-3xl">
+            🚜
+          </div>
+
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold text-gray-900">
+              {asset.AssetName}
+            </h2>
+            <p className="text-sm text-gray-500">{asset.AssetCode}</p>
+
+            <span className="inline-flex mt-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+              {asset.Status}
+            </span>
+          </div>
         </div>
-
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {asset.AssetName}
-          </h2>
-          <p className="text-sm text-gray-500">{asset.AssetCode}</p>
-
-          <span className="inline-flex mt-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-            {asset.Status}
-          </span>
+        {/* <div className=" flex ">
+         
+        </div> */}
+        <div className="flex w-[75%] gap-4">
+          {/* <div className="flex items-center gap-2 mb-3 text-gray-800">
+            <Building2 size={18} />
+            <h3 className="font-semibold">Overview</h3>
+          </div> */}
+           <InfoRow label="Category" value={asset.Category} />
+          <InfoRow label="Site" value={asset.SiteName} />
+          <InfoRow label="Model" value={asset.Model} />
+          <InfoRow label="Serial Number" value={asset.SerialNo} />
         </div>
       </div>
 
       {/* Overview */}
-      <section className="bg-white p-4 rounded-xl shadow-sm">
-        <div className="flex items-center gap-2 mb-3 text-gray-800">
-          <Building2 size={18} />
-          <h3 className="font-semibold">Overview</h3>
-        </div>
+      {/* <section className="bg-white p-4 rounded-xl shadow-sm"> */}
 
-        <InfoRow label="Category" value={asset.Category} />
-        <InfoRow label="Site" value={asset.SiteName} />
-        <InfoRow label="Model" value={asset.Model} />
-        <InfoRow label="Serial Number" value={asset.SerialNo} />
-      </section>
+      {/* </section> */}
 
       {/* Fuel Cluster */}
-      <section className="p-4">
+      <section className="p-4 ">
         <AssetCluster
           assetType="battery"
           chargePercent={44}

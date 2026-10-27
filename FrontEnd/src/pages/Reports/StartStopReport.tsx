@@ -33,7 +33,6 @@ const StartStopReport= () => {
   const [assetId] = useState("");
   const [startDate] = useState<Date | undefined>();
   const [endDate] = useState<Date | undefined>();
-
   // =====================================================
   // API DATA
   // =====================================================
@@ -327,7 +326,7 @@ const StartStopReport= () => {
 
       {/* FILTER */}
 
-      <ReportFilter />
+      <ReportFilter reportSection />
 
       {/* TABLE CARD */}
 

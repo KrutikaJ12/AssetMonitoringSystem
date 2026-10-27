@@ -25,7 +25,7 @@ async function getAssetSummaryReports({
             SELECT
                 sm.SiteName,
                 adu.AssetID,
-
+                am.AssetCode,
                 adu.FirstEventDateTimeUtc AS StartDate,
                 adu.LastEventDateTimeUtc AS EndDate,
 
@@ -59,6 +59,9 @@ async function getAssetSummaryReports({
 
             LEFT JOIN dbo.SiteMaster sm
                 ON sm.SiteID = ais.SiteID
+            
+            LEFT JOIN dbo.AssetMaster am
+            ON am.AssetID = adu.AssetID
 
             WHERE adu.AssetID = @assetId
               AND adu.UsageDate >= @fromDate
@@ -180,7 +183,7 @@ async function getAssetSummaryReports({
 
             SELECT
                 sm.SiteName,
-
+                am.AssetCode,
                 WeeklyData.AssetID AS AssetID,
 
                 -- Reporting period start
@@ -233,11 +236,15 @@ async function getAssetSummaryReports({
 
             LEFT JOIN dbo.SiteMaster sm
                 ON sm.SiteID = ais.SiteID
+            
+            LEFT JOIN dbo.AssetMaster am
+            ON am.AssetID = WeeklyData.AssetID
 
-            GROUP BY
-                sm.SiteName,
-                WeeklyData.AssetID,
-                WeeklyData.PeriodStart
+           GROUP BY
+           sm.SiteName,
+           am.AssetCode,
+           WeeklyData.AssetID,
+           WeeklyData.PeriodStart
 
             ORDER BY WeeklyData.PeriodStart;
         `);
@@ -284,7 +291,7 @@ async function getAssetSummaryReports({
 
             SELECT
                 sm.SiteName,
-
+                am.AssetCode,
                 MonthlyData.AssetID AS AssetID,
 
                 -- Reporting period start
@@ -337,9 +344,13 @@ async function getAssetSummaryReports({
 
             LEFT JOIN dbo.SiteMaster sm
                 ON sm.SiteID = ais.SiteID
+            
+            LEFT JOIN dbo.AssetMaster am
+            ON am.AssetID = MonthlyData.AssetID
 
             GROUP BY
                 sm.SiteName,
+                am.AssetCode,
                 MonthlyData.AssetID,
                 MonthlyData.PeriodStart,
                 CASE
@@ -436,8 +447,6 @@ async function getMovementReports() {
   return response.recordset;
 }
 
-
-
 // ======================================================
 // ASSET DETAIL REPORT
 // ======================================================
@@ -503,22 +512,22 @@ async function getMovementReports() {
 //     };
 // }
 async function getAssetReportDetails({
-    assetId,
-    fromDate,
-    toDate,
-    reportType,
+  assetId,
+  fromDate,
+  toDate,
+  reportType,
 }) {
-    const pool = await sql.connect();
+  const pool = await sql.connect();
 
-    // --------------------------------------------------
-    // 1. Summary
-    // --------------------------------------------------
+  // --------------------------------------------------
+  // 1. Summary
+  // --------------------------------------------------
 
-    const summaryResponse = await pool.request()
-        .input("assetId", sql.BigInt, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+  const summaryResponse = await pool
+    .request()
+    .input("assetId", sql.BigInt, assetId)
+    .input("fromDate", sql.Date, fromDate)
+    .input("toDate", sql.Date, toDate).query(`
             WITH WorkingData AS (
                 SELECT
                     AssetID,
@@ -584,15 +593,15 @@ async function getAssetReportDetails({
             WHERE am.AssetID = @assetId;
         `);
 
-    // --------------------------------------------------
-    // 2. Operation Calendar
-    // --------------------------------------------------
+  // --------------------------------------------------
+  // 2. Operation Calendar
+  // --------------------------------------------------
 
-    const operationCalendarResponse = await pool.request()
-        .input("assetId", sql.BigInt, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+  const operationCalendarResponse = await pool
+    .request()
+    .input("assetId", sql.BigInt, assetId)
+    .input("fromDate", sql.Date, fromDate)
+    .input("toDate", sql.Date, toDate).query(`
             SELECT
                 adu.UsageDate AS ReportDate,
 
@@ -614,15 +623,15 @@ async function getAssetReportDetails({
             ORDER BY adu.UsageDate;
         `);
 
-    // --------------------------------------------------
-    // 3. Service Time Period Analysis
-    // --------------------------------------------------
+  // --------------------------------------------------
+  // 3. Service Time Period Analysis
+  // --------------------------------------------------
 
-    const serviceTimePeriodsResponse = await pool.request()
-        .input("assetId", sql.BigInt, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+  const serviceTimePeriodsResponse = await pool
+    .request()
+    .input("assetId", sql.BigInt, assetId)
+    .input("fromDate", sql.Date, fromDate)
+    .input("toDate", sql.Date, toDate).query(`
             SELECT
                 StatusCode,
                 StartDateTimeUtc,
@@ -655,15 +664,15 @@ async function getAssetReportDetails({
             ORDER BY StartDateTimeUtc;
         `);
 
-    // --------------------------------------------------
-    // 4. Asset Details
-    // --------------------------------------------------
+  // --------------------------------------------------
+  // 4. Asset Details
+  // --------------------------------------------------
 
-    const assetDetailsResponse = await pool.request()
-        .input("assetId", sql.BigInt, assetId)
-        .input("fromDate", sql.Date, fromDate)
-        .input("toDate", sql.Date, toDate)
-        .query(`
+  const assetDetailsResponse = await pool
+    .request()
+    .input("assetId", sql.BigInt, assetId)
+    .input("fromDate", sql.Date, fromDate)
+    .input("toDate", sql.Date, toDate).query(`
             SELECT
                 aed.EventDateTimeUtc AS EventTime,
 
@@ -699,18 +708,15 @@ async function getAssetReportDetails({
             ORDER BY aed.EventDateTimeUtc;
         `);
 
-    return {
-        summary: summaryResponse.recordset[0] || null,
+  return {
+    summary: summaryResponse.recordset[0] || null,
 
-        operationCalendar:
-            operationCalendarResponse.recordset,
+    operationCalendar: operationCalendarResponse.recordset,
 
-        serviceTimePeriods:
-            serviceTimePeriodsResponse.recordset,
+    serviceTimePeriods: serviceTimePeriodsResponse.recordset,
 
-        assetDetails:
-            assetDetailsResponse.recordset,
-    };
+    assetDetails: assetDetailsResponse.recordset,
+  };
 }
 // ======================================================
 // STOP REPORT
@@ -739,9 +745,6 @@ async function getStopReports() {
 
   return response.recordset;
 }
-
-
-
 
 module.exports = {
   getAssetSummaryReports,
