@@ -60,18 +60,20 @@ const AssetModal = ({ isOpen, onClose, mode, assets, selectedAsset }) => {
     value: site.SiteID,
     label: site.SiteName,
   }));
-  const assetTypeOptions = assets
-  ?.map((asset) => ({
-    value: asset.AssetTypeID,
-    label: asset.AssetTypeName,
-  }))
-//   .filter(
-//     (option, index, self) =>
-//       index === self.findIndex(
-//         (item) => item.value === option.value
-//       )
-//   );
-  console.log("formData", formData,selectedAsset,assetTypeOptions);
+  
+const assetTypeOptions = [
+  ...new Map(
+    assets?.map((asset) => [
+      asset.AssetTypeID,
+      {
+        value: asset.AssetTypeID,
+        label: asset.AssetTypeName,
+      },
+    ]) ?? []
+  ).values(),
+];
+ 
+  console.log("formData", formData,selectedAsset);
   useEffect(() => {
     if (selectedAsset && (mode === "edit" || mode === "view")) {
       setFormData({
