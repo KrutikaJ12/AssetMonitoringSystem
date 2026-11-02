@@ -36,8 +36,8 @@ function parseTelemetryPacket(packetString) {
       const parts = packetString.split(",");
       if (parts.length >= 5) {
         deviceIdentifier = parts[2];
-        const timeStr = parts[3]; 
-        const dateStr = parts[4]; 
+        const timeStr = parts[3];
+        const dateStr = parts[4];
 
         if (timeStr && timeStr.length >= 6 && dateStr && dateStr.length === 6) {
           const hours = timeStr.substring(0, 2);
@@ -48,15 +48,17 @@ function parseTelemetryPacket(packetString) {
           const month = dateStr.substring(2, 4);
           const year = "20" + dateStr.substring(4, 6);
 
-          const parsedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
+          const parsedDate = new Date(
+            `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`,
+          );
           if (!isNaN(parsedDate.getTime())) {
-            eventDateTime = parsedDate; 
+            eventDateTime = parsedDate;
           }
         }
-        speed = 40; 
+        speed = 40;
         ignition = true;
       }
-    } 
+    }
     // 2. GPS Data Format: ATL<IMEI>,$GPRMC,...
     else if (packetString.includes("$GPRMC")) {
       const matchDevice = packetString.match(/ATL(\d{15}),/);
@@ -64,16 +66,18 @@ function parseTelemetryPacket(packetString) {
         deviceIdentifier = matchDevice[1];
       }
 
-      const gprmcMatch = packetString.match(/\$GPRMC,([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*)/);
+      const gprmcMatch = packetString.match(
+        /\$GPRMC,([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*),([^\,]*)/,
+      );
       if (gprmcMatch) {
-        const timeStr = gprmcMatch[1]; 
+        const timeStr = gprmcMatch[1];
         const latStr = gprmcMatch[3];
         const latDir = gprmcMatch[4];
         const lonStr = gprmcMatch[5];
         const lonDir = gprmcMatch[6];
-        const speedKnots = parseFloat(gprmcMatch[7]) || 0; 
-        const dateStr = gprmcMatch[9]; 
-        
+        const speedKnots = parseFloat(gprmcMatch[7]) || 0;
+        const dateStr = gprmcMatch[9];
+
         speed = Math.round(speedKnots * 1.852);
         latitude = convertToDecimalDegrees(latStr, latDir);
         longitude = convertToDecimalDegrees(lonStr, lonDir);
@@ -87,9 +91,11 @@ function parseTelemetryPacket(packetString) {
           const month = dateStr.substring(2, 4);
           const year = "20" + dateStr.substring(4, 6);
 
-          const parsedDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`);
+          const parsedDate = new Date(
+            `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`,
+          );
           if (!isNaN(parsedDate.getTime())) {
-            eventDateTime = parsedDate; 
+            eventDateTime = parsedDate;
           }
         }
       }
@@ -100,9 +106,9 @@ function parseTelemetryPacket(packetString) {
         const subParts = ioAndData.split(",");
 
         if (subParts.length > 0) {
-          const ioStatusBinary = subParts[0]; 
+          const ioStatusBinary = subParts[0];
           if (ioStatusBinary.length > 0) {
-            ignition = ioStatusBinary.charAt(0) === '1';
+            ignition = ioStatusBinary.charAt(0) === "1";
           }
         }
 
@@ -117,7 +123,7 @@ function parseTelemetryPacket(packetString) {
 
     if (!deviceIdentifier) return null;
 
-    const status = (speed > 0 || ignition) ? "WORKING" : "STOPPED";
+    const status = speed > 0 || ignition ? "WORKING" : "STOPPED";
 
     return {
       deviceIdentifier,
@@ -126,7 +132,7 @@ function parseTelemetryPacket(packetString) {
       eventDateTime,
       odometer,
       latitude,
-      longitude
+      longitude,
     };
   } catch (err) {
     console.error("Packet parsing error:", err.message);
@@ -138,12 +144,12 @@ function startPacketWorker() {
   console.log("Packet processing background worker started...");
 
   setInterval(async () => {
+    isProcessing = true;
     try {
       const pool = getPool();
       if (!pool) return;
 
-      const result = await pool.request()
-        .query(`
+      const result = await pool.request().query(`
           SELECT TOP 50 RawID, DeviceIdentifier, 
                  COALESCE(CustomerID, 1) AS CustomerID, 
                  COALESCE(AssetID, 1) AS AssetID, 
@@ -156,33 +162,39 @@ function startPacketWorker() {
       if (pendingPackets.length === 0) return;
 
       for (let packet of pendingPackets) {
-        const { RawID, CustomerID, AssetID, ReceivedDateTimeUtc, RawPacket } = packet;
+        const { RawID, CustomerID, AssetID, ReceivedDateTimeUtc, RawPacket } =
+          packet;
 
         const parsed = parseTelemetryPacket(RawPacket);
         if (!parsed) {
-          await pool.request()
+          await pool
+            .request()
             .input("rawId", sql.Int, RawID)
             .input("err", sql.VarChar, "Invalid packet format")
-            .query(`UPDATE AssetRawData SET ProcessingStatus = 'FAILED', ErrorMessage = @err WHERE RawID = @rawId`);
+            .query(
+              `UPDATE AssetRawData SET ProcessingStatus = 'FAILED', ErrorMessage = @err WHERE RawID = @rawId`,
+            );
           continue;
         }
 
-        const { 
-          deviceIdentifier: DeviceIdentifier, 
-          speed, 
-          status, 
+        const {
+          deviceIdentifier: DeviceIdentifier,
+          speed,
+          status,
           eventDateTime,
           odometer,
           latitude,
-          longitude
+          longitude,
         } = parsed;
 
         const transaction = new sql.Transaction(pool);
-        await transaction.begin();
+        
 
         try {
+          await transaction.begin();
           // 1. Insert history event data with RawID, Latitude, and Longitude
-          await transaction.request()
+          await transaction
+            .request()
             .input("rawId", sql.Int, RawID)
             .input("device", sql.VarChar, DeviceIdentifier)
             .input("customerId", sql.Int, CustomerID)
@@ -191,15 +203,19 @@ function startPacketWorker() {
             .input("lat", sql.Float, latitude)
             .input("lon", sql.Float, longitude)
             .input("eventTime", sql.DateTime2, eventDateTime)
-            .input("receivedTime", sql.DateTime2, ReceivedDateTimeUtc || new Date())
-            .query(`
+            .input(
+              "receivedTime",
+              sql.DateTime2,
+              ReceivedDateTimeUtc || new Date(),
+            ).query(`
               INSERT INTO AssetEventData 
               (RawID, DeviceIdentifier, CustomerID, AssetID, SpeedKph, Latitude, Longitude, EventDateTimeUtc, ReceivedDateTimeUtc, CreatedDateTimeUtc) 
               VALUES (@rawId, @device, @customerId, @assetId, @speed, @lat, @lon, @eventTime, @receivedTime, GETDATE())
             `);
 
           // 2. Upsert live status table
-          await transaction.request()
+          await transaction
+            .request()
             .input("device", sql.VarChar, DeviceIdentifier)
             .input("assetId", sql.BigInt, AssetID)
             .input("customerId", sql.Int, CustomerID)
@@ -207,8 +223,7 @@ function startPacketWorker() {
             .input("speed", sql.Int, speed)
             .input("lat", sql.Float, latitude)
             .input("lon", sql.Float, longitude)
-            .input("eventTime", sql.DateTime2, eventDateTime)
-            .query(`
+            .input("eventTime", sql.DateTime2, eventDateTime).query(`
               IF EXISTS (SELECT 1 FROM AssetLiveStatus WHERE AssetID = @assetId)
               BEGIN
                 UPDATE AssetLiveStatus 
@@ -223,9 +238,12 @@ function startPacketWorker() {
             `);
 
           // 3. Mark raw packet as processed
-          await transaction.request()
+          await transaction
+            .request()
             .input("rawId", sql.Int, RawID)
-            .query(`UPDATE AssetRawData SET ProcessingStatus = 'PROCESSED' WHERE RawID = @rawId`);
+            .query(
+              `UPDATE AssetRawData SET ProcessingStatus = 'PROCESSED' WHERE RawID = @rawId`,
+            );
 
           await transaction.commit();
           // console.log(`Successfully processed RawID: ${RawID} with Lat/Long`);
@@ -238,22 +256,35 @@ function startPacketWorker() {
             latitude: latitude,
             longitude: longitude,
             odometer: odometer,
-            updatedAt: eventDateTime
+            updatedAt: eventDateTime,
           });
-
         } catch (innerErr) {
-          await transaction.rollback();
-          console.error(`Error processing RawID ${RawID}:`, innerErr.message);
+          try {
+            await transaction.rollback();
+          } catch (rollbackErr) {
+            console.error(
+              `Rollback failed for RawID ${RawID}:`,
+              rollbackErr.message,
+            );
+          }
 
-          await pool.request()
+          console.error(`Error processing RawID ${RawID}:`, innerErr.message);
+          await transaction.rollback();
+          // console.error(`Error processing RawID ${RawID}:`, innerErr.message);
+
+          await pool
+            .request()
             .input("rawId", sql.Int, RawID)
             .input("err", sql.VarChar, innerErr.message)
-            .query(`UPDATE AssetRawData SET ProcessingStatus = 'FAILED', ErrorMessage = @err WHERE RawID = @rawId`);
+            .query(
+              `UPDATE AssetRawData SET ProcessingStatus = 'FAILED', ErrorMessage = @err WHERE RawID = @rawId`,
+            );
         }
       }
-
     } catch (err) {
       console.error("Worker loop error:", err.message);
+    } finally {
+      isProcessing = false;
     }
   }, 3000);
 }

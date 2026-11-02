@@ -46,14 +46,18 @@ initSocket(server);
 const PORT = process.env.PORT;
 
 const startServer = async () => {
+  try {
     await connectDB();
 
     server.listen(PORT, () => {
-        console.log(`Server running on ${PORT}`);
+      console.log(`Server running on ${PORT}`);
 
-        // Background packet processing worker start karo
-        startPacketWorker();
+      startPacketWorker();
     });
+  } catch (err) {
+    console.error("❌ Server startup failed:", err.message);
+    process.exit(1);
+  }
 };
 
 startServer();
