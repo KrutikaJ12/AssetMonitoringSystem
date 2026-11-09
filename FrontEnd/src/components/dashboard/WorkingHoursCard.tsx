@@ -88,7 +88,7 @@ const topAssets = [];
         {/* Header */}
         <div className="flex items-center justify-between ">
           <div>
-            <p className="text-sm text-gray-500">Monthly asset utilization</p>
+            <p className="text-sm text-gray-500"> Asset utilization</p>
           </div>
 
           <select className="rounded-lg border px-3 py-2 text-sm">
