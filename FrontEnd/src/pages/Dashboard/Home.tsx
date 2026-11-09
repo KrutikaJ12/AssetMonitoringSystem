@@ -16,6 +16,8 @@ import { SectionCard } from "../../components/cards/SectionCard";
 import WorkingHoursCard from "../../components/dashboard/WorkingHoursCard";
 import { useDashboard } from "../../hooks/useDashboard";
 import { socket } from "../../services/socket"; // <-- Socket import add kiya hai
+import {  CarFront,  BatteryChargingIcon, ChevronDown } from "lucide-react";
+import batteryImage from "../../../../FrontEnd/public/images/logo/batteryImage.png"
 
 /* =========================================================
    NOTIFICATION TYPE
@@ -33,17 +35,14 @@ type DashboardNotification = {
    DUMMY NOTIFICATION API
 ========================================================= */
 
-const getNotifications = async (): Promise<
-  DashboardNotification[]
-> => {
+const getNotifications = async (): Promise<DashboardNotification[]> => {
   return [
     {
       id: Date.now(),
 
       title: "Idle Asset Alert",
 
-      description:
-        "Asset VC-1001 has been idle for more than 30 minutes.",
+      description: "Asset VC-1001 has been idle for more than 30 minutes.",
 
       severity: "High",
 
@@ -62,7 +61,7 @@ export default function Home() {
   ======================================================= */
 
   const { data, isLoading, error } = useDashboard();
-
+ const [selectedVehicle, setSelectedVehicle] = useState("");
   /* =======================================================
      SIDEBAR / WIDGET CUSTOMIZATION STATE
   ======================================================= */
@@ -88,7 +87,7 @@ export default function Home() {
 
   const handleCheckboxChange = (id: string) => {
     setTempWidgets((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, checked: !w.checked } : w))
+      prev.map((w) => (w.id === id ? { ...w, checked: !w.checked } : w)),
     );
   };
 
@@ -98,7 +97,7 @@ export default function Home() {
   };
 
   const filteredWidgets = tempWidgets.filter((w) =>
-    w.label.toLowerCase().includes(searchQuery.toLowerCase())
+    w.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const isWidgetVisible = (id: string) => {
@@ -123,9 +122,7 @@ export default function Home() {
     }
 
     if (!("Notification" in window)) {
-      console.warn(
-        "This browser does not support notifications."
-      );
+      console.warn("This browser does not support notifications.");
 
       return;
     }
@@ -145,10 +142,7 @@ export default function Home() {
           setNotificationPermission(permission);
         })
         .catch((err) => {
-          console.error(
-            "Notification permission error:",
-            err
-          );
+          console.error("Notification permission error:", err);
         });
     }
   }, []);
@@ -159,7 +153,7 @@ export default function Home() {
   useEffect(() => {
     socket.on("assetUpdate", (updatedAsset) => {
       console.log("Real-time asset update received:", updatedAsset);
-      // Agar aap React Query use kar rahe hain, toh yahan refetch() call kar sakte hain 
+      // Agar aap React Query use kar rahe hain, toh yahan refetch() call kar sakte hain
       // taaki dashboard data automatically server se naya fetch ho jaye.
     });
 
@@ -193,10 +187,7 @@ export default function Home() {
              ONLY HIGH / CRITICAL
           ================================================= */
 
-          if (
-            alert.severity !== "High" &&
-            alert.severity !== "Critical"
-          ) {
+          if (alert.severity !== "High" && alert.severity !== "Critical") {
             return;
           }
 
@@ -204,29 +195,26 @@ export default function Home() {
              TOAST NOTIFICATION
           ================================================= */
 
-          toast.error(
-            `${alert.title}: ${alert.description}`,
-            {
-              position: "top-right",
+          toast.error(`${alert.title}: ${alert.description}`, {
+            position: "top-right",
 
-              autoClose: 1000,
+            autoClose: 1000,
 
-              closeOnClick: true,
+            closeOnClick: true,
 
-              pauseOnHover: false,
+            pauseOnHover: false,
 
-              draggable: true,
+            draggable: true,
 
-              newestOnTop: true,
+            newestOnTop: true,
 
-              /*
-               * Unique ID.
-               *
-               * Every second new Toast.
-               */
-              toastId: `asset-alert-${Date.now()}`,
-            }
-          );
+            /*
+             * Unique ID.
+             *
+             * Every second new Toast.
+             */
+            toastId: `asset-alert-${Date.now()}`,
+          });
 
           /* =================================================
              BROWSER NOTIFICATION
@@ -238,21 +226,20 @@ export default function Home() {
             Notification.permission === "granted"
           ) {
             try {
-              const browserNotification =
-                new Notification(alert.title, {
-                  body: alert.description,
+              const browserNotification = new Notification(alert.title, {
+                body: alert.description,
 
-                  icon: "/favicon.ico",
+                icon: "/favicon.ico",
 
-                  /*
-                   * Unique tag.
-                   *
-                   * Every second new browser notification.
-                   */
-                  tag: `asset-alert-${Date.now()}`,
+                /*
+                 * Unique tag.
+                 *
+                 * Every second new browser notification.
+                 */
+                tag: `asset-alert-${Date.now()}`,
 
-                  requireInteraction: false,
-                });
+                requireInteraction: false,
+              });
 
               /* =============================================
                  CLICK
@@ -272,18 +259,12 @@ export default function Home() {
                 browserNotification.close();
               }, 1000);
             } catch (browserError) {
-              console.error(
-                "Browser notification error:",
-                browserError
-              );
+              console.error("Browser notification error:", browserError);
             }
           }
         });
       } catch (notificationError) {
-        console.error(
-          "Notification API Error:",
-          notificationError
-        );
+        console.error("Notification API Error:", notificationError);
       }
     };
 
@@ -317,53 +298,36 @@ export default function Home() {
   ======================================================= */
 
   const enableNotifications = async () => {
-    if (
-      typeof window === "undefined" ||
-      !("Notification" in window)
-    ) {
-      toast.error(
-        "Your browser does not support notifications."
-      );
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      toast.error("Your browser does not support notifications.");
 
       return;
     }
 
     try {
-      const permission =
-        await Notification.requestPermission();
+      const permission = await Notification.requestPermission();
 
       setNotificationPermission(permission);
 
       if (permission === "granted") {
-        toast.success(
-          "Browser notifications enabled successfully!",
-          {
-            position: "top-right",
+        toast.success("Browser notifications enabled successfully!", {
+          position: "top-right",
 
-            autoClose: 3000,
-          }
-        );
+          autoClose: 3000,
+        });
 
         return;
       }
 
-      toast.warning(
-        "Browser notification permission was not granted.",
-        {
-          position: "top-right",
+      toast.warning("Browser notification permission was not granted.", {
+        position: "top-right",
 
-          autoClose: 5000,
-        }
-      );
+        autoClose: 5000,
+      });
     } catch (err) {
-      console.error(
-        "Enable notification error:",
-        err
-      );
+      console.error("Enable notification error:", err);
 
-      toast.error(
-        "Unable to enable browser notifications."
-      );
+      toast.error("Unable to enable browser notifications.");
     }
   };
 
@@ -372,13 +336,8 @@ export default function Home() {
   ======================================================= */
 
   const handleTestNotification = async () => {
-    if (
-      typeof window === "undefined" ||
-      !("Notification" in window)
-    ) {
-      toast.error(
-        "This browser does not support notifications."
-      );
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      toast.error("This browser does not support notifications.");
 
       return;
     }
@@ -391,15 +350,11 @@ export default function Home() {
 
     if (permission === "default") {
       try {
-        permission =
-          await Notification.requestPermission();
+        permission = await Notification.requestPermission();
 
         setNotificationPermission(permission);
       } catch (err) {
-        console.error(
-          "Notification permission error:",
-          err
-        );
+        console.error("Notification permission error:", err);
 
         return;
       }
@@ -411,7 +366,7 @@ export default function Home() {
 
     if (permission !== "granted") {
       toast.warning(
-        "Please allow browser notifications from browser settings."
+        "Please allow browser notifications from browser settings.",
       );
 
       return;
@@ -421,40 +376,32 @@ export default function Home() {
        TEST TOAST
     ===================================================== */
 
-    toast.error(
-      "Test Alert: Low Fuel Warning!",
-      {
-        position: "top-right",
+    toast.error("Test Alert: Low Fuel Warning!", {
+      position: "top-right",
 
-        autoClose: 3000,
+      autoClose: 3000,
 
-        closeOnClick: true,
+      closeOnClick: true,
 
-        pauseOnHover: false,
+      pauseOnHover: false,
 
-        toastId: `test-toast-${Date.now()}`,
-      }
-    );
+      toastId: `test-toast-${Date.now()}`,
+    });
 
     /* =====================================================
        TEST BROWSER NOTIFICATION
     ===================================================== */
 
     try {
-      const notification =
-        new Notification(
-          "Low Fuel Warning!",
-          {
-            body:
-              "Vehicle VC-1001 fuel level is below the configured limit.",
+      const notification = new Notification("Low Fuel Warning!", {
+        body: "Vehicle VC-1001 fuel level is below the configured limit.",
 
-            icon: "/favicon.ico",
+        icon: "/favicon.ico",
 
-            tag: `test-low-fuel-${Date.now()}`,
+        tag: `test-low-fuel-${Date.now()}`,
 
-            requireInteraction: false,
-          }
-        );
+        requireInteraction: false,
+      });
 
       notification.onclick = () => {
         window.focus();
@@ -466,10 +413,7 @@ export default function Home() {
         notification.close();
       }, 5000);
     } catch (err) {
-      console.error(
-        "Test browser notification error:",
-        err
-      );
+      console.error("Test browser notification error:", err);
     }
   };
 
@@ -477,13 +421,15 @@ export default function Home() {
      DASHBOARD DATA
   ======================================================= */
 
-  console.log('dashboarddata',data)
+  console.log("dashboarddata", data);
   const assetStatusLabels =
     data?.data?.assetStatus?.map((asset) => asset.status) ?? [];
   const assetStatusSeries =
     data?.data?.assetStatus?.map((asset) => asset.count) ?? [];
-  const assetTypes = data?.data?.assetTypes?.map((asset) => asset.assetType) ?? [];
-  const assetTypesSeries = data?.data?.assetTypes?.map((asset) => asset.count) ?? [];
+  const assetTypes =
+    data?.data?.assetTypes?.map((asset) => asset.assetType) ?? [];
+  const assetTypesSeries =
+    data?.data?.assetTypes?.map((asset) => asset.count) ?? [];
   const adminMetrics = [
     {
       title: "Total Assets",
@@ -505,7 +451,7 @@ export default function Home() {
 
     {
       title: "Total Sites",
-      value:data?.data?.summary?.totalSites ?? 0,
+      value: data?.data?.summary?.totalSites ?? 0,
       icon: <GroupIcon />,
     },
 
@@ -527,11 +473,7 @@ export default function Home() {
 
     labels: assetStatusLabels,
 
-    colors: [
-      "#dc2626",
-      "#ef4444",
-      "#fca5a5",
-    ],
+    colors: ["#16a34a", "#ca8a04", "#dc2626","#475569"],
 
     legend: {
       position: "bottom",
@@ -549,11 +491,7 @@ export default function Home() {
 
     labels: assetTypes,
 
-    colors: [
-      "#dc2626",
-      "#ef4444",
-      "#fca5a5",
-    ],
+    colors: ["#dc2626", "#ef4444", "#fca5a5"],
 
     legend: {
       position: "bottom",
@@ -581,9 +519,7 @@ export default function Home() {
           }}
         />
 
-        <div className="p-4 text-red-600">
-          Failed to load dashboard data.
-        </div>
+        <div className="p-4 text-red-600">Failed to load dashboard data.</div>
       </>
     );
   }
@@ -664,9 +600,24 @@ export default function Home() {
           className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
           title="Customize Dashboard Widgets"
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
           </svg>
           <span>Settings</span>
         </button>
@@ -684,8 +635,7 @@ export default function Home() {
             </p>
 
             <p className="text-sm text-yellow-700">
-              Enable browser notifications to receive
-              real-time asset alerts.
+              Enable browser notifications to receive real-time asset alerts.
             </p>
           </div>
 
@@ -709,9 +659,7 @@ export default function Home() {
         ================================================= */}
 
         <div className="grid w-full gap-2">
-          <StatisticsMetrics
-            metrics={adminMetrics}
-          />
+          <StatisticsMetrics metrics={adminMetrics} />
         </div>
 
         {/* =================================================
@@ -720,13 +668,11 @@ export default function Home() {
 
         <div className="mb-6 flex md:gap-6">
           <div className="flex w-full flex-col gap-4">
-
             {/* =============================================
                 TOP CARDS
             ============================================= */}
 
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-
               {/* ASSET STATUS */}
               {isWidgetVisible("assetStatus") && (
                 <SectionCard title="Assets Status Overview">
@@ -754,7 +700,7 @@ export default function Home() {
               {/* RECENT ALERTS */}
               {isWidgetVisible("recentAlerts") && (
                 <SectionCard title="Recents Alerts" actionText="View Alerts">
-                  <RecentAlerts data={data.data.recentAlerts}/>
+                  <RecentAlerts data={data.data.recentAlerts} />
                 </SectionCard>
               )}
             </div>
@@ -765,9 +711,7 @@ export default function Home() {
 
             {isWidgetVisible("workingHours") && (
               <SectionCard title="Working Hours">
-                <WorkingHoursCard
-                  data={data.data.workingHours}
-                />
+                <WorkingHoursCard data={data.data.workingHours} />
               </SectionCard>
             )}
 
@@ -777,9 +721,7 @@ export default function Home() {
 
             {isWidgetVisible("fuelConsumption") && (
               <div>
-                <StatisticsChart
-                  data={data.fuelConsumption}
-                />
+                <StatisticsChart data={data.fuelConsumption} />
               </div>
             )}
 
@@ -787,12 +729,100 @@ export default function Home() {
                 BATTERY
             ============================================= */}
 
-            {isWidgetVisible("batteryChart") && (
-              <div>
-                <BatteryChart />
-              </div>
-            )}
+
+
+
+
+
+{isWidgetVisible("batteryChart") && (
+  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+
+    {/* Header */}
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      {/* Title */}
+      <div className="flex flex-1 items-center gap-4 sm:border-r sm:border-gray-200 sm:py-1 dark:sm:border-gray-700">
+
+        <div className="rounded-xl bg-indigo-100 p-3 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+          <BatteryChargingIcon size={25} />
+        </div>
+
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            Battery Status
+          </h3>
+
+          <p className="text-sm text-gray-400">
+            Monitor individual vehicle battery information
+          </p>
+        </div>
+      </div>
+
+      {/* Vehicle Dropdown */}
+      <div className="relative w-full sm:w-[220px]">
+
+        <CarFront
+          size={19}
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+        />
+
+        <select
+          value={selectedVehicle}
+          onChange={(e) => setSelectedVehicle(e.target.value)}
+          className="w-full appearance-none rounded-xl border border-gray-300 bg-gray-50 py-3 pl-10 pr-10 text-sm text-gray-700 outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+        >
+          <option value="">Select Vehicle</option>
+          <option value="392">MH16BY7745</option>
+          <option value="393">NLO1N5922</option>
+        </select>
+
+        <ChevronDown
+          size={18}
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+        />
+
+      </div>
+    </div>
+
+    {/* Battery Empty State */}
+    {!selectedVehicle ? (
+      <div className="mt-5 flex min-h-[168px] flex-col items-center gap-4 overflow-hidden rounded-xl bg-gradient-to-br from-[#EDF3FD] via-[#F8FAFF] to-[#EAF0FD] sm:flex-row sm:gap-6">
+
+        {/* Illustration */}
+        <div className="flex h-[168px] w-full shrink-0 items-center justify-center sm:w-[320px]">
+          <img
+            src={batteryImage}
+            alt="Battery and construction vehicle illustration"
+            className="h-full w-full object-contain"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="px-5 pb-5 text-center sm:flex-1 sm:py-5 sm:pl-0 sm:pr-8 sm:text-left">
+          <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-gray-800">
+            Select a vehicle to view battery status
+          </h3>
+
+          <p className="text-sm leading-6 text-gray-500">
+            Choose a vehicle from the dropdown to see its battery
+            level, voltage, charging status, temperature and health.
+          </p>
+        </div>
+
+      </div>
+    ) : (
+      <div className="mt-5">
+        {/* Render your existing battery details component here */}
+        {/* <BatteryDetails assetId={Number(selectedVehicle)} /> */}
+        <BatteryChart/>
+      </div>
+    )}
+
+  </div>
+)}
+          
           </div>
+         
         </div>
 
         {/* =================================================
@@ -801,9 +831,7 @@ export default function Home() {
 
         {isWidgetVisible("siteSummary") && (
           <div className="col-span-12 mt-4 xl:col-span-7">
-            <SiteSummary
-              data={data.data.siteSummary}
-            />
+            <SiteSummary data={data.data.siteSummary} />
           </div>
         )}
       </div>
@@ -822,12 +850,21 @@ export default function Home() {
           {/* Right Sliding Panel */}
           <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
             <div className="flex h-full w-80 max-w-sm flex-col bg-white shadow-2xl border-l border-gray-200 dark:border-gray-800 dark:bg-gray-900">
-              
               {/* Search Bar Container */}
               <div className="p-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="relative flex items-center">
-                  <svg className="absolute left-3 h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="absolute left-3 h-4 w-4 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                   <input
                     type="text"
@@ -882,7 +919,6 @@ export default function Home() {
                   Cancel
                 </button>
               </div>
-
             </div>
           </div>
         </div>
