@@ -71,7 +71,7 @@ async function getAssets(customerId, siteId) {
     WHERE am.CustomerID = @CustomerID
       ${siteCondition}
 
-    ORDER BY am.AssetID;
+    ORDER BY am.AssetID desc;
 `);
 
   return result.recordset;

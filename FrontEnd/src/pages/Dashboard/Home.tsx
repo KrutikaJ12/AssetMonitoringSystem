@@ -480,6 +480,37 @@ export default function Home() {
     },
   };
 
+/* =======================================================
+   BATTERY STATISTICS OPTIONS
+======================================================= */
+
+const batteryStatusOptions: ApexOptions = {
+  chart: { type: "donut" },
+  labels: ["Less than 0%", "0%", "1 - 25%", "25 - 50%", "50 - 75%", "Above 75%"],
+  colors: ["#d1d5db", "#6b7280", "#ef4444", "#facc15", "#3b82f6", "#4ade80"],
+  legend: { position: "bottom" },
+};
+const batteryStatusSeries = [0, 0, 0, 0, 0, 0]; // API data se replace karo
+
+const batteryHealthOptions: ApexOptions = {
+  chart: { type: "donut" },
+  labels: ["1 - 25%", "25 - 50%", "50 - 75%", "75 - 100%"],
+  colors: ["#ef4444", "#8b5cf6", "#2dd4bf", "#22c55e"],
+  legend: { position: "bottom" },
+};
+const batteryHealthSeries = [0, 0, 0, 0]; // API data se replace karo
+
+const batteryTempOptions: ApexOptions = {
+  chart: { type: "donut" },
+  labels: ["1 To 15 °C", "15 To 30 °C", "30 To 45 °C", "> 45 °C", "0 °C", "Non Reporting"],
+  colors: ["#4ade80", "#3b82f6", "#facc15", "#ef4444", "#6b7280", "#d1d5db"],
+  legend: { position: "bottom" },
+};
+const batteryTempSeries = [0, 1, 0, 0, 0, 0]; // API data se replace karo
+
+const currentlyCharging = 0; // API data se replace karo
+
+
   /* =======================================================
      ASSET TYPE OPTIONS
   ======================================================= */
@@ -725,6 +756,53 @@ export default function Home() {
               </div>
             )}
 
+{/* =============================================
+    BATTERY STATISTICS
+============================================= */}
+
+{isWidgetVisible("batteryStats") && (
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    {/* Battery Status */}
+    <SectionCard title="Battery Status">
+      <Chart
+        options={batteryStatusOptions}
+        series={batteryStatusSeries}
+        type="donut"
+        height={300}
+      />
+    </SectionCard>
+
+    {/* Battery Health */}
+    <SectionCard title="Battery Health">
+      <Chart
+        options={batteryHealthOptions}
+        series={batteryHealthSeries}
+        type="donut"
+        height={300}
+      />
+    </SectionCard>
+
+    {/* Battery Temperature */}
+    <SectionCard title="Battery Temperature (°C)">
+      <Chart
+        options={batteryTempOptions}
+        series={batteryTempSeries}
+        type="donut"
+        height={300}
+      />
+    </SectionCard>
+
+    {/* Currently Charging */}
+    <SectionCard title="Currently Charging">
+      <div className="flex h-[300px] items-center justify-center gap-3">
+        <BatteryChargingIcon size={48} className="text-green-600" />
+        <span className="text-5xl font-light text-green-600">
+          {currentlyCharging}
+        </span>
+      </div>
+    </SectionCard>
+  </div>
+)}
             {/* =============================================
                 BATTERY
             ============================================= */}

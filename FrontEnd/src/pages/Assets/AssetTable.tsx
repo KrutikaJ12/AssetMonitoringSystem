@@ -336,6 +336,12 @@ export function AssetTable(Asset: AssetTableProps) {
     >
       Status
     </TableCell>
+     <TableCell
+      isHeader
+      className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
+    >
+      Status Duration
+    </TableCell>
     <TableCell
       isHeader
       className="py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400"
@@ -421,6 +427,9 @@ export function AssetTable(Asset: AssetTableProps) {
         >
           {asset.Status}
         </Badge>
+      </TableCell>
+       <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
+        {"-"}
       </TableCell>
       <TableCell className="py-3 text-left text-gray-500 text-theme-sm dark:text-gray-400">
         {asset.EngineHours}
