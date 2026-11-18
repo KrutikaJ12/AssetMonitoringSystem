@@ -969,22 +969,36 @@ export default function Home() {
                 </p>
 
                 <div className="space-y-3">
-                  {filteredWidgets.map((widget) => (
-                    <label
-                      key={widget.id}
-                      className="flex items-center justify-between cursor-pointer group py-1"
-                    >
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 dark:text-gray-300">
-                        {widget.label}
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={widget.checked}
-                        onChange={() => handleCheckboxChange(widget.id)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                      />
-                    </label>
-                  ))}
+                  {filteredWidgets
+                    .filter((widget) => {
+                      if (
+                        fleetType === 2 &&
+                        ["Site Summary", "Fuel Consumption"].includes(
+                          widget.label,
+                        )
+                      ) {
+                        return false;
+                      }
+
+                      return true;
+                    })
+                    .map((widget) => (
+                      <label
+                        key={widget.id}
+                        className="flex items-center justify-between cursor-pointer group py-1"
+                      >
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 dark:text-gray-300">
+                          {widget.label}
+                        </span>
+
+                        <input
+                          type="checkbox"
+                          checked={widget.checked}
+                          onChange={() => handleCheckboxChange(widget.id)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </label>
+                    ))}
                 </div>
               </div>
 
