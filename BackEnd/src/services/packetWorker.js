@@ -208,9 +208,32 @@ function startPacketWorker() {
               sql.DateTime2,
               ReceivedDateTimeUtc || new Date(),
             ).query(`
-              INSERT INTO AssetEventData 
-              (RawID, DeviceIdentifier, CustomerID, AssetID, SpeedKph, Latitude, Longitude, EventDateTimeUtc, ReceivedDateTimeUtc, CreatedDateTimeUtc) 
-              VALUES (@rawId, @device, @customerId, @assetId, @speed, @lat, @lon, @eventTime, @receivedTime, GETDATE())
+             INSERT INTO AssetEventData
+(
+    RawID,
+    DeviceIdentifier,
+    CustomerID,
+    AssetID,
+    SpeedKph,
+    Latitude,
+    Longitude,
+    EventDateTime,
+    ReceivedDateTime,
+    CreatedDateTime
+)
+VALUES
+(
+    @rawId,
+    @device,
+    @customerId,
+    @assetId,
+    @speed,
+    @lat,
+    @lon,
+    @eventTime,
+    @receivedTime,
+   DATEADD(MINUTE, 330, SYSUTCDATETIME())
+)
             `);
 
           // 2. Upsert live status table
