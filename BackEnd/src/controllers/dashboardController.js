@@ -105,7 +105,24 @@ async function getSummary(req, res, next) {
           totalSites: Number(summary?.TotalSites || 0),
           activeOperators: Number(summary?.ActiveOperators || 0),
         },
-
+        evSummary: {
+          evAssets: Number(summary?.EVAssets || 0),
+          chargingAssets: Number(summary?.ChargingAssets || 0),
+          averageBatterySOC:
+            summary?.AverageBatterySOC != null
+              ? Number(summary.AverageBatterySOC)
+              : null,
+          averageBatterySOH:
+            summary?.AverageBatterySOH != null
+              ? Number(summary.AverageBatterySOH)
+              : null,
+          averageBatteryTemperature:
+            summary?.AverageBatteryTemperature != null
+              ? Number(summary.AverageBatteryTemperature)
+              : null,
+          evWarningAssets: Number(summary?.EVWarningAssets || 0),
+          evCriticalFaultAssets: Number(summary?.EVCriticalFaultAssets || 0),
+        },
         assetStatus: [
           {
             status: "RUNNING",
