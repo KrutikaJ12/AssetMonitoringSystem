@@ -37,6 +37,7 @@ import StartStopReport from "./pages/Reports/StartStopReport";
 import MovementReport from "./pages/Reports/MovementReport";
 import StopReport from "./pages/Reports/StopReport";
 import LiveTrackingPage from "./pages/Tracking/LiveTrackingPage";
+import BmsPage from "./pages/bms/BmsPage";
 
 export default function App() {
   return (
@@ -91,6 +92,30 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* BMS ROUTE */}
+<Route
+  path="/admin/bms"
+  element={
+    <ProtectedRoute>
+      <PermissionRoute permission="ASSET_VIEW">
+        <BmsPage />
+      </PermissionRoute>
+    </ProtectedRoute>
+  }
+/>
+
+{/* Optional: Agar Site Manager ke liye bhi chahiye */}
+<Route
+  path="/siteManager/bms"
+  element={
+    <ProtectedRoute>
+      <PermissionRoute permission="ASSET_VIEW">
+        <BmsPage />
+      </PermissionRoute>
+    </ProtectedRoute>
+  }
+/>
 
               {/* 2. LIVE TRACKING ROUTE ADD KIYA GAYA HAS */}
             <Route

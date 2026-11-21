@@ -18,7 +18,7 @@ const reportRoutes = require("./src/routes/reportRoutes");
 
 // Socket aur Worker imports
 const { initSocket } = require("./src/sockets/socketServer");
-const { startPacketWorker } = require("./src/services/packetWorker");
+// const { startPacketWorker } = require("./src/services/packetWorker");
 
 // connectDB();
 const app = express();
@@ -52,7 +52,7 @@ const startServer = async () => {
     server.listen(PORT, () => {
       console.log(`Server running on ${PORT}`);
 
-      startPacketWorker();
+      // startPacketWorker();
     });
   } catch (err) {
     console.error("❌ Server startup failed:", err.message);
