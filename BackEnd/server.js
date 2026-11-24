@@ -15,6 +15,8 @@ const assetRoutes = require("./src/routes/assetRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const { connectDB } = require("./src/config/db")
 const reportRoutes = require("./src/routes/reportRoutes");
+//For bms(ev) customer
+const bmsRoutes = require("./src/routes/bmsroutes")
 
 // Socket aur Worker imports
 const { initSocket } = require("./src/sockets/socketServer");
@@ -36,6 +38,9 @@ app.use("/api",opratorRoutes)
 app.use("/api",assetRoutes);
 app.use("/api",userRoutes)
 app.use("/api/reports", reportRoutes);
+//For bms(ev) customer
+app.use("/api/bms",bmsRoutes)
+
 
 // HTTP server create karo taaki Socket.io attach ho sake
 const server = http.createServer(app);
