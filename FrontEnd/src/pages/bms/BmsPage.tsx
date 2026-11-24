@@ -1,81 +1,248 @@
-import React, { useState } from "react";
+
+import { useState } from "react";
+import { useGetBmsData } from "../../hooks/useBmsInsights";
 
 type TabType = "trends" | "cells";
 
-interface BmsLiveMetrics {
-  soc: number;
-  mode: "Charging (+)" | "Discharging (-)" | "Idle";
-  voltageBalanceStatus: "CRITICAL" | "OK";
-  voltageDelta: number;
-  tempStatus: "OK" | "WARNING";
-  maxTemp24h: number;
-  packVoltage: number;
-  batteryTemp: number;
-  current: number;
-  soh: number | null;
-  cellVoltageDelta: number;
-  cellTempDelta: number;
-  estimatedMode: string;
-  batteryInfo: string;
-  productionDate: string;
-  manufacturer: string;
-  typeCapacityRating: string;
-  maxCellV24h: number;
-  minCellV24h: number;
-  maxCellT24h: number;
-  minCellT24h: number;
-  totalPoints: number;
+interface BatteryInfo {
+  BatteryID: string;
+  BatterySerialNo: string;
+  BMSIdentifier: string;
+  BatteryChemistry: string;
+  NominalVoltageV: number;
+  RatedCapacityAh: number;
+  RatedEnergyKWh: number;
+  CellCount: number;
+  ManufactureDate: string | null;
+  InstallationDate: string | null;
 }
 
-const mockBmsData: BmsLiveMetrics = {
-  soc: 86,
-  mode: "Charging (+)",
-  voltageBalanceStatus: "CRITICAL",
-  voltageDelta: 3.275,
-  tempStatus: "OK",
-  maxTemp24h: 26,
-  packVoltage: 49.1,
-  batteryTemp: 20.8,
-  current: 2.9835,
-  soh: null,
-  cellVoltageDelta: 3.275,
-  cellTempDelta: 3.0,
-  estimatedMode: "--",
-  batteryInfo: "Demo",
-  productionDate: "--",
-  manufacturer: "Demo",
-  typeCapacityRating: "Demo / Demo",
-  maxCellV24h: 3.277,
-  minCellV24h: 3.273,
-  maxCellT24h: 26.0,
-  minCellT24h: 19.0,
-  totalPoints: 631,
-};
+interface LiveTelemetry {
+  StateOfChargePercent: number;
+  StateOfHealthPercent: number | null;
+  PackVoltageV: number;
+  PackCurrentA: number;
+  PackPowerKW: number;
+  CellVoltageMinV: number;
+  CellVoltageMaxV: number;
+  CellVoltageDeltaV: number;
+  BatteryTemperatureC: number;
+  MinimumCellTemperatureC: number;
+  MaximumCellTemperatureC: number;
+  IsCharging: boolean;
+  IsDischarging: boolean;
+  HasWarning: boolean;
+  HasCriticalFault: boolean;
+  AdditionalDataJson: string | null;
+}
+
+interface CellReading {
+  CellReadingID: string;
+  CellNo: number;
+  CellVoltageV: number;
+  CellTemperatureC: number;
+  BalancingActive: boolean;
+}
+
+interface BmsApiData {
+  batteryInfo: BatteryInfo | null;
+  liveTelemetry: LiveTelemetry | null;
+  cellReadings: CellReading[];
+  alarms: unknown[];
+}
+
+function formatDate(date: string | null | undefined) {
+  if (!date) return "--";
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export default function BmsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("trends");
   const [threshold, setThreshold] = useState<number>(0.5);
 
-  const data = mockBmsData;
+  const assetId = new URLSearchParams(window.location.search).get("vehicleId");
 
-  // Gauge needle angle calculation (-200A to +200A mapped to -90deg to +90deg)
-  const clampedCurrent = Math.max(-200, Math.min(200, data.current));
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useGetBmsData(assetId);
+
+  /*
+   * Supports both response shapes:
+   * 1. { success: true, data: {...} }
+   * 2. Axios response: { data: { success: true, data: {...} } }
+   */
+  const apiData = (
+    response?.data?.data ?? response?.data ?? response
+  ) as BmsApiData | undefined;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">Loading BMS insights...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-sm text-red-600">
+          {error instanceof Error
+            ? error.message
+            : "Failed to load BMS data."}
+        </p>
+      </div>
+    );
+  }
+
+  if (!assetId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">
+          Asset ID is missing from the URL.
+        </p>
+      </div>
+    );
+  }
+
+  const battery = apiData?.batteryInfo;
+  const telemetry = apiData?.liveTelemetry;
+  const cells = apiData?.cellReadings ?? [];
+
+  if (!battery || !telemetry) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">
+          No BMS data available for this asset.
+        </p>
+      </div>
+    );
+  }
+
+  // Parse additional BMS information.
+  let additionalData: { BMSManufacturer?: string } = {};
+
+  try {
+    additionalData = telemetry.AdditionalDataJson
+      ? JSON.parse(telemetry.AdditionalDataJson)
+      : {};
+  } catch {
+    additionalData = {};
+  }
+
+  // Derive charging / discharging mode from API values.
+  const mode = telemetry.IsCharging
+    ? "Charging (+)"
+    : telemetry.IsDischarging
+      ? "Discharging (-)"
+      : "Idle";
+
+  // Current is positive while charging and negative while discharging.
+  const current = telemetry.IsDischarging
+    ? -Math.abs(telemetry.PackCurrentA)
+    : telemetry.IsCharging
+      ? Math.abs(telemetry.PackCurrentA)
+      : telemetry.PackCurrentA;
+
+  // Calculate cell temperature difference from the latest cell readings.
+  const cellTemperatures = cells
+    .map((cell) => Number(cell.CellTemperatureC))
+    .filter(Number.isFinite);
+
+  const maxCellTemperature =
+    cellTemperatures.length > 0
+      ? Math.max(...cellTemperatures)
+      : telemetry.MaximumCellTemperatureC;
+
+  const minCellTemperature =
+    cellTemperatures.length > 0
+      ? Math.min(...cellTemperatures)
+      : telemetry.MinimumCellTemperatureC;
+
+  const cellVoltages = cells
+    .map((cell) => Number(cell.CellVoltageV))
+    .filter(Number.isFinite);
+
+  const maxCellVoltage =
+    cellVoltages.length > 0
+      ? Math.max(...cellVoltages)
+      : telemetry.CellVoltageMaxV;
+
+  const minCellVoltage =
+    cellVoltages.length > 0
+      ? Math.min(...cellVoltages)
+      : telemetry.CellVoltageMinV;
+
+  const voltageBalanceStatus = telemetry.HasCriticalFault
+    ? "CRITICAL"
+    : "OK";
+
+  const tempStatus =
+    telemetry.HasWarning || telemetry.HasCriticalFault
+      ? "WARNING"
+      : "OK";
+
+  const batteryData = {
+    soc: telemetry.StateOfChargePercent,
+    mode,
+    voltageBalanceStatus,
+    voltageDelta: telemetry.CellVoltageDeltaV,
+    tempStatus,
+    maxTemp: telemetry.MaximumCellTemperatureC,
+    packVoltage: telemetry.PackVoltageV,
+    batteryTemp: telemetry.BatteryTemperatureC,
+    current,
+    soh: telemetry.StateOfHealthPercent,
+    cellVoltageDelta: telemetry.CellVoltageDeltaV,
+    cellTempDelta: maxCellTemperature - minCellTemperature,
+    estimatedMode: "--",
+    batteryInfo: battery.BatterySerialNo,
+    productionDate: formatDate(battery.ManufactureDate),
+    manufacturer: additionalData.BMSManufacturer || battery.BMSIdentifier,
+    typeCapacityRating: `${battery.BatteryChemistry} / ${battery.RatedCapacityAh} Ah`,
+    maxCellVoltage,
+    minCellVoltage,
+    maxCellTemperature,
+    minCellTemperature,
+  };
+
+  // Gauge needle angle calculation (-200A to +200A mapped to -90deg to +90deg).
+  const clampedCurrent = Math.max(-200, Math.min(200, batteryData.current));
   const needleAngle = (clampedCurrent / 200) * 90;
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-800">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
         {/* LEFT COLUMN: LIVE OVERVIEW */}
         <div className="lg:col-span-4 space-y-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-sm font-semibold text-slate-700">Live Overview</h1>
+            <h1 className="text-sm font-semibold text-slate-700">
+              Live Overview
+            </h1>
           </div>
 
           {/* State of Charge Card */}
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">State of Charge</span>
-              <span className="text-xs font-semibold text-emerald-600">High</span>
+              <span className="text-xs font-semibold text-slate-700">
+                State of Charge
+              </span>
+              <span className="text-xs font-semibold text-emerald-600">
+                {batteryData.soc >= 80
+                  ? "High"
+                  : batteryData.soc >= 40
+                    ? "Moderate"
+                    : "Low"}
+              </span>
             </div>
 
             {/* Battery Bar */}
@@ -83,9 +250,13 @@ export default function BmsPage() {
               <div className="relative h-14 w-full rounded-lg border border-slate-300 bg-slate-100 overflow-hidden p-1">
                 <div
                   className="h-full rounded-md bg-emerald-500 transition-all duration-500 flex items-center justify-center"
-                  style={{ width: `${data.soc}%` }}
+                  style={{
+                    width: `${Math.max(0, Math.min(100, batteryData.soc))}%`,
+                  }}
                 >
-                  <span className="text-base font-bold text-slate-900">{data.soc}%</span>
+                  <span className="text-base font-bold text-slate-900">
+                    {batteryData.soc}%
+                  </span>
                 </div>
               </div>
               <div className="h-6 w-1.5 rounded-r bg-slate-300 ml-0.5" />
@@ -93,30 +264,40 @@ export default function BmsPage() {
 
             <div className="flex items-center justify-between text-xs pt-1">
               <span className="text-slate-500 font-medium">Mode</span>
-              <span className="font-semibold text-slate-700">{data.mode}</span>
+              <span className="font-semibold text-slate-700">
+                {batteryData.mode}
+              </span>
             </div>
 
             {/* Status Badges */}
             <div className="space-y-2 pt-1">
               <div
                 className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${
-                  data.voltageBalanceStatus === "CRITICAL"
+                  batteryData.voltageBalanceStatus === "CRITICAL"
                     ? "border-red-400 bg-red-50 text-red-600"
                     : "border-emerald-400 bg-emerald-50 text-emerald-600"
                 }`}
               >
-                Voltage Balance: {data.voltageBalanceStatus} (Δ {data.voltageDelta.toFixed(3)}V)
+                Voltage Balance: {batteryData.voltageBalanceStatus} (Δ{" "}
+                {batteryData.voltageDelta.toFixed(3)}V)
               </div>
 
               <div>
-                <span className="inline-block rounded-full border border-emerald-400 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-                  Temp Status: {data.tempStatus} ({data.maxTemp24h}°C)
+                <span
+                  className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${
+                    batteryData.tempStatus === "WARNING"
+                      ? "border-amber-400 bg-amber-50 text-amber-600"
+                      : "border-emerald-400 bg-emerald-50 text-emerald-600"
+                  }`}
+                >
+                  Temp Status: {batteryData.tempStatus} (
+                  {batteryData.maxTemp}°C)
                 </span>
               </div>
             </div>
 
             <p className="text-[11px] text-slate-400 pt-1">
-              Health badges update from latest cell snapshot + 24h max temp.
+              Status based on the latest BMS telemetry.
             </p>
           </div>
 
@@ -124,76 +305,98 @@ export default function BmsPage() {
           <div className="grid grid-cols-2 gap-3">
             <MetricCard
               title="Pack Voltage"
-              value={`${data.packVoltage.toFixed(2)} V`}
+              value={`${batteryData.packVoltage.toFixed(2)} V`}
               subtitle="Total pack voltage"
             />
+
             <MetricCard
               title="Battery Temp"
-              value={`${data.batteryTemp.toFixed(1)} °C`}
-              subtitle="Main / average"
+              value={`${batteryData.batteryTemp.toFixed(1)} °C`}
+              subtitle="Battery temperature"
             />
+
             <MetricCard
               title="Current"
-              value={`${data.current.toFixed(4)} A`}
+              value={`${batteryData.current.toFixed(2)} A`}
               subtitle="Charge (+) / Discharge (-)"
             />
+
             <MetricCard
               title="SOH"
-              value={data.soh !== null ? `${data.soh}%` : "--"}
+              value={
+                batteryData.soh !== null
+                  ? `${batteryData.soh}%`
+                  : "--"
+              }
               subtitle="State of health"
             />
+
             <MetricCard
               title="Cell Voltage Δ"
-              value={`${data.cellVoltageDelta.toFixed(3)} V`}
-              subtitle="max(cellV) - min(cellV)"
+              value={`${batteryData.cellVoltageDelta.toFixed(3)} V`}
+              subtitle="Max cell V - Min cell V"
             />
+
             <MetricCard
               title="Cell Temp Δ"
-              value={`${data.cellTempDelta.toFixed(1)} °C`}
-              subtitle="max(cellT) - min(cellT)"
+              value={`${batteryData.cellTempDelta.toFixed(1)} °C`}
+              subtitle="Max cell T - Min cell T"
             />
+
             <MetricCard
               title="Estimated Modes"
-              value={data.estimatedMode}
-              subtitle="Based on SOC + capacity"
+              value={batteryData.estimatedMode}
+              subtitle="Not available from API"
             />
+
             <MetricCard
               title="Battery Info"
-              value={data.batteryInfo}
-              subtitle={`Production Date: ${data.productionDate}`}
+              value={batteryData.batteryInfo}
+              subtitle={`Production Date: ${batteryData.productionDate}`}
             />
+
             <MetricCard
               title="Manufacturer"
-              value={data.manufacturer}
-              subtitle="Battery maker"
+              value={batteryData.manufacturer}
+              subtitle="BMS manufacturer"
             />
+
             <MetricCard
               title="Type / Capacity / Rating"
-              value="Demo"
-              subtitle={data.typeCapacityRating}
+              value={battery.BatteryChemistry}
+              subtitle={`${battery.RatedCapacityAh} Ah / ${battery.NominalVoltageV} V / ${battery.RatedEnergyKWh} kWh`}
             />
           </div>
 
           {/* Current Gauge Card */}
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-700">Current Gauge</span>
-              <span className="text-xs text-slate-500">{data.mode}</span>
+              <span className="text-xs font-semibold text-slate-700">
+                Current Gauge
+              </span>
+              <span className="text-xs text-slate-500">
+                {batteryData.mode}
+              </span>
             </div>
 
             <div className="flex flex-col items-center justify-center py-2">
               <svg viewBox="0 0 240 135" className="w-full max-w-[260px]">
-                {/* Semi-circle Arc Background */}
                 <path
                   d="M 20 120 A 100 100 0 0 1 220 120"
                   fill="none"
                   stroke="#cbd5e1"
                   strokeWidth="24"
                 />
-                {/* Center Tick */}
-                <line x1="120" y1="8" x2="120" y2="32" stroke="#64748b" strokeWidth="2" />
 
-                {/* Scale Labels */}
+                <line
+                  x1="120"
+                  y1="8"
+                  x2="120"
+                  y2="32"
+                  stroke="#64748b"
+                  strokeWidth="2"
+                />
+
                 <text x="38" y="114" fontSize="9" fill="#475569">-200</text>
                 <text x="52" y="75" fontSize="9" fill="#475569">-120</text>
                 <text x="84" y="47" fontSize="9" fill="#475569">-40</text>
@@ -201,18 +404,22 @@ export default function BmsPage() {
                 <text x="172" y="75" fontSize="9" fill="#475569">120</text>
                 <text x="184" y="114" fontSize="9" fill="#475569">200</text>
 
-                {/* Needle */}
                 <g transform={`rotate(${needleAngle} 120 120)`}>
-                  <polygon points="117,120 123,120 120,30" fill="#0284c7" />
+                  <polygon
+                    points="117,120 123,120 120,30"
+                    fill="#0284c7"
+                  />
                   <circle cx="120" cy="120" r="6" fill="#0f172a" />
                 </g>
               </svg>
 
               <div className="text-center -mt-2">
                 <div className="text-lg font-bold text-slate-800">
-                  {data.current.toFixed(1)} A
+                  {batteryData.current.toFixed(1)} A
                 </div>
-                <div className="text-[11px] text-slate-400">{data.mode}</div>
+                <div className="text-[11px] text-slate-400">
+                  {batteryData.mode}
+                </div>
               </div>
             </div>
           </div>
@@ -222,36 +429,45 @@ export default function BmsPage() {
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-slate-700">Trends & Cells</h2>
-              <p className="text-xs text-slate-400">Range: last 24 hours</p>
+              <h2 className="text-sm font-semibold text-slate-700">
+                Trends & Cells
+              </h2>
+              <p className="text-xs text-slate-400">
+                Latest telemetry snapshot
+              </p>
             </div>
+
             <span className="text-xs text-slate-500 font-medium">
-              Points: {data.totalPoints}
+              Cells: {cells.length}
             </span>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-4">
+
             {/* Top 4 Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <SummaryHighlightCard
                 label="Max Cell V"
-                value={`${data.maxCellV24h.toFixed(3)} V`}
-                sub="Last 24h"
+                value={`${batteryData.maxCellVoltage.toFixed(3)} V`}
+                sub="Latest snapshot"
               />
+
               <SummaryHighlightCard
                 label="Min Cell V"
-                value={`${data.minCellV24h.toFixed(3)} V`}
-                sub="Last 24h"
+                value={`${batteryData.minCellVoltage.toFixed(3)} V`}
+                sub="Latest snapshot"
               />
+
               <SummaryHighlightCard
                 label="Max Cell T"
-                value={`${data.maxCellT24h.toFixed(1)} °C`}
-                sub="Last 24h"
+                value={`${batteryData.maxCellTemperature.toFixed(1)} °C`}
+                sub="Latest snapshot"
               />
+
               <SummaryHighlightCard
                 label="Min Cell T"
-                value={`${data.minCellT24h.toFixed(1)} °C`}
-                sub="Last 24h"
+                value={`${batteryData.minCellTemperature.toFixed(1)} °C`}
+                sub="Latest snapshot"
               />
             </div>
 
@@ -267,6 +483,7 @@ export default function BmsPage() {
               >
                 Trends
               </button>
+
               <button
                 onClick={() => setActiveTab("cells")}
                 className={`rounded-full px-4 py-1 text-xs font-medium border transition ${
@@ -296,37 +513,32 @@ export default function BmsPage() {
                     <span className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
                       Threshold: {threshold.toFixed(1)}A
                     </span>
+
                     <input
                       type="range"
                       min={0.1}
                       max={5.0}
                       step={0.1}
                       value={threshold}
-                      onChange={(e) => setThreshold(parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        setThreshold(parseFloat(e.target.value))
+                      }
                       className="w-36 accent-sky-600 cursor-pointer"
                     />
                   </div>
                 </div>
 
-                {/* 2x3 Trend Chart Placeholders */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ChartBox title="SOC Trend (%)" subtitle="Time markers are sampled" />
-                  <ChartBox title="Pack Voltage (V)" subtitle="Over selected range" />
-                  <ChartBox title="Current (A)" subtitle="Charge / Discharge" />
-                  <ChartBox title="Battery Temp (°C)" subtitle="Main / average" />
-                  <ChartBox
-                    title="Charging / Discharging Timeline"
-                    subtitle="Based on current"
-                  />
-                  <ChartBox title="Cell Imbalance ΔV Trend (V)" subtitle="ΔV trend" />
+                {/* Trend Chart Placeholders */}
+                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center">
+                  <p className="text-xs font-semibold text-slate-600">
+                    Historical trend data is not available yet
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    The current API provides the latest BMS snapshot. Trend
+                    charts will display data once historical telemetry is
+                    available.
+                  </p>
                 </div>
-
-                {/* Bottom Full-Width Scatter Chart */}
-                <ChartBox
-                  title="Smart View: SOC vs Voltage"
-                  subtitle="Point cloud"
-                  heightClass="h-52"
-                />
               </>
             ) : (
               /* CELLS TAB VIEW */
@@ -334,22 +546,39 @@ export default function BmsPage() {
                 <h3 className="text-xs font-semibold text-slate-700 mb-3">
                   Individual Cell Voltages & Temperatures
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
-                  {Array.from({ length: 16 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-center"
-                    >
-                      <div className="text-[11px] text-slate-400">Cell {idx + 1}</div>
-                      <div className="text-xs font-bold text-slate-800 mt-0.5">
-                        3.27{(idx % 5) + 3} V
+
+                {cells.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
+                    {cells.map((cell) => (
+                      <div
+                        key={cell.CellReadingID}
+                        className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-center"
+                      >
+                        <div className="text-[11px] text-slate-400">
+                          Cell {cell.CellNo}
+                        </div>
+
+                        <div className="text-xs font-bold text-slate-800 mt-0.5">
+                          {Number(cell.CellVoltageV).toFixed(3)} V
+                        </div>
+
+                        <div className="text-[11px] text-emerald-600 mt-0.5">
+                          {Number(cell.CellTemperatureC).toFixed(1)}°C
+                        </div>
+
+                        {cell.BalancingActive && (
+                          <div className="text-[10px] font-medium text-sky-600 mt-1">
+                            Balancing
+                          </div>
+                        )}
                       </div>
-                      <div className="text-[11px] text-emerald-600 mt-0.5">
-                        22.{idx % 9}°C
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400">
+                    No individual cell readings available.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -393,30 +622,6 @@ function SummaryHighlightCard({
       <div className="text-[11px] font-medium text-slate-500">{label}</div>
       <div className="mt-1 text-base font-bold text-slate-800">{value}</div>
       <div className="mt-0.5 text-[11px] text-slate-400">{sub}</div>
-    </div>
-  );
-}
-
-function ChartBox({
-  title,
-  subtitle,
-  heightClass = "h-44",
-}: {
-  title: string;
-  subtitle: string;
-  heightClass?: string;
-}) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3.5">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-slate-700">{title}</span>
-        <span className="text-[11px] text-slate-400">{subtitle}</span>
-      </div>
-      <div
-        className={`${heightClass} flex items-center justify-center rounded border border-dashed border-slate-200 bg-slate-50/50 text-xs text-slate-400`}
-      >
-        Chart Component ({title})
-      </div>
     </div>
   );
 }
