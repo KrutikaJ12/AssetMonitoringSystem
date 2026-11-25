@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { menuConfig,customerMenuConfig } from "../config/menuConfig";
+import { menuConfig } from "../config/menuConfig";
 import { useAuth } from "../hooks/useAuth"
 // Assume these icons are imported from an icon library
 import {
@@ -148,7 +148,7 @@ const othersItems: NavItem[] = [
 
 
 const AppSidebar: React.FC = () => {
-  const { hasModule,user } = useAuth();
+  const { hasModule } = useAuth();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
   let role = "admin";
@@ -157,23 +157,12 @@ const AppSidebar: React.FC = () => {
   } else if (location.pathname.startsWith("/operator")) {
     role = "operator";
   }
- const customerMenu = customerMenuConfig[user?.customerId];
+  const navItems = menuConfig[role].filter((item) => {
+    if (!item.moduleCode) return true;
 
-// const navItems = customerMenu
-//   ? customerMenu
-//   : menuConfig[role].filter((item) => {
-//       if (!item.moduleCode) return true;
-//       return hasModule(item.moduleCode);
-//     });
-const navItems = customerMenu
-  ? customerMenu.filter(
-      (item) => item.moduleCode && hasModule(item.moduleCode)
-    )
-  : menuConfig[role].filter((item) => {
-      if (!item.moduleCode) return true;
-      return hasModule(item.moduleCode);
-    });
-
+    return hasModule(item.moduleCode);
+});
+console.log("navItems",navItems)
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;

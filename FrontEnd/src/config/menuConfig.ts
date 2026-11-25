@@ -1,13 +1,8 @@
 type NavItem = {
   name: string;
+//   icon: React.ReactNode;
   path?: string;
-  moduleCode?: string;
-  subItems?: {
-    name: string;
-    path: string;
-    pro?: boolean;
-    new?: boolean;
-  }[];
+  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
 // export const adminMenu: NavItem[] = [
@@ -105,42 +100,42 @@ export const adminMenu: NavItem[] = [
 
   // Defines the Reports submenu and routes for Asset Summary and Asset Daily Usage reports.
   {
-    name: "Reports",
-    moduleCode: "REPORTS",
-    subItems: [
-      {
-        name: "Asset Summary Report",
-        path: "/admin/reports/summary",
-        pro: false,
-      },
-      // {
-      //   name: "Asset Daily Usage Report",
-      //   path: "/admin/reports/daily-usage",
-      //   pro: false,
-      // },
-      {
-        name: "Speed Violation Report",
-        path: "/admin/reports/speedviolationreport",
-        pro: false,
-      },
+  name: "Reports",
+  moduleCode: "REPORTS",
+  subItems: [
+    {
+      name: "Asset Summary Report",
+      path: "/admin/reports/summary",
+      pro: false,
+    },
+    // {
+    //   name: "Asset Daily Usage Report",
+    //   path: "/admin/reports/daily-usage",
+    //   pro: false,
+    // },
+    {
+      name: "Speed Violation Report",
+      path: "/admin/reports/speedviolationreport",
+      pro: false,
+    },
 
       {
-        name: "Start-Stop Report",
-        path: "/admin/reports/startstopreport",
-        pro: false,
-      },
-      {
-        name: "Movement Report",
-        path: "/admin/reports/movementreport",
-        pro: false,
-      },
-      {
-        name: "Stop Report",
-        path: "/admin/reports/stopreport",
-        pro: false,
-      },
-    ],
-  },
+      name: "Start-Stop Report",
+      path: "/admin/reports/startstopreport",
+      pro: false,
+    },
+    {
+      name: "Movement Report",
+      path: "/admin/reports/movementreport",
+      pro: false,
+    },
+    {
+      name: "Stop Report",
+      path: "/admin/reports/stopreport",
+      pro: false,
+    },
+  ],
+},
   {
     name: "Users",
     path: "/admin/users",
@@ -154,36 +149,43 @@ export const adminMenu: NavItem[] = [
 ];
 export const siteManagerMenu: NavItem[] = [
   {
+    
     name: "Dashboard",
     path: "/siteManager",
   },
   {
+    
     name: "Assets",
     path: "/assets",
   },
   {
+    
     name: "Operators",
     path: "/operators",
   },
   {
+    
     name: "Location",
     path: "/siteManager/live-tracking",
   },
   {
+   
     name: "Alerts",
     path: "/alerts",
   },
   {
+    
     name: "Reports",
     path: "/reports",
   },
   {
+    
     name: "Settings",
     path: "/settings",
   },
 ];
 
-export const operatorMenu: NavItem[] = [
+export const operatorMenu:NavItem[] = [
   {
     name: "Dashboard",
     path: "/operator",
@@ -197,31 +199,19 @@ export const operatorMenu: NavItem[] = [
     path: "/tasks",
   },
   {
+
     name: "Alerts",
     path: "/alerts",
   },
-  {
+    {
+
     name: "Profile",
     path: "/profile",
   },
 ];
-export const customerMenuConfig: Record<number, NavItem[]> = {
-  2: [
-    {
-      name: "Dashboard",
-      path: "/admin/dashboard",
-      moduleCode: "DASHBOARD",
-    },
-    {
-      name: "Location",
-      path: "/admin/live-tracking",
-      moduleCode: "LOCATION",
-    },
-  ],
-};
+
 export const menuConfig = {
   admin: adminMenu,
   siteManager: siteManagerMenu,
   operator: operatorMenu,
-  customer: customerMenuConfig,
 };
