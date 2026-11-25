@@ -20,6 +20,7 @@ import { CarFront, BatteryChargingIcon, ChevronDown } from "lucide-react";
 import batteryImage from "../../../../FrontEnd/public/images/logo/batteryImage.png";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router";
+import { Tabs, type TabItem } from "../../components/common/Tabs";
 /* =========================================================
    NOTIFICATION TYPE
 ========================================================= */
@@ -549,18 +550,28 @@ export default function Home() {
     },
   };
 
+  //BATTERY TABS
+  const BATTERY_TABS = [
+    { key: "status", label: "Status" },
+    { key: "health", label: "Health" },
+    { key: "temperature", label: "Temperature" },
+    { key: "charging", label: "Charging" },
+  ] as const satisfies readonly TabItem[];
 
+  type BatteryTabKey = (typeof BATTERY_TABS)[number]["key"];
+  const [batteryTab, setBatteryTab] = useState<BatteryTabKey>("status");
+  
   // Component ke andar:
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  const value = e.target.value;
-  setSelectedVehicle(value);
+  const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedVehicle(value);
 
-  if (value) {
-    navigate(`/admin/bms?vehicleId=${value}`);
-  }
-};
+    if (value) {
+      navigate(`/admin/bms?vehicleId=${value}`);
+    }
+  };
   /* =======================================================
      ERROR
   ======================================================= */
@@ -788,57 +799,59 @@ const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
                   <StatisticsChart data={data.fuelConsumption} />
                 </div>
               )}
-
             {/* =============================================
     BATTERY STATISTICS
 ============================================= */}
-
             {(isGenericDashboard || fleetType === 2 || fleetType === 3) &&
               isWidgetVisible("batteryStats") && (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {/* Battery Status */}
-                  <SectionCard title="Battery Status">
-                    <Chart
-                      options={batteryStatusOptions}
-                      series={batteryStatusSeries}
-                      type="donut"
-                      height={300}
+                <SectionCard title="Battery Statistics">
+                  <div className="space-y-4">
+                    <Tabs
+                      tabs={[...BATTERY_TABS]}
+                      active={batteryTab}
+                      onChange={(key) => setBatteryTab(key as BatteryTabKey)}
                     />
-                  </SectionCard>
 
-                  {/* Battery Health */}
-                  <SectionCard title="Battery Health">
-                    <Chart
-                      options={batteryHealthOptions}
-                      series={batteryHealthSeries}
-                      type="donut"
-                      height={300}
-                    />
-                  </SectionCard>
-
-                  {/* Battery Temperature */}
-                  <SectionCard title="Battery Temperature (°C)">
-                    <Chart
-                      options={batteryTempOptions}
-                      series={batteryTempSeries}
-                      type="donut"
-                      height={300}
-                    />
-                  </SectionCard>
-
-                  {/* Currently Charging */}
-                  <SectionCard title="Currently Charging">
-                    <div className="flex h-[300px] items-center justify-center gap-3">
-                      <BatteryChargingIcon
-                        size={48}
-                        className="text-green-600"
+                    {batteryTab === "status" && (
+                      <Chart
+                        options={batteryStatusOptions}
+                        series={batteryStatusSeries}
+                        type="donut"
+                        height={320}
                       />
-                      <span className="text-5xl font-light text-green-600">
-                        {currentlyCharging}
-                      </span>
-                    </div>
-                  </SectionCard>
-                </div>
+                    )}
+
+                    {batteryTab === "health" && (
+                      <Chart
+                        options={batteryHealthOptions}
+                        series={batteryHealthSeries}
+                        type="donut"
+                        height={320}
+                      />
+                    )}
+
+                    {batteryTab === "temperature" && (
+                      <Chart
+                        options={batteryTempOptions}
+                        series={batteryTempSeries}
+                        type="donut"
+                        height={320}
+                      />
+                    )}
+
+                    {batteryTab === "charging" && (
+                      <div className="flex h-[320px] items-center justify-center gap-3">
+                        <BatteryChargingIcon
+                          size={48}
+                          className="text-green-600"
+                        />
+                        <span className="text-5xl font-light text-green-600">
+                          {currentlyCharging}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </SectionCard>
               )}
             {/* =============================================
                 BATTERY
@@ -872,15 +885,15 @@ const handleVehicleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
                       className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                     />
 
-                 <select
-  value={selectedVehicle}
-  onChange={handleVehicleChange}
-  className="w-full appearance-none rounded-xl border border-gray-300 bg-gray-50 py-3 pl-10 pr-10 text-sm text-gray-700 outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
->
-  <option value="">Select Vehicle</option>
-  <option value="395">MH16BY7745</option>
-  <option value="393">NLO1N5922</option>
-</select>
+                    <select
+                      value={selectedVehicle}
+                      onChange={handleVehicleChange}
+                      className="w-full appearance-none rounded-xl border border-gray-300 bg-gray-50 py-3 pl-10 pr-10 text-sm text-gray-700 outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    >
+                      <option value="">Select Vehicle</option>
+                      <option value="395">MH16BY7745</option>
+                      <option value="393">NLO1N5922</option>
+                    </select>
 
                     <ChevronDown
                       size={18}
