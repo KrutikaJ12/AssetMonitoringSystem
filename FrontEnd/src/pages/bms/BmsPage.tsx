@@ -1,9 +1,16 @@
-
 import { useState } from "react";
 import { useGetBmsData } from "../../hooks/useBmsInsights";
+import { TabItem, Tabs } from "../../components/common/Tabs";
+import LiveTracking from "../Tracking/LiveTrackingPage";
 
-type TabType = "trends" | "cells";
+// type TabType = "location"|"trends" | "cells";
+const TABS = [
+  { key: "location", label: "Location" },
+  { key: "trends", label: "Trends" },
+  { key: "cells", label: "Cells" },
+] as const satisfies readonly TabItem[];
 
+type TabType = (typeof TABS)[number]["key"];
 interface BatteryInfo {
   BatteryID: string;
   BatterySerialNo: string;
@@ -62,26 +69,21 @@ function formatDate(date: string | null | undefined) {
 }
 
 export default function BmsPage() {
-  const [activeTab, setActiveTab] = useState<TabType>("trends");
+  const [activeTab, setActiveTab] = useState<TabType>("location");
   const [threshold, setThreshold] = useState<number>(0.5);
 
   const assetId = new URLSearchParams(window.location.search).get("vehicleId");
 
-  const {
-    data: response,
-    isLoading,
-    isError,
-    error,
-  } = useGetBmsData(assetId);
+  const { data: response, isLoading, isError, error } = useGetBmsData(assetId);
 
   /*
    * Supports both response shapes:
    * 1. { success: true, data: {...} }
    * 2. Axios response: { data: { success: true, data: {...} } }
    */
-  const apiData = (
-    response?.data?.data ?? response?.data ?? response
-  ) as BmsApiData | undefined;
+  const apiData = (response?.data?.data ?? response?.data ?? response) as
+    | BmsApiData
+    | undefined;
 
   if (isLoading) {
     return (
@@ -95,9 +97,7 @@ export default function BmsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <p className="text-sm text-red-600">
-          {error instanceof Error
-            ? error.message
-            : "Failed to load BMS data."}
+          {error instanceof Error ? error.message : "Failed to load BMS data."}
         </p>
       </div>
     );
@@ -181,14 +181,10 @@ export default function BmsPage() {
       ? Math.min(...cellVoltages)
       : telemetry.CellVoltageMinV;
 
-  const voltageBalanceStatus = telemetry.HasCriticalFault
-    ? "CRITICAL"
-    : "OK";
+  const voltageBalanceStatus = telemetry.HasCriticalFault ? "CRITICAL" : "OK";
 
   const tempStatus =
-    telemetry.HasWarning || telemetry.HasCriticalFault
-      ? "WARNING"
-      : "OK";
+    telemetry.HasWarning || telemetry.HasCriticalFault ? "WARNING" : "OK";
 
   const batteryData = {
     soc: telemetry.StateOfChargePercent,
@@ -221,7 +217,6 @@ export default function BmsPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-800">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
         {/* LEFT COLUMN: LIVE OVERVIEW */}
         <div className="lg:col-span-4 space-y-4">
           <div className="flex items-center justify-between">
@@ -290,8 +285,8 @@ export default function BmsPage() {
                       : "border-emerald-400 bg-emerald-50 text-emerald-600"
                   }`}
                 >
-                  Temp Status: {batteryData.tempStatus} (
-                  {batteryData.maxTemp}°C)
+                  Temp Status: {batteryData.tempStatus} ({batteryData.maxTemp}
+                  °C)
                 </span>
               </div>
             </div>
@@ -323,11 +318,7 @@ export default function BmsPage() {
 
             <MetricCard
               title="SOH"
-              value={
-                batteryData.soh !== null
-                  ? `${batteryData.soh}%`
-                  : "--"
-              }
+              value={batteryData.soh !== null ? `${batteryData.soh}%` : "--"}
               subtitle="State of health"
             />
 
@@ -374,9 +365,7 @@ export default function BmsPage() {
               <span className="text-xs font-semibold text-slate-700">
                 Current Gauge
               </span>
-              <span className="text-xs text-slate-500">
-                {batteryData.mode}
-              </span>
+              <span className="text-xs text-slate-500">{batteryData.mode}</span>
             </div>
 
             <div className="flex flex-col items-center justify-center py-2">
@@ -397,18 +386,27 @@ export default function BmsPage() {
                   strokeWidth="2"
                 />
 
-                <text x="38" y="114" fontSize="9" fill="#475569">-200</text>
-                <text x="52" y="75" fontSize="9" fill="#475569">-120</text>
-                <text x="84" y="47" fontSize="9" fill="#475569">-40</text>
-                <text x="142" y="47" fontSize="9" fill="#475569">40</text>
-                <text x="172" y="75" fontSize="9" fill="#475569">120</text>
-                <text x="184" y="114" fontSize="9" fill="#475569">200</text>
+                <text x="38" y="114" fontSize="9" fill="#475569">
+                  -200
+                </text>
+                <text x="52" y="75" fontSize="9" fill="#475569">
+                  -120
+                </text>
+                <text x="84" y="47" fontSize="9" fill="#475569">
+                  -40
+                </text>
+                <text x="142" y="47" fontSize="9" fill="#475569">
+                  40
+                </text>
+                <text x="172" y="75" fontSize="9" fill="#475569">
+                  120
+                </text>
+                <text x="184" y="114" fontSize="9" fill="#475569">
+                  200
+                </text>
 
                 <g transform={`rotate(${needleAngle} 120 120)`}>
-                  <polygon
-                    points="117,120 123,120 120,30"
-                    fill="#0284c7"
-                  />
+                  <polygon points="117,120 123,120 120,30" fill="#0284c7" />
                   <circle cx="120" cy="120" r="6" fill="#0f172a" />
                 </g>
               </svg>
@@ -443,7 +441,6 @@ export default function BmsPage() {
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-4">
-
             {/* Top 4 Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <SummaryHighlightCard
@@ -470,9 +467,18 @@ export default function BmsPage() {
                 sub="Latest snapshot"
               />
             </div>
-
             {/* Tabs */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab("location")}
+                className={`rounded-full px-4 py-1 text-xs font-medium border transition ${
+                  activeTab === "location"
+                    ? "border-sky-500 bg-sky-50 text-sky-700"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                Location
+              </button>
               <button
                 onClick={() => setActiveTab("trends")}
                 className={`rounded-full px-4 py-1 text-xs font-medium border transition ${
@@ -494,9 +500,13 @@ export default function BmsPage() {
               >
                 Cells
               </button>
-            </div>
-
-            {activeTab === "trends" ? (
+            </div> */}
+            <Tabs
+              tabs={[...TABS]}
+              active={activeTab}
+              onChange={(key) => setActiveTab(key as TabType)}
+            />
+            {activeTab === "trends" && (
               <>
                 {/* Timeline Controls */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
@@ -520,9 +530,7 @@ export default function BmsPage() {
                       max={5.0}
                       step={0.1}
                       value={threshold}
-                      onChange={(e) =>
-                        setThreshold(parseFloat(e.target.value))
-                      }
+                      onChange={(e) => setThreshold(parseFloat(e.target.value))}
                       className="w-36 accent-sky-600 cursor-pointer"
                     />
                   </div>
@@ -540,8 +548,17 @@ export default function BmsPage() {
                   </p>
                 </div>
               </>
-            ) : (
-              /* CELLS TAB VIEW */
+            )}
+            {activeTab === "location" && (
+              <>
+               <div>
+                <LiveTracking/>
+               </div>
+              </>
+            )}
+         
+
+            {activeTab === "cells" && (
               <div className="rounded-lg border border-slate-200 p-4">
                 <h3 className="text-xs font-semibold text-slate-700 mb-3">
                   Individual Cell Voltages & Temperatures
