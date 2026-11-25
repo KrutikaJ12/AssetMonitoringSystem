@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   MapContainer,
@@ -13,7 +14,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const createAssetMarker = (assetType = "") => {
-  const type = assetType.toLowerCase();
+  const type = String(assetType).toLowerCase();
 
   let icon = "🚜";
 
@@ -31,19 +32,11 @@ const createAssetMarker = (assetType = "") => {
     className: "custom-asset-marker",
     html: `
       <div style="
-        width: 42px;
-        height: 42px;
-        background: white;
-        border: 2px solid #4F46E5;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-      ">
-        ${icon}
-      </div>
+        width:42px;height:42px;background:white;
+        border:2px solid #4F46E5;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:22px;box-shadow:0 3px 8px rgba(0,0,0,.25);
+      ">${icon}</div>
     `,
     iconSize: [42, 42],
     iconAnchor: [21, 21],
@@ -51,23 +44,20 @@ const createAssetMarker = (assetType = "") => {
   });
 };
 
-const createCustomMarker = (title = "Site") => {
-  return L.divIcon({
+const createCustomMarker = () =>
+  L.divIcon({
     className: "custom-leaflet-marker",
     html: `
       <div style="
-        background-color: #4F46E5;
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
-        border: 2px solid white;
+        background:#4F46E5;width:38px;height:38px;
+        border-radius:50%;display:flex;align-items:center;
+        justify-content:center;color:white;
+        box-shadow:0 4px 10px rgba(79,70,229,.4);
+        border:2px solid white;
       ">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
@@ -77,7 +67,6 @@ const createCustomMarker = (title = "Site") => {
     iconAnchor: [19, 38],
     popupAnchor: [0, -38],
   });
-};
 
 const PRESET_COORDINATES = {
   vashi: { lat: 19.077065, lng: 72.998632 },
@@ -86,70 +75,80 @@ const PRESET_COORDINATES = {
   thane: { lat: 19.21833, lng: 72.978088 },
 };
 
+const getCoordinates = (item) => ({
+  lat: Number(item?.Latitude ?? item?.latitude ?? item?.lat),
+  lng: Number(item?.Longitude ?? item?.longitude ?? item?.lng),
+});
+
+const isValidCoordinates = (lat, lng) =>
+  Number.isFinite(lat) &&
+  Number.isFinite(lng) &&
+  lat >= -90 &&
+  lat <= 90 &&
+  lng >= -180 &&
+  lng <= 180 &&
+  !(lat === 0 && lng === 0);
+
 const MapRecenter = ({ center }) => {
   const map = useMap();
+
   useEffect(() => {
     map.setView([center.lat, center.lng], map.getZoom());
-  }, [center, map]);
+  }, [center.lat, center.lng, map]);
+
   return null;
 };
 
 const LocationMarker = ({ onLocationSelect }) => {
   useMapEvents({
     click(e) {
-      const { lat, lng } = e.latlng;
-      onLocationSelect(lat, lng);
+      onLocationSelect(e.latlng.lat, e.latlng.lng);
     },
   });
-  return null;
-};
-
-const MapFitBounds = ({ sites }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!sites || sites.length === 0) return;
-
-    const validSites = sites.filter(
-      (site) =>
-        Number.isFinite(Number(site.Latitude)) &&
-        Number.isFinite(Number(site.Longitude)),
-    );
-
-    if (validSites.length === 0) return;
-
-    const bounds = L.latLngBounds(
-      validSites.map((site) => [Number(site.Latitude), Number(site.Longitude)]),
-    );
-
-    map.fitBounds(bounds, { padding: [50, 50] });
-  }, [sites, map]);
 
   return null;
 };
 
-const MapFitSiteAndAssets = ({ site, assets, showAssets }) => {
+const MapFitBounds = ({ sites, assets }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!showAssets || !site) return;
-
     const points = [
-      [Number(site.lat), Number(site.lng)],
-      ...assets
-        .filter(
-          (asset) =>
-            Number.isFinite(Number(asset.Latitude)) &&
-            Number.isFinite(Number(asset.Longitude)),
-        )
-        .map((asset) => [Number(asset.Latitude), Number(asset.Longitude)]),
-    ];
+      ...sites.map(getCoordinates),
+      ...assets.map(getCoordinates),
+    ]
+      .filter(({ lat, lng }) => isValidCoordinates(lat, lng))
+      .map(({ lat, lng }) => [lat, lng]);
 
-    if (points.length <= 1) return;
+    if (points.length > 0) {
+      map.fitBounds(L.latLngBounds(points), {
+        padding: [50, 50],
+        maxZoom: 15,
+      });
+    }
+  }, [sites, assets, map]);
 
-    const bounds = L.latLngBounds(points);
-    map.fitBounds(bounds, { padding: [50, 50] });
-  }, [site, assets, showAssets, map]);
+  return null;
+};
+
+const MapFitSiteAndAssets = ({ site, assets }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    const points = [
+      getCoordinates(site),
+      ...assets.map(getCoordinates),
+    ]
+      .filter(({ lat, lng }) => isValidCoordinates(lat, lng))
+      .map(({ lat, lng }) => [lat, lng]);
+
+    if (points.length > 0) {
+      map.fitBounds(L.latLngBounds(points), {
+        padding: [50, 50],
+        maxZoom: 15,
+      });
+    }
+  }, [site.lat, site.lng, assets, map]);
 
   return null;
 };
@@ -162,52 +161,75 @@ const LiveMap = ({
   sites = [],
   assets = [],
   onAssetClick,
+  onSiteClick,
 }) => {
-  const [mapCenter, setMapCenter] = useState({ lat: 19.07609, lng: 72.877426 });
+  const [mapCenter, setMapCenter] = useState({
+    lat: 19.07609,
+    lng: 72.877426,
+  });
+
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loadingAddress, setLoadingAddress] = useState(false);
-  const [showAssetMarkers, setShowAssetMarkers] = useState(false);
+
   const isAllSitesMode = sites.length > 0;
 
-  useEffect(() => {
-    const parsedLat = parseFloat(center?.lat);
-    const parsedLng = parseFloat(center?.lng);
+  // Normalize coordinates and filter invalid markers.
+  const validSites = sites.filter((site) => {
+    const { lat, lng } = getCoordinates(site);
+    return isValidCoordinates(lat, lng);
+  });
 
-    if (
-      !isNaN(parsedLat) &&
-      !isNaN(parsedLng) &&
-      parsedLat !== 0 &&
-      parsedLng !== 0
-    ) {
-      setMapCenter({ lat: parsedLat, lng: parsedLng });
+  const validAssets = assets.filter((asset) => {
+    const { lat, lng } = getCoordinates(asset);
+    return isValidCoordinates(lat, lng);
+  });
+
+  useEffect(() => {
+    const lat = Number(center?.lat);
+    const lng = Number(center?.lng);
+
+    if (isValidCoordinates(lat, lng)) {
+      setMapCenter({ lat, lng });
       return;
     }
 
     const searchKey = (locationName || siteName || "").toLowerCase();
+
     for (const key in PRESET_COORDINATES) {
       if (searchKey.includes(key)) {
         setMapCenter(PRESET_COORDINATES[key]);
         return;
       }
     }
-  }, [center, siteName, locationName]);
+  }, [center?.lat, center?.lng, siteName, locationName]);
 
   const handleLocationSelect = async (lat, lng) => {
-    setSelectedLocation({ lat, lng, address: "Fetching address..." });
+    setSelectedLocation({
+      lat,
+      lng,
+      address: "Fetching address...",
+    });
+
     setLoadingAddress(true);
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
       );
+
       const data = await response.json();
+
       setSelectedLocation({
         lat,
         lng,
         address: data?.display_name || "Address not found",
       });
-    } catch (error) {
-      setSelectedLocation({ lat, lng, address: "Selected Pin Location" });
+    } catch {
+      setSelectedLocation({
+        lat,
+        lng,
+        address: "Selected Pin Location",
+      });
     } finally {
       setLoadingAddress(false);
     }
@@ -215,35 +237,46 @@ const LiveMap = ({
 
   const activePosition = selectedLocation || mapCenter;
 
+  const handleSiteClick = (site) => {
+    onSiteClick?.(site);
+  };
+
+  const handleAssetClick = (asset) => {
+    onAssetClick?.(asset);
+  };
+
+  const singleSiteDetails = {
+    SiteName: siteName,
+    LocationName: locationName,
+    Latitude: mapCenter.lat,
+    Longitude: mapCenter.lng,
+    Assets: assets,
+  };
+
   return (
     <div className="relative w-full h-[550px] rounded-2xl overflow-hidden shadow-md border border-gray-200">
-      {/* Top Left Floating Coordinate Card */}
+
       {!isAllSitesMode && (
         <div className="absolute top-4 left-12 z-[1000] max-w-md bg-white/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg border border-gray-200">
           <div className="text-[11px] font-bold uppercase text-indigo-600 mb-0.5">
-            📍 LOCATION:{" "}
-            {isAllSitesMode
-              ? "ALL SITES"
-              : siteName || locationName || "PLANT LOCATION"}
+            📍 LOCATION: {siteName || locationName || "PLANT LOCATION"}
           </div>
+
           <div className="text-xs font-semibold text-gray-800 mb-2 truncate max-w-[300px]">
-            {loadingAddress ? (
-              <span className="text-gray-400 italic font-normal">
-                Fetching address...
-              </span>
-            ) : (
-              selectedLocation?.address || `${siteName || "Plant"} Location`
-            )}
+            {loadingAddress
+              ? "Fetching address..."
+              : selectedLocation?.address || `${siteName || "Plant"} Location`}
           </div>
-          <div className="flex items-center gap-3 text-xs font-mono text-gray-600 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100">
+
+          <div className="flex items-center gap-3 text-xs font-mono text-gray-600 bg-gray-50 px-2.5 py-1.5 rounded-lg border">
             <div>
-              <span className="font-semibold text-gray-500">LAT:</span>{" "}
+              LAT:{" "}
               <span className="text-indigo-600 font-bold">
                 {activePosition.lat.toFixed(6)}
               </span>
             </div>
             <div>
-              <span className="font-semibold text-gray-500">LNG:</span>{" "}
+              LNG:{" "}
               <span className="text-indigo-600 font-bold">
                 {activePosition.lng.toFixed(6)}
               </span>
@@ -255,28 +288,35 @@ const LiveMap = ({
       <MapContainer
         center={[mapCenter.lat, mapCenter.lng]}
         zoom={14}
-        scrollWheelZoom={true}
+        scrollWheelZoom
         style={{ width: "100%", height: "100%" }}
       >
         <MapRecenter center={mapCenter} />
-        {isAllSitesMode && <MapFitBounds sites={sites} />}
-        {!isAllSitesMode && (
-          <LocationMarker onLocationSelect={handleLocationSelect} />
-        )}
-
-      
-<TileLayer
-  attribution="&copy; Google Maps"
-  url="https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
-  maxZoom={20}
-/>
-
 
         {isAllSitesMode ? (
-          sites.map((site) => {
-            const lat = Number(site.Latitude);
-            const lng = Number(site.Longitude);
-            const radius = Number(site.RadiusMeters);
+          <MapFitBounds sites={validSites} assets={validAssets} />
+        ) : (
+          <>
+            <LocationMarker onLocationSelect={handleLocationSelect} />
+
+            <MapFitSiteAndAssets
+              site={mapCenter}
+              assets={validAssets}
+            />
+          </>
+        )}
+
+        <TileLayer
+          attribution="&copy; Google Maps"
+          url="https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
+          maxZoom={20}
+        />
+
+        {/* ALL SITE MARKERS */}
+        {isAllSitesMode &&
+          validSites.map((site) => {
+            const { lat, lng } = getCoordinates(site);
+            const radius = Number(site.RadiusMeters) || geofenceRadius;
 
             return (
               <React.Fragment key={site.SiteID}>
@@ -294,42 +334,37 @@ const LiveMap = ({
 
                 <Marker
                   position={[lat, lng]}
-                  icon={createCustomMarker(site.SiteName)}
+                  icon={createCustomMarker()}
+                  eventHandlers={{
+                    click: () => handleSiteClick(site),
+                  }}
                 >
-                  <Popup className="custom-row-popup">
-                    <div className="p-1 font-sans">
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <p className="font-bold text-gray-900 text-xs truncate">
-                            {site.SiteName}
-                          </p>
-                          <p className="text-[10px] text-gray-500">
-                            {site.LocationName}
-                          </p>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200 whitespace-nowrap">
-                          Geofence: {radius}m
-                        </span>
-                      </div>
+                  <Popup>
+                    <div className="p-1 min-w-[180px]">
+                      <p className="font-bold text-gray-900 text-xs">
+                        {site.SiteName || site.Name || "Site"}
+                      </p>
+                      <p className="text-[10px] text-gray-500">
+                        {site.LocationName || "Location unavailable"}
+                      </p>
+                      <p className="text-[10px] text-indigo-600 mt-1">
+                        Assets: {site.Assets?.length ?? 0}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-1">
+                        Click marker to view details
+                      </p>
                     </div>
                   </Popup>
                 </Marker>
               </React.Fragment>
             );
-          })
-        ) : (
-          <>
-            <MapFitSiteAndAssets
-              site={{
-                lat: activePosition.lat,
-                lng: activePosition.lng,
-              }}
-              assets={assets}
-              showAssets={showAssetMarkers}
-            />
+          })}
 
+        {/* SINGLE SITE GEOFENCE AND MARKER */}
+        {!isAllSitesMode && (
+          <>
             <Circle
-              center={[activePosition.lat, activePosition.lng]}
+              center={[mapCenter.lat, mapCenter.lng]}
               radius={geofenceRadius}
               pathOptions={{
                 color: "#4F46E5",
@@ -338,151 +373,87 @@ const LiveMap = ({
                 dashArray: "6, 8",
                 weight: 2,
               }}
+            />
+
+            <Marker
+              position={[mapCenter.lat, mapCenter.lng]}
+              icon={createCustomMarker()}
               eventHandlers={{
-                mouseover: (e) => {
-                  e.target.openPopup();
-                },
-                mouseout: (e) => {
-                  e.target.closePopup();
-                },
-                click: (e) => {
-                  setShowAssetMarkers(true);
-                  e.target.closePopup();
-                },
+                click: () => handleSiteClick(singleSiteDetails),
               }}
             >
-              <Marker
-                position={[activePosition.lat, activePosition.lng]}
-                icon={createCustomMarker(siteName)}
-              >
-                <Popup className="custom-row-popup">
-                  <div className="p-1 font-sans min-w-[280px]">
-                    <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 mb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-900 text-xs truncate">
-                          {siteName}
-                        </p>
-                        <p className="text-[10px] text-gray-500 truncate">
-                          {locationName}
-                        </p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 whitespace-nowrap">
-                        Total Assets: {assets.length}
-                      </span>
-                    </div>
-
-                    {assets.length === 0 ? (
-                      <p className="text-[11px] text-gray-400 italic">
-                        No assets assigned
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-1.5">
-                        {assets.map((asset) => (
-                          <div
-                            key={asset.AssetID}
-                            onClick={() => onAssetClick && onAssetClick(asset)}
-                            className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg p-2 cursor-pointer hover:bg-indigo-50/50 transition-colors"
-                          >
-                            <div className="flex flex-col min-w-0">
-                              <span className="font-bold text-gray-800 text-[11px] truncate">
-                                {asset.AssetName}
-                              </span>
-                              <span className="text-[9px] text-gray-400 font-medium truncate">
-                                {asset.AssetTypeName || "Equipment"}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span
-                                className={`px-1.5 py-0.5 text-[9px] font-bold rounded uppercase ${
-                                  asset.CurrentStatus?.toLowerCase() ===
-                                  "running"
-                                    ? "bg-emerald-100 text-emerald-700"
-                                    : "bg-rose-100 text-rose-700"
-                                }`}
-                              >
-                                {asset.CurrentStatus}
-                              </span>
-                              <span className="text-[10px] text-indigo-600 font-mono font-bold">
-                                {asset.SpeedKph || 0} km/h
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            </Circle>
-
-            {/* Asset Individual Markers */}
-            {showAssetMarkers &&
-              assets.map((asset) => {
-                const lat = Number(asset.Latitude);
-                const lng = Number(asset.Longitude);
-                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-                  return null;
-                }
-                return (
-                  <Marker
-                    key={asset.AssetID}
-                    position={[lat, lng]}
-                    icon={createAssetMarker(asset.AssetTypeName)}
-                    eventHandlers={{
-                      click: () => {
-                        if (onAssetClick) {
-                          onAssetClick(asset);
-                        }
-                      },
-                    }}
-                  >
-                    <Popup className="custom-row-popup">
-                      <div className="flex items-center gap-3 p-1 font-sans min-w-[280px]">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="font-bold text-gray-900 text-xs truncate">
-                              {asset.AssetName}
-                            </p>
-                            <span className="text-[9px] text-gray-400 font-medium truncate">
-                              {asset.AssetTypeName || "Equipment"}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center justify-between gap-2 mt-1.5">
-                            <span
-                              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
-                                asset.CurrentStatus?.toLowerCase() === "running"
-                                  ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                                  : "bg-rose-50 text-rose-600 border border-rose-200"
-                              }`}
-                            >
-                              {asset.CurrentStatus}
-                            </span>
-                            <span className="text-[10px] font-mono font-semibold text-indigo-600">
-                              {asset.SpeedKph || 0} km/h
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Popup>
-                    {/* Asset name always visible below its icon */}
-                    <Tooltip
-                      permanent
-                      direction="bottom"
-                      offset={[0, 12]}
-                      interactive={false}
-                      className="asset-name-tooltip"
-                    >
-                      {asset.AssetName}
-                    </Tooltip>
-                  </Marker>
-                );
-              })}
+              <Popup>
+                <div className="p-2 min-w-[220px]">
+                  <p className="font-bold text-gray-900 text-xs">
+                    {siteName || "Site"}
+                  </p>
+                  <p className="text-[10px] text-gray-500">
+                    {locationName}
+                  </p>
+                  <p className="text-[10px] text-indigo-600 mt-1">
+                    Total Assets: {validAssets.length}
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
           </>
         )}
 
-        
+        {/* ASSET MARKERS - BOTH MODES */}
+        {validAssets.map((asset, index) => {
+          const { lat, lng } = getCoordinates(asset);
+
+          return (
+            <Marker
+              key={asset.AssetID ?? asset.AssetId ?? index}
+              position={[lat, lng]}
+              icon={createAssetMarker(asset.AssetTypeName || asset.AssetType)}
+              eventHandlers={{
+                click: () => handleAssetClick(asset),
+              }}
+            >
+              <Popup className="custom-row-popup">
+                <div className="p-2 min-w-[220px]">
+                  <p className="font-bold text-gray-900 text-xs">
+                    {asset.AssetName || asset.Name || "Asset"}
+                  </p>
+
+                  <p className="text-[10px] text-gray-500">
+                    {asset.AssetTypeName || asset.AssetType || "Equipment"}
+                  </p>
+
+                  <div className="flex items-center justify-between mt-2 gap-2">
+                    <span className="text-[10px] font-semibold text-emerald-600">
+                      {asset.CurrentStatus || asset.Status || "Unknown"}
+                    </span>
+
+                    <span className="text-[10px] font-mono text-indigo-600">
+                      {asset.SpeedKph ?? 0} km/h
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAssetClick(asset)}
+                    className="mt-2 w-full rounded-md bg-indigo-600 text-white px-2 py-1.5 text-[10px] font-semibold"
+                  >
+                    View Asset Details
+                  </button>
+                </div>
+              </Popup>
+
+              <Tooltip
+                permanent
+                direction="bottom"
+                offset={[0, 12]}
+                interactive={false}
+                className="asset-name-tooltip"
+              >
+                {asset.AssetName || asset.Name || "Asset"}
+              </Tooltip>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
