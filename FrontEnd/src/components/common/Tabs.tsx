@@ -12,7 +12,7 @@ interface TabsProps {
 
 export function Tabs({ tabs, active, onChange }: TabsProps) {
   return (
-    <div role="tablist" className="flex gap-6 border-b border-slate-300">
+    <div role="tablist" className="flex gap-8 border-b border-slate-300">
       {tabs.map((tab) => {
         const isActive = tab.key === active;
         return (
@@ -22,10 +22,10 @@ export function Tabs({ tabs, active, onChange }: TabsProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(tab.key)}
-            className={`-mb-px border-b-2 pb-3 text-sm font-medium transition-colors ${
+            className={`-mb-px border-b-2 pb-3 text-sm transition-colors ${
               isActive
-                ? "border-slate-900 text-slate-900"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-slate-900 font-bold text-slate-900"
+                : "border-transparent font-medium text-slate-500 hover:text-slate-700"
             }`}
           >
             {tab.label}
