@@ -4,6 +4,7 @@ import { TabItem, Tabs } from "../../components/common/Tabs";
 import LiveTracking from "../Tracking/LiveTrackingPage";
 import Chart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
+import { ArrowLeft } from "lucide-react";
 // type TabType = "location"|"trends" | "cells";
 const TABS = [
   { key: "location", label: "Location" },
