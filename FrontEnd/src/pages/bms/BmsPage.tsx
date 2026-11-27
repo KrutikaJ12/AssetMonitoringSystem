@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useGetBmsData } from "../../hooks/useBmsInsights";
 import { TabItem, Tabs } from "../../components/common/Tabs";
 import LiveTracking from "../Tracking/LiveTrackingPage";
+import { ArrowLeft } from "lucide-react";
+
 
 // type TabType = "location"|"trends" | "cells";
 const TABS = [
@@ -14,6 +16,7 @@ type TabType = (typeof TABS)[number]["key"];
 interface BatteryInfo {
   BatteryID: string;
   BatterySerialNo: string;
+   CustomerID: number;
   BMSIdentifier: string;
   BatteryChemistry: string;
   NominalVoltageV: number;
@@ -66,6 +69,28 @@ function formatDate(date: string | null | undefined) {
     month: "short",
     year: "numeric",
   });
+}
+
+
+/* --- BACK BUTTON COMPONENT --- */
+
+function BackButton({ customerId }: { customerId?: number | null }) {
+  if (Number(customerId) !== 2) {
+    return null;
+  }
+
+  return (
+    <div className="mb-5">
+      <button
+        type="button"
+        onClick={() => window.history.back()}
+        className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-sky-400 hover:bg-sky-50 hover:text-sky-700 active:scale-95"
+      >
+        <ArrowLeft size={18} strokeWidth={2.5} />
+        <span>Back</span>
+      </button>
+    </div>
+  );
 }
 
 export default function BmsPage() {
@@ -215,7 +240,9 @@ export default function BmsPage() {
   const needleAngle = (clampedCurrent / 200) * 90;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-800">
+    <div className="min-h-screen bg-slate-50 p-2 md:p-6 text-slate-800">
+       {/* BACK BUTTON - ONLY FOR CUSTOMER ID 2 */}
+      <BackButton customerId={battery.CustomerID} />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* LEFT COLUMN: LIVE OVERVIEW */}
         <div className="lg:col-span-4 space-y-4">
