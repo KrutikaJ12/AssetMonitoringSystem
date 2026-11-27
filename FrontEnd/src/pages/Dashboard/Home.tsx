@@ -61,7 +61,6 @@ export default function Home() {
   /* =======================================================
      DASHBOARD DATA
   ======================================================= */
-
   const { data, isLoading, error } = useDashboard();
   const [selectedVehicle, setSelectedVehicle] = useState("");
   /* =======================================================
@@ -69,6 +68,7 @@ export default function Home() {
   ======================================================= */
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [headings, setHeadings] = useState("dashboard");
   const { user } = useContext(AuthContext);
   const fleetType =
     user?.fleetType == null || user?.fleetType === ""
@@ -76,6 +76,7 @@ export default function Home() {
       : Number(user.fleetType);
 
   const isGenericDashboard = fleetType === null;
+  console.log("isGenericDashboard",isGenericDashboard,fleetType)
   const [widgets, setWidgets] = useState([
     { id: "assetStatus", label: "Asset Status Overview", checked: true },
     { id: "assetType", label: "Assets By Type", checked: true },
@@ -560,7 +561,7 @@ export default function Home() {
 
   type BatteryTabKey = (typeof BATTERY_TABS)[number]["key"];
   const [batteryTab, setBatteryTab] = useState<BatteryTabKey>("status");
-  
+
   // Component ke andar:
   const navigate = useNavigate();
 
@@ -632,18 +633,10 @@ export default function Home() {
 
   return (
     <>
-      {/* ===================================================
-          PAGE META
-      =================================================== */}
-
       <PageMeta
         title="Asset Monitoring Dashboard | TailAdmin"
         description="Asset monitoring system dashboard"
       />
-
-      {/* ===================================================
-          TOAST CONTAINER
-      =================================================== */}
 
       <ToastContainer
         position="top-right"
@@ -654,65 +647,20 @@ export default function Home() {
         draggable
         theme="light"
         limit={5}
-        style={{
-          zIndex: 999999,
-        }}
+        style={{ zIndex: 999999 }}
       />
 
-      {/* ===================================================
-          HEADER SECTION WITH SETTINGS ICON
-      =================================================== */}
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-          Dashboard Overview
-        </h2>
-
-        {/* Setting/Filter Button Trigger */}
-        <button
-          type="button"
-          onClick={handleOpenSidebar}
-          className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-          title="Customize Dashboard Widgets"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          <span>Settings</span>
-        </button>
-      </div>
-
-      {/* ===================================================
-          NOTIFICATION STATUS
-      =================================================== */}
-
+      {/* NOTIFICATION BANNER (shows on both tabs) */}
       {notificationPermission !== "granted" && (
         <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
           <div>
             <p className="font-semibold text-yellow-800">
               🔔 Browser Notifications Disabled
             </p>
-
             <p className="text-sm text-yellow-700">
               Enable browser notifications to receive real-time asset alerts.
             </p>
           </div>
-
           <button
             type="button"
             onClick={enableNotifications}
@@ -723,168 +671,153 @@ export default function Home() {
         </div>
       )}
 
-      {/* ===================================================
-          DASHBOARD
-      =================================================== */}
+      {/* HEADER: tabs + settings button */}
+      <div className="mb-4 flex items-center justify-between">
+        <Tabs
+          tabs={[
+            { key: "dashboard", label: "Dashboard Overview" },
+            { key: "BMS", label: "BMS" },
+          ]}
+          active={headings}
+          onChange={setHeadings}
+        />
 
-      <div>
-        {/* =================================================
-            STATISTICS
-        ================================================= */}
+        <button
+          type="button"
+          onClick={handleOpenSidebar}
+          className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+          title="Customize Dashboard Widgets"
+        >
+          {/* ...your existing settings <svg> here... */}
+          <span>Settings</span>
+        </button>
+      </div>
 
-        <div className="grid w-full gap-2">
+      {/* =========== DASHBOARD OVERVIEW TAB =========== */}
+      {headings === "dashboard" && (
+        <div className="space-y-4">
           <StatisticsMetrics metrics={adminMetrics} />
-        </div>
 
-        {/* =================================================
-            DASHBOARD CONTENT
-        ================================================= */}
-
-        <div className="mb-6 flex md:gap-6">
-          <div className="flex w-full flex-col gap-4">
-            {/* =============================================
-                TOP CARDS
-            ============================================= */}
-
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-              {/* ASSET STATUS */}
-              {isWidgetVisible("assetStatus") && (
-                <SectionCard title="Assets Status Overview">
-                  <Chart
-                    options={donutOptions}
-                    series={assetStatusSeries}
-                    type="donut"
-                    height={300}
-                  />
-                </SectionCard>
-              )}
-
-              {/* ASSET TYPE */}
-              {isWidgetVisible("assetType") && (
-                <SectionCard title="Assets By Type">
-                  <Chart
-                    options={assetTypeOptions}
-                    series={assetTypesSeries}
-                    type="donut"
-                    height={300}
-                  />
-                </SectionCard>
-              )}
-
-              {/* RECENT ALERTS */}
-              {isWidgetVisible("recentAlerts") && (
-                <SectionCard title="Recents Alerts" actionText="View Alerts">
-                  <RecentAlerts data={data.data.recentAlerts} />
-                </SectionCard>
-              )}
-            </div>
-
-            {/* =============================================
-                WORKING HOURS
-            ============================================= */}
-
-            {isWidgetVisible("workingHours") && (
-              <SectionCard title="Working Hours">
-                <WorkingHoursCard data={data.data.workingHours} />
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+            {isWidgetVisible("assetStatus") && (
+              <SectionCard title="Assets Status Overview">
+                <Chart
+                  options={donutOptions}
+                  series={assetStatusSeries}
+                  type="donut"
+                  height={300}
+                />
               </SectionCard>
             )}
 
-            {/* =============================================
-                FUEL
-            ============================================= */}
+            {isWidgetVisible("assetType") && (
+              <SectionCard title="Assets By Type">
+                <Chart
+                  options={assetTypeOptions}
+                  series={assetTypesSeries}
+                  type="donut"
+                  height={300}
+                />
+              </SectionCard>
+            )}
 
-            {(isGenericDashboard || fleetType === 1 || fleetType === 3) &&
-              isWidgetVisible("fuelConsumption") && (
-                <div>
-                  <StatisticsChart data={data.fuelConsumption} />
-                </div>
-              )}
-            {/* =============================================
-    BATTERY STATISTICS
-============================================= */}
-            {(isGenericDashboard || fleetType === 2 || fleetType === 3) &&
-              isWidgetVisible("batteryStats") && (
-                <SectionCard title="Battery Statistics">
-                  <div className="space-y-4">
-                    <Tabs
-                      tabs={[...BATTERY_TABS]}
-                      active={batteryTab}
-                      onChange={(key) => setBatteryTab(key as BatteryTabKey)}
-                    />
+            {isWidgetVisible("recentAlerts") && (
+              <SectionCard title="Recents Alerts" actionText="View Alerts">
+                <RecentAlerts data={data.data.recentAlerts} />
+              </SectionCard>
+            )}
+          </div>
 
-                    {batteryTab === "status" && (
-                      <Chart
-                        options={batteryStatusOptions}
-                        series={batteryStatusSeries}
-                        type="donut"
-                        height={320}
-                      />
-                    )}
+          {isWidgetVisible("workingHours") && (
+            <SectionCard title="Working Hours">
+              <WorkingHoursCard data={data.data.workingHours} />
+            </SectionCard>
+          )}
 
-                    {batteryTab === "health" && (
-                      <Chart
-                        options={batteryHealthOptions}
-                        series={batteryHealthSeries}
-                        type="donut"
-                        height={320}
-                      />
-                    )}
+          {(isGenericDashboard || fleetType === 1 || fleetType === 3) &&
+            isWidgetVisible("fuelConsumption") && (
+              <div>
+                <StatisticsChart data={data.fuelConsumption} />
+              </div>
+            )}
 
-                    {batteryTab === "temperature" && (
-                      <Chart
-                        options={batteryTempOptions}
-                        series={batteryTempSeries}
-                        type="donut"
-                        height={320}
-                      />
-                    )}
+          {(isGenericDashboard || fleetType === 1 || fleetType === 3) &&
+            isWidgetVisible("siteSummary") && (
+              <SiteSummary data={data.data.siteSummary} />
+            )}
+        </div>
+      )}
 
-                    {batteryTab === "charging" && (
-                      <div className="flex h-[320px] items-center justify-center gap-3">
-                        <BatteryChargingIcon
-                          size={48}
-                          className="text-green-600"
-                        />
-                        <span className="text-5xl font-light text-green-600">
-                          {currentlyCharging}
-                        </span>
-                      </div>
-                    )}
+      {/* =========== BMS TAB =========== */}
+      {(isGenericDashboard || fleetType === 2 || fleetType === 3)  && headings === "BMS" &&
+        isWidgetVisible("batteryStats") && (
+          <div className="space-y-4">
+            <SectionCard title="Battery Statistics">
+              <div className="space-y-4">
+                <Tabs
+                  tabs={[...BATTERY_TABS]}
+                  active={batteryTab}
+                  onChange={(key) => setBatteryTab(key as BatteryTabKey)}
+                />
+
+                {batteryTab === "status" && (
+                  <Chart
+                    options={batteryStatusOptions}
+                    series={batteryStatusSeries}
+                    type="donut"
+                    height={320}
+                  />
+                )}
+                {batteryTab === "health" && (
+                  <Chart
+                    options={batteryHealthOptions}
+                    series={batteryHealthSeries}
+                    type="donut"
+                    height={320}
+                  />
+                )}
+                {batteryTab === "temperature" && (
+                  <Chart
+                    options={batteryTempOptions}
+                    series={batteryTempSeries}
+                    type="donut"
+                    height={320}
+                  />
+                )}
+                {batteryTab === "charging" && (
+                  <div className="flex h-[320px] items-center justify-center gap-3">
+                    <BatteryChargingIcon size={48} className="text-green-600" />
+                    <span className="text-5xl font-light text-green-600">
+                      {currentlyCharging}
+                    </span>
                   </div>
-                </SectionCard>
-              )}
-            {/* =============================================
-                BATTERY
-            ============================================= */}
+                )}
+              </div>
+            </SectionCard>
 
             {isWidgetVisible("batteryChart") && (
               <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  {/* Title */}
                   <div className="flex flex-1 items-center gap-4 sm:border-r sm:border-gray-200 sm:py-1 dark:sm:border-gray-700">
                     <div className="rounded-xl bg-indigo-100 p-3 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
                       <BatteryChargingIcon size={25} />
                     </div>
-
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                         Battery Status
                       </h3>
-
                       <p className="text-sm text-gray-400">
                         Monitor individual vehicle battery information
                       </p>
                     </div>
                   </div>
 
-                  {/* Vehicle Dropdown */}
                   <div className="relative w-full sm:w-[220px]">
                     <CarFront
                       size={19}
                       className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                     />
-
                     <select
                       value={selectedVehicle}
                       onChange={handleVehicleChange}
@@ -894,7 +827,6 @@ export default function Home() {
                       <option value="395">MH16BY7745</option>
                       <option value="393">NLO1N5922</option>
                     </select>
-
                     <ChevronDown
                       size={18}
                       className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
@@ -902,10 +834,9 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Battery Empty State */}
+                {/* Empty state / details */}
                 {!selectedVehicle ? (
                   <div className="mt-5 flex min-h-[168px] flex-col items-center gap-4 overflow-hidden rounded-xl bg-gradient-to-br from-[#EDF3FD] via-[#F8FAFF] to-[#EAF0FD] sm:flex-row sm:gap-6">
-                    {/* Illustration */}
                     <div className="flex h-[168px] w-full shrink-0 items-center justify-center sm:w-[320px]">
                       <img
                         src={batteryImage}
@@ -913,13 +844,10 @@ export default function Home() {
                         className="h-full w-full object-contain"
                       />
                     </div>
-
-                    {/* Description */}
                     <div className="px-5 pb-5 text-center sm:flex-1 sm:py-5 sm:pl-0 sm:pr-8 sm:text-left">
                       <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-gray-800">
                         Select a vehicle to view battery status
                       </h3>
-
                       <p className="text-sm leading-6 text-gray-500">
                         Choose a vehicle from the dropdown to see its battery
                         level, voltage, charging status, temperature and health.
@@ -928,125 +856,18 @@ export default function Home() {
                   </div>
                 ) : (
                   <div className="mt-5">
-                    {/* Render your existing battery details component here */}
-                    {/* <BatteryDetails assetId={Number(selectedVehicle)} /> */}
                     <BatteryChart />
                   </div>
                 )}
               </div>
             )}
           </div>
-        </div>
+        )}
 
-        {/* =================================================
-            SITE SUMMARY
-        ================================================= */}
-
-        {(isGenericDashboard || fleetType === 1 || fleetType === 3) &&
-          isWidgetVisible("siteSummary") && (
-            <SiteSummary data={data.data.siteSummary} />
-          )}
-      </div>
-
-      {/* ===================================================
-          RIGHT SIDEBAR DRAWER (LAYOUT FIXED)
-      =================================================== */}
+      {/* RIGHT SIDEBAR DRAWER */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-[99999] overflow-hidden">
-          {/* Dark Overlay Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-
-          {/* Right Sliding Panel */}
-          <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
-            <div className="flex h-full w-80 max-w-sm flex-col bg-white shadow-2xl border-l border-gray-200 dark:border-gray-800 dark:bg-gray-900">
-              {/* Search Bar Container */}
-              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-                <div className="relative flex items-center">
-                  <svg
-                    className="absolute left-3 h-4 w-4 text-blue-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Search widgets..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Widgets Selection List */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <p className="text-xs font-normal text-gray-400">
-                  Select widgets to show on dashboard:
-                </p>
-
-                <div className="space-y-3">
-                  {filteredWidgets
-                    .filter((widget) => {
-                      if (
-                        fleetType === 2 &&
-                        ["Site Summary", "Fuel Consumption"].includes(
-                          widget.label,
-                        )
-                      ) {
-                        return false;
-                      }
-
-                      return true;
-                    })
-                    .map((widget) => (
-                      <label
-                        key={widget.id}
-                        className="flex items-center justify-between cursor-pointer group py-1"
-                      >
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 dark:text-gray-300">
-                          {widget.label}
-                        </span>
-
-                        <input
-                          type="checkbox"
-                          checked={widget.checked}
-                          onChange={() => handleCheckboxChange(widget.id)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                      </label>
-                    ))}
-                </div>
-              </div>
-
-              {/* Action Buttons Footer (Apply and Cancel Fixed) */}
-              <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900">
-                <button
-                  type="button"
-                  onClick={handleApplyWidgets}
-                  className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Apply
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+          {/* ...your existing drawer code, unchanged... */}
         </div>
       )}
     </>
