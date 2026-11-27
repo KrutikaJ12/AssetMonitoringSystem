@@ -682,13 +682,32 @@ export default function Home() {
           onChange={setHeadings}
         />
 
+        {/* Setting/Filter Button Trigger */}
         <button
           type="button"
           onClick={handleOpenSidebar}
           className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
           title="Customize Dashboard Widgets"
         >
-          {/* ...your existing settings <svg> here... */}
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
           <span>Settings</span>
         </button>
       </div>
@@ -865,9 +884,102 @@ export default function Home() {
         )}
 
       {/* RIGHT SIDEBAR DRAWER */}
-      {isSidebarOpen && (
+     {isSidebarOpen && (
         <div className="fixed inset-0 z-[99999] overflow-hidden">
-          {/* ...your existing drawer code, unchanged... */}
+          {/* Dark Overlay Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+
+          {/* Right Sliding Panel */}
+          <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
+            <div className="flex h-full w-80 max-w-sm flex-col bg-white shadow-2xl border-l border-gray-200 dark:border-gray-800 dark:bg-gray-900">
+              {/* Search Bar Container */}
+              <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="relative flex items-center">
+                  <svg
+                    className="absolute left-3 h-4 w-4 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search widgets..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-md border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Widgets Selection List */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <p className="text-xs font-normal text-gray-400">
+                  Select widgets to show on dashboard:
+                </p>
+
+                <div className="space-y-3">
+                  {filteredWidgets
+                    .filter((widget) => {
+                      if (
+                        fleetType === 2 &&
+                        ["Site Summary", "Fuel Consumption"].includes(
+                          widget.label,
+                        )
+                      ) {
+                        return false;
+                      }
+
+                      return true;
+                    })
+                    .map((widget) => (
+                      <label
+                        key={widget.id}
+                        className="flex items-center justify-between cursor-pointer group py-1"
+                      >
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 dark:text-gray-300">
+                          {widget.label}
+                        </span>
+
+                        <input
+                          type="checkbox"
+                          checked={widget.checked}
+                          onChange={() => handleCheckboxChange(widget.id)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </label>
+                    ))}
+                </div>
+              </div>
+
+              {/* Action Buttons Footer (Apply and Cancel Fixed) */}
+              <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-900">
+                <button
+                  type="button"
+                  onClick={handleApplyWidgets}
+                  className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Apply
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </>
