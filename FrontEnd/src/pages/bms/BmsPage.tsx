@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useGetBmsData } from "../../hooks/useBmsInsights";
 import { TabItem, Tabs } from "../../components/common/Tabs";
 import LiveTracking from "../Tracking/LiveTrackingPage";
-
+import Chart from "react-apexcharts";
+import type { ApexOptions } from "apexcharts";
 // type TabType = "location"|"trends" | "cells";
 const TABS = [
   { key: "location", label: "Location" },
@@ -11,6 +12,14 @@ const TABS = [
 ] as const satisfies readonly TabItem[];
 
 type TabType = (typeof TABS)[number]["key"];
+const TREND_TABS = [
+  { key: "soc", label: "SOC & SOH" },
+  { key: "voltage", label: "Voltage" },
+  { key: "current", label: "Current" },
+  { key: "temperature", label: "Temperature" },
+] as const satisfies readonly TabItem[];
+
+type TrendTabType = (typeof TREND_TABS)[number]["key"];
 interface BatteryInfo {
   BatteryID: string;
   BatterySerialNo: string;
@@ -50,12 +59,33 @@ interface CellReading {
   CellTemperatureC: number;
   BalancingActive: boolean;
 }
-
+interface HistoricalTelemetry {
+  BatteryTelemetryID: string;
+  BatteryID: string;
+  EventDateTimeUtc: string;
+  PackVoltageV: number;
+  PackCurrentA: number;
+  PackPowerKW: number;
+  StateOfChargePercent: number;
+  StateOfHealthPercent: number;
+  CellVoltageMinV: number;
+  CellVoltageMaxV: number;
+  CellVoltageAverageV: number;
+  CellVoltageDeltaV: number;
+  BatteryTemperatureC: number;
+  IsCharging: boolean;
+  IsDischarging: boolean;
+  ChargeCurrentA: number;
+  ChargeVoltageV: number | null;
+  ChargingPowerKW: number;
+  CycleCount: number;
+}
 interface BmsApiData {
   batteryInfo: BatteryInfo | null;
   liveTelemetry: LiveTelemetry | null;
   cellReadings: CellReading[];
   alarms: unknown[];
+  historicalTelemetry: HistoricalTelemetry[];
 }
 
 function formatDate(date: string | null | undefined) {
@@ -71,7 +101,7 @@ function formatDate(date: string | null | undefined) {
 export default function BmsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("location");
   const [threshold, setThreshold] = useState<number>(0.5);
-
+  const [activeTrendTab, setActiveTrendTab] = useState<TrendTabType>("soc");
   const assetId = new URLSearchParams(window.location.search).get("vehicleId");
 
   const { data: response, isLoading, isError, error } = useGetBmsData(assetId);
@@ -116,7 +146,7 @@ export default function BmsPage() {
   const battery = apiData?.batteryInfo;
   const telemetry = apiData?.liveTelemetry;
   const cells = apiData?.cellReadings ?? [];
-
+  const history = apiData?.historicalTelemetry ?? [];
   if (!battery || !telemetry) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -442,7 +472,7 @@ export default function BmsPage() {
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-4">
             {/* Top 4 Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <SummaryHighlightCard
                 label="Max Cell V"
                 value={`${batteryData.maxCellVoltage.toFixed(3)} V`}
@@ -466,7 +496,7 @@ export default function BmsPage() {
                 value={`${batteryData.minCellTemperature.toFixed(1)} °C`}
                 sub="Latest snapshot"
               />
-            </div>
+            </div> */}
             {/* Tabs */}
             {/* <div className="flex items-center gap-2">
               <button
@@ -537,26 +567,145 @@ export default function BmsPage() {
                 </div>
 
                 {/* Trend Chart Placeholders */}
-                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center">
-                  <p className="text-xs font-semibold text-slate-600">
-                    Historical trend data is not available yet
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    The current API provides the latest BMS snapshot. Trend
-                    charts will display data once historical telemetry is
-                    available.
-                  </p>
-                </div>
+                {history.length > 0 ? (
+                  <div className="space-y-4">
+                    <Tabs
+                      tabs={[...TREND_TABS]}
+                      active={activeTrendTab}
+                      onChange={(key) => setActiveTrendTab(key as TrendTabType)}
+                    />
+
+                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                      {activeTrendTab === "soc" && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-700">
+                            State of Charge & Health
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Historical SOC and SOH readings
+                          </p>
+                          {history.length > 0 ? (
+                            <BmsTrendChart
+                              title="State of Charge & Health"
+                              unit="%"
+                              history={history}
+                              color="#0d9488"
+                              secondColor="#6366f1"
+                              fields={[
+                                { name: "SOC", key: "StateOfChargePercent" },
+                                { name: "SOH", key: "StateOfHealthPercent" },
+                              ]}
+                            />
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-4">
+                              No historical telemetry available.
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {activeTrendTab === "voltage" && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-700">
+                            Pack Voltage
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Historical battery pack voltage
+                          </p>
+                          {history.length > 0 ? (
+                            <BmsTrendChart
+                              title="Pack Voltage"
+                              unit="V"
+                              history={history}
+                              color="#0284c7"
+                              fields={[
+                                { name: "Voltage", key: "PackVoltageV" },
+                              ]}
+                            />
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-4">
+                              No historical telemetry available.
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {activeTrendTab === "current" && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-700">
+                            Charging / Discharging Current
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Historical battery current
+                          </p>
+                          {history.length > 0 ? (
+                            <BmsTrendChart
+                              title="Charging / Discharging Current"
+                              unit="A"
+                              history={history}
+                              color="#8b5cf6"
+                              fields={[
+                                { name: "Current", key: "PackCurrentA" },
+                              ]}
+                            />
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-4">
+                              No historical telemetry available.
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {activeTrendTab === "temperature" && (
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-700">
+                            Battery Temperature
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Historical battery temperature
+                          </p>
+                          {history.length > 0 ? (
+                            <BmsTrendChart
+                              title="Battery Temperature"
+                              unit="°C"
+                              history={history}
+                              color="#ea580c"
+                              fields={[
+                                {
+                                  name: "Temperature",
+                                  key: "BatteryTemperatureC",
+                                },
+                              ]}
+                            />
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-4">
+                              No historical telemetry available.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-center">
+                    <p className="text-xs font-semibold text-slate-600">
+                      No historical telemetry available
+                    </p>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      Historical battery trends will appear when telemetry
+                      records are available.
+                    </p>
+                  </div>
+                )}
               </>
             )}
             {activeTab === "location" && (
               <>
-               <div>
-                <LiveTracking/>
-               </div>
+                <div>
+                  <LiveTracking />
+                </div>
               </>
             )}
-         
 
             {activeTab === "cells" && (
               <div className="rounded-lg border border-slate-200 p-4">
@@ -639,6 +788,98 @@ function SummaryHighlightCard({
       <div className="text-[11px] font-medium text-slate-500">{label}</div>
       <div className="mt-1 text-base font-bold text-slate-800">{value}</div>
       <div className="mt-0.5 text-[11px] text-slate-400">{sub}</div>
+    </div>
+  );
+}
+
+type TrendField = {
+  name: string;
+  key: keyof HistoricalTelemetry;
+};
+
+function BmsTrendChart({
+  title,
+  unit,
+  history,
+  color,
+  secondColor,
+  fields,
+}: {
+  title: string;
+  unit: string;
+  history: HistoricalTelemetry[];
+  color: string;
+  secondColor?: string;
+  fields: TrendField[];
+}) {
+  const series = fields.map((field) => ({
+    name: field.name,
+    data: history.map((item) => ({
+      x: new Date(item.EventDateTimeUtc).getTime(),
+      y: Number(item[field.key]),
+    })),
+  }));
+
+  const options: ApexOptions = {
+    chart: {
+      type: "line",
+      height: 280,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+    },
+    colors: secondColor ? [color, secondColor] : [color],
+    stroke: {
+      curve: "smooth",
+      width: 3,
+    },
+    markers: {
+      size: 3,
+      hover: { size: 5 },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      type: "datetime",
+      labels: {
+        datetimeUTC: false,
+        format: "dd MMM",
+        style: { colors: "#94a3b8", fontSize: "11px" },
+      },
+    },
+    yaxis: {
+      title: {
+        text: unit,
+      },
+      labels: {
+        style: { colors: "#94a3b8" },
+        formatter: (value) => value.toFixed(1),
+      },
+    },
+    tooltip: {
+      x: {
+        format: "dd MMM yyyy, HH:mm",
+      },
+      y: {
+        formatter: (value) => `${value.toFixed(2)} ${unit}`,
+      },
+    },
+    legend: {
+      show: fields.length > 1,
+      position: "top",
+      horizontalAlign: "right",
+    },
+    grid: {
+      borderColor: "#e2e8f0",
+      strokeDashArray: 4,
+    },
+  };
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h3 className="text-sm font-semibold text-slate-700 mb-2">{title}</h3>
+
+      <Chart options={options} series={series} type="line" height={280} />
     </div>
   );
 }
